@@ -1,4 +1,4 @@
-import { eq, isNull, ne, sql } from "drizzle-orm";
+import { eq, isNull, lt, ne, sql } from "drizzle-orm";
 import {
   bigint,
   bigserial,
@@ -34,7 +34,7 @@ export const personTable = pgTable(
   (table) => [check("gender_check", sql`${table.gender} IN ('M', 'F')`)],
 );
 
-const contactTypeEnum = pgEnum("contact_type", personContactTypes);
+export const contactTypeEnum = pgEnum("contact_type", personContactTypes);
 
 export const personContactTable = pgTable(
   "person_contact",
@@ -47,11 +47,14 @@ export const personContactTable = pgTable(
     ...timestamps,
   },
   (table) => [
-    index().on(table.personId),
-    uniqueIndex().on(table.personId, table.value),
-    uniqueIndex()
+    index("person_contact_person_id_index").on(table.personId),
+    uniqueIndex("person_contact_person_id_value_unique").on(
+      table.personId,
+      table.value,
+    ),
+    uniqueIndex("person_contact_person_id_contact_type_unique")
       .on(table.personId, table.contactType)
-      .where(eq(table.contactType, true).inlineParams()),
+      .where(eq(table.isPrimary, true).inlineParams()),
   ],
 );
 
@@ -70,16 +73,18 @@ export const personAddressTable = pgTable(
     ...timestamps,
   },
   (table) => [
-    index().on(table.personId),
+    index("person_address_person_id_index").on(table.personId),
     check(
-      "end_date_check",
-      sql`${table.endDate} IS NULL OR ${table.endDate} > ${table.startDate}`,
+      "person_address_end_date_check",
+      sql`${isNull(table.endDate)} OR ${lt(table.endDate, table.startDate)}`,
     ),
-    uniqueIndex().on(table.personId).where(isNull(table.endDate)),
+    uniqueIndex("person_address_person_id_unique")
+      .on(table.personId)
+      .where(isNull(table.endDate)),
   ],
 );
 
-const relationshipTypeEnum = pgEnum(
+export const relationshipTypeEnum = pgEnum(
   "relationship_type",
   personRelationshipTypes,
 );
@@ -110,17 +115,21 @@ export const personRelationshipTable = pgTable(
     ...timestamps,
   },
   (table) => [
-    index().on(table.personId),
-    index().on(table.relatedPersonId),
-    uniqueIndex()
+    index("person_relationship_person_id_index").on(table.personId),
+    index("person_relationship_related_person_id_index").on(
+      table.relatedPersonId,
+    ),
+    uniqueIndex("person_relationship_person_id_related_person_id_unique")
       .on(
-        sql`(LEAST(${table.personId}, ${table.relatedPersonId}), GREATEST(${table.personId}, ${table.relatedPersonId}))`,
+        sql`LEAST(${table.personId}, ${table.relatedPersonId})`,
+        sql`GREATEST(${table.personId}, ${table.relatedPersonId})`,
+        table.relationshipType,
       )
       .where(
         sql`${eq(table.relationshipType, "spouse").inlineParams()} AND ${isNull(table.endDate)}`,
       ),
     check(
-      "person_is_different_from_related_person",
+      "person_relationship_is_different_from_related_person_check",
       ne(table.personId, table.relatedPersonId),
     ),
   ],
