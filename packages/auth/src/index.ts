@@ -5,6 +5,10 @@ import { admin } from "better-auth/plugins";
 
 import { db } from "@acme/db/client";
 
+const database = drizzleAdapter(db, {
+  provider: "pg",
+});
+
 export function initAuth<
   TExtraPlugins extends BetterAuthPlugin[] = [],
 >(options: {
@@ -14,9 +18,7 @@ export function initAuth<
   extraPlugins?: TExtraPlugins;
 }) {
   const config = {
-    database: drizzleAdapter(db, {
-      provider: "pg",
-    }),
+    database,
     emailAndPassword: {
       enabled: true,
       disableSignUp: true,
