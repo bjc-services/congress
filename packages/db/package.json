@@ -12,8 +12,12 @@
       "default": "./src/client.ts"
     },
     "./schema": {
-      "types": "./dist/schema.d.ts",
-      "default": "./src/schema.ts"
+      "types": "./dist/schema/index.d.ts",
+      "default": "./src/schema/index.ts"
+    },
+    "./transaction": {
+      "types": "./dist/transaction.d.ts",
+      "default": "./src/transaction.ts"
     }
   },
   "scripts": {
@@ -28,9 +32,11 @@
     "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
+    "@acme/validators": "workspace:*",
     "drizzle-orm": "^0.44.7",
     "drizzle-zod": "^0.8.3",
     "postgres": "^3.4.7",
+    "ulidx": "^2.4.1",
     "zod": "catalog:"
   },
   "devDependencies": {
