@@ -1,10 +1,20 @@
 import { ulid } from "ulidx";
 
 export const prefixes = {
+  user: "user",
+  session: "ses",
+  account: "acc",
+  verification: "ver",
   person: "person",
   personContact: "p_ctct",
   personAddress: "p_addr",
   personRelationship: "p_rel",
+  beneficiaryAccount: "ben_acc",
+  beneficiarySession: "ben_ses",
+  beneficiaryDocument: "ben_dcm",
+  upload: "upl",
+  uploadType: "upl_type",
+  uploadLink: "upl_link",
 } as const;
 
 const _typeCheckUniquePrefixes: ErrorIfDuplicates<typeof prefixes> = prefixes;

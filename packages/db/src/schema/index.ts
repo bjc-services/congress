@@ -22,5 +22,6 @@ export const CreatePostSchema = createInsertSchema(Post, {
   updatedAt: true,
 });
 
-export * from "./auth.sql";
+export * from "./dashboard-auth.sql";
+export * from "./beneficiary-auth.sql";
 export * from "./person.sql";

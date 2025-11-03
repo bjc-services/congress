@@ -3,7 +3,7 @@ import type { TRPCRouterRecord } from "@trpc/server";
 import { protectedProcedure, publicProcedure } from "../trpc";
 
 export const authRouter = {
-  getSession: publicProcedure.query(({ ctx }) => {
+  getSession: publicProcedure({ captcha: false }).query(({ ctx }) => {
     return ctx.session;
   }),
   getSecretMessage: protectedProcedure.query(() => {

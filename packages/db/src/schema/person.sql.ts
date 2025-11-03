@@ -11,6 +11,7 @@ import {
   pgTable,
   text,
   uniqueIndex,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 import {
@@ -24,7 +25,7 @@ export const personTable = pgTable(
   "person",
   {
     id: bigserial({ mode: "number" }).primaryKey(),
-    national_id: text().notNull().unique(),
+    nationalId: varchar("national_id", { length: 10 }).notNull().unique(),
     firstName: text(),
     lastName: text(),
     gender: char({ length: 1 }),

@@ -9,6 +9,11 @@ import SuperJSON from "superjson";
 import type { AppRouter } from "@acme/api";
 
 import { env } from "~/env";
+import { getAuthToken } from "./beneficiary-auth";
+
+function getbeneficiaryAuthToken(): string | null {
+  return getAuthToken();
+}
 
 export const trpcClient = createTRPCClient<AppRouter>({
   links: [
@@ -22,7 +27,11 @@ export const trpcClient = createTRPCClient<AppRouter>({
       url: env.VITE_API_URL + "/api/trpc",
       headers() {
         const headers = new Headers();
-        headers.set("x-trpc-source", "nextjs-react");
+        headers.set("x-trpc-source", "beneficiary-app");
+        const token = getbeneficiaryAuthToken();
+        if (token) {
+          headers.set("authorization", `Bearer ${token}`);
+        }
         return headers;
       },
     }),
