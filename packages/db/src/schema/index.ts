@@ -1,27 +1,13 @@
-import { sql } from "drizzle-orm";
-import { pgTable } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod/v4";
-
-export const Post = pgTable("post", (t) => ({
-  id: t.uuid().notNull().primaryKey().defaultRandom(),
-  title: t.varchar({ length: 256 }).notNull(),
-  content: t.text().notNull(),
-  createdAt: t.timestamp().defaultNow().notNull(),
-  updatedAt: t
-    .timestamp({ mode: "date", withTimezone: true })
-    .$onUpdateFn(() => sql`now()`),
-}));
-
-export const CreatePostSchema = createInsertSchema(Post, {
-  title: z.string().max(256),
-  content: z.string().max(256),
-}).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
 export * from "./dashboard-auth.sql";
 export * from "./beneficiary-auth.sql";
 export * from "./person.sql";
+export * from "./upload.sql";
+export * from "./program.sql";
+export * from "./program-requirements.sql";
+export * from "./application.sql";
+export * from "./payment-formula.sql";
+export * from "./payment.sql";
+export * from "./organization.sql";
+export * from "./household.sql";
+export * from "./message.sql";
+export * from "./recommendation.sql";
