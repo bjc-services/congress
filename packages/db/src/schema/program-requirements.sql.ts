@@ -14,8 +14,8 @@ import {
 
 import { createTable } from "../create-table";
 import { ulid } from "../types";
-import { userTable } from "./dashboard-auth.sql";
-import { programVersionTable } from "./program.sql";
+import { User } from "./dashboard-auth.sql";
+import { ProgramVersion } from "./program.sql";
 
 /**
  * Operator enum for eligibility criteria
@@ -39,13 +39,13 @@ export const eligibilityCriteriaOperatorEnum = pgEnum(
  * eligibility_criteria table - Field-based rules for program eligibility
  * Stores simple field-based rules like "maritalStatus = married" or "numberOfPersons >= 5"
  */
-export const eligibilityCriteriaTable = createTable(
+export const EligibilityCriteria = createTable(
   "eligibility_criteria",
   {
     id: bigserial({ mode: "number" }).primaryKey(),
     programVersionId: bigint("program_version_id", { mode: "number" })
       .notNull()
-      .references(() => programVersionTable.id, { onDelete: "cascade" }),
+      .references(() => ProgramVersion.id, { onDelete: "cascade" }),
     fieldName: text("field_name").notNull(),
     operator: eligibilityCriteriaOperatorEnum("operator").notNull(),
     value: jsonb("value").notNull(), // Can be single value or array for 'in'/'not_in'
@@ -65,14 +65,14 @@ export const eligibilityCriteriaTable = createTable(
  * System-defined types are created during migration
  * Staff can create custom types as needed
  */
-export const documentTypeTable = createTable(
+export const DocumentType = createTable(
   "document_type",
   {
     id: bigserial({ mode: "number" }).primaryKey(),
     name: text("name").notNull().unique(),
     description: text("description"),
     isSystemDefined: boolean("is_system_defined").notNull().default(false),
-    createdByUserId: ulid("user").references(() => userTable.id, {
+    createdByUserId: ulid("user").references(() => User.id, {
       onDelete: "set null",
     }),
     timeArchived: timestamp("time_archived"),
@@ -87,16 +87,16 @@ export const documentTypeTable = createTable(
  * program_document_requirement table - What documents each program version needs
  * Links document types to program versions with requirement details
  */
-export const programDocumentRequirementTable = createTable(
+export const ProgramDocumentRequirement = createTable(
   "program_document_requirement",
   {
     id: bigserial({ mode: "number" }).primaryKey(),
     programVersionId: bigint("program_version_id", { mode: "number" })
       .notNull()
-      .references(() => programVersionTable.id, { onDelete: "cascade" }),
+      .references(() => ProgramVersion.id, { onDelete: "cascade" }),
     documentTypeId: bigint("document_type_id", { mode: "number" })
       .notNull()
-      .references(() => documentTypeTable.id, { onDelete: "restrict" }),
+      .references(() => DocumentType.id, { onDelete: "restrict" }),
     isRequired: boolean("is_required").notNull().default(true),
     description: text("description"), // Specific instructions for this program
     displayOrder: integer("display_order").notNull().default(0),
@@ -118,36 +118,36 @@ export const programDocumentRequirementTable = createTable(
  * Relations
  */
 export const eligibilityCriteriaRelations = relations(
-  eligibilityCriteriaTable,
+  EligibilityCriteria,
   ({ one }) => ({
-    programVersion: one(programVersionTable, {
-      fields: [eligibilityCriteriaTable.programVersionId],
-      references: [programVersionTable.id],
+    programVersion: one(ProgramVersion, {
+      fields: [EligibilityCriteria.programVersionId],
+      references: [ProgramVersion.id],
     }),
   }),
 );
 
 export const documentTypeRelations = relations(
-  documentTypeTable,
+  DocumentType,
   ({ one, many }) => ({
-    createdBy: one(userTable, {
-      fields: [documentTypeTable.createdByUserId],
-      references: [userTable.id],
+    createdBy: one(User, {
+      fields: [DocumentType.createdByUserId],
+      references: [User.id],
     }),
-    programRequirements: many(programDocumentRequirementTable),
+    programRequirements: many(ProgramDocumentRequirement),
   }),
 );
 
 export const programDocumentRequirementRelations = relations(
-  programDocumentRequirementTable,
+  ProgramDocumentRequirement,
   ({ one }) => ({
-    programVersion: one(programVersionTable, {
-      fields: [programDocumentRequirementTable.programVersionId],
-      references: [programVersionTable.id],
+    programVersion: one(ProgramVersion, {
+      fields: [ProgramDocumentRequirement.programVersionId],
+      references: [ProgramVersion.id],
     }),
-    documentType: one(documentTypeTable, {
-      fields: [programDocumentRequirementTable.documentTypeId],
-      references: [documentTypeTable.id],
+    documentType: one(DocumentType, {
+      fields: [ProgramDocumentRequirement.documentTypeId],
+      references: [DocumentType.id],
     }),
   }),
 );

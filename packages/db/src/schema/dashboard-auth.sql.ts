@@ -3,7 +3,7 @@ import { boolean, text, timestamp } from "drizzle-orm/pg-core";
 import { createTable } from "../create-table";
 import { ulid } from "../types";
 
-export const userTable = createTable("user", {
+export const User = createTable("user", {
   id: ulid("user").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
@@ -20,7 +20,7 @@ export const userTable = createTable("user", {
   banExpires: timestamp("ban_expires"),
 });
 
-export const sessionTable = createTable("session", {
+export const Session = createTable("session", {
   id: ulid("session").primaryKey(),
   expiresAt: timestamp("expires_at").notNull(),
   token: text("token").notNull().unique(),
@@ -32,17 +32,17 @@ export const sessionTable = createTable("session", {
   userAgent: text("user_agent"),
   userId: text("user_id")
     .notNull()
-    .references(() => userTable.id, { onDelete: "cascade" }),
+    .references(() => User.id, { onDelete: "cascade" }),
   impersonatedBy: text("impersonated_by"),
 });
 
-export const accountTable = createTable("account", {
+export const Account = createTable("account", {
   id: ulid("account").primaryKey(),
   accountId: text("account_id").notNull(),
   providerId: text("provider_id").notNull(),
   userId: text("user_id")
     .notNull()
-    .references(() => userTable.id, { onDelete: "cascade" }),
+    .references(() => User.id, { onDelete: "cascade" }),
   accessToken: text("access_token"),
   refreshToken: text("refresh_token"),
   idToken: text("id_token"),
@@ -56,7 +56,7 @@ export const accountTable = createTable("account", {
     .notNull(),
 });
 
-export const verificationTable = createTable("verification", {
+export const Verification = createTable("verification", {
   id: ulid("verification").primaryKey(),
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),

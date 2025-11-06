@@ -11,9 +11,9 @@ import {
 
 import { createTable } from "../create-table";
 import { ulid } from "../types";
-import { applicationTable } from "./application.sql";
-import { beneficiaryAccountTable } from "./beneficiary-auth.sql";
-import { userTable } from "./dashboard-auth.sql";
+import { Application } from "./application.sql";
+import { BeneficiaryAccount } from "./beneficiary-auth.sql";
+import { User } from "./dashboard-auth.sql";
 
 /**
  * Message type enum - Hardcoded types for UI handling
@@ -45,21 +45,21 @@ export const messageRecipientTypeEnum = pgEnum("message_recipient_type", [
  * Example metadata for document_request: {requested_documents: ["national_id", "proof_of_residence"]}
  * Example metadata for input_request: {requested_fields: ["bankAccountNo", "bankBranchNo"]}
  */
-export const messageTable = createTable(
+export const Message = createTable(
   "message",
   {
     id: bigserial({ mode: "number" }).primaryKey(),
     messageType: messageTypeEnum("message_type").notNull(),
     recipientType: messageRecipientTypeEnum("recipient_type").notNull(),
     recipientBeneficiaryAccountId: ulid("beneficiaryAccount").references(
-      () => beneficiaryAccountTable.id,
+      () => BeneficiaryAccount.id,
       { onDelete: "cascade" },
     ), // For specific beneficiary messages
     applicationId: bigint("application_id", { mode: "number" }).references(
-      () => applicationTable.id,
+      () => Application.id,
       { onDelete: "set null" },
     ), // Context if related to application
-    senderUserId: ulid("user").references(() => userTable.id, {
+    senderUserId: ulid("user").references(() => User.id, {
       onDelete: "set null",
     }), // Staff member sender
     subject: text("subject"),
@@ -83,17 +83,17 @@ export const messageTable = createTable(
 /**
  * Relations
  */
-export const messageRelations = relations(messageTable, ({ one }) => ({
-  recipientBeneficiaryAccount: one(beneficiaryAccountTable, {
-    fields: [messageTable.recipientBeneficiaryAccountId],
-    references: [beneficiaryAccountTable.id],
+export const messageRelations = relations(Message, ({ one }) => ({
+  recipientBeneficiaryAccount: one(BeneficiaryAccount, {
+    fields: [Message.recipientBeneficiaryAccountId],
+    references: [BeneficiaryAccount.id],
   }),
-  application: one(applicationTable, {
-    fields: [messageTable.applicationId],
-    references: [applicationTable.id],
+  application: one(Application, {
+    fields: [Message.applicationId],
+    references: [Application.id],
   }),
-  sender: one(userTable, {
-    fields: [messageTable.senderUserId],
-    references: [userTable.id],
+  sender: one(User, {
+    fields: [Message.senderUserId],
+    references: [User.id],
   }),
 }));

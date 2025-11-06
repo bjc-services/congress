@@ -11,8 +11,8 @@ import {
 
 import { createTable } from "../create-table";
 import { ulid } from "../types";
-import { applicationTable } from "./application.sql";
-import { userTable } from "./dashboard-auth.sql";
+import { Application } from "./application.sql";
+import { User } from "./dashboard-auth.sql";
 
 /**
  * Recommendation status enum - Lifecycle of recommendations
@@ -29,16 +29,16 @@ export const recommendationStatusEnum = pgEnum("recommendation_status", [
  * When committee members or coordinators recommend an amount for an application
  * Staff reviews and can accept, reject, or modify the recommendation
  */
-export const applicationRecommendationTable = createTable(
+export const ApplicationRecommendation = createTable(
   "application_recommendation",
   {
     id: bigserial({ mode: "number" }).primaryKey(),
     applicationId: bigint("application_id", { mode: "number" })
       .notNull()
-      .references(() => applicationTable.id, { onDelete: "cascade" }),
+      .references(() => Application.id, { onDelete: "cascade" }),
     recommendedByUserId: ulid("user")
       .notNull()
-      .references(() => userTable.id, { onDelete: "restrict" }), // Coordinator or committee member
+      .references(() => User.id, { onDelete: "restrict" }), // Coordinator or committee member
     recommendedAmount: numeric("recommended_amount", {
       precision: 10,
       scale: 2,
@@ -46,7 +46,7 @@ export const applicationRecommendationTable = createTable(
     recommendationDate: timestamp("recommendation_date").notNull().defaultNow(),
     notes: text("notes"), // Justification for the recommendation
     status: recommendationStatusEnum("status").notNull().default("pending"),
-    reviewedByUserId: ulid("user").references(() => userTable.id, {
+    reviewedByUserId: ulid("user").references(() => User.id, {
       onDelete: "set null",
     }), // Staff member who reviewed
     timeReviewed: timestamp("time_reviewed"),
@@ -69,20 +69,20 @@ export const applicationRecommendationTable = createTable(
  * Relations
  */
 export const applicationRecommendationRelations = relations(
-  applicationRecommendationTable,
+  ApplicationRecommendation,
   ({ one }) => ({
-    application: one(applicationTable, {
-      fields: [applicationRecommendationTable.applicationId],
-      references: [applicationTable.id],
+    application: one(Application, {
+      fields: [ApplicationRecommendation.applicationId],
+      references: [Application.id],
     }),
-    recommendedBy: one(userTable, {
-      fields: [applicationRecommendationTable.recommendedByUserId],
-      references: [userTable.id],
+    recommendedBy: one(User, {
+      fields: [ApplicationRecommendation.recommendedByUserId],
+      references: [User.id],
       relationName: "recommendation_recommended_by",
     }),
-    reviewedBy: one(userTable, {
-      fields: [applicationRecommendationTable.reviewedByUserId],
-      references: [userTable.id],
+    reviewedBy: one(User, {
+      fields: [ApplicationRecommendation.reviewedByUserId],
+      references: [User.id],
       relationName: "recommendation_reviewed_by",
     }),
   }),

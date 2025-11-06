@@ -801,8 +801,8 @@ When calculating payments based on household size:
 #### Application with Full Context
 
 ```typescript
-const application = await db.query.applicationTable.findFirst({
-  where: eq(applicationTable.id, applicationId),
+const application = await db.query.Application.findFirst({
+  where: eq(Application.id, applicationId),
   with: {
     programVersion: {
       with: {
@@ -812,7 +812,7 @@ const application = await db.query.applicationTable.findFirst({
     person: {
       with: {
         contacts: true,
-        addresses: { where: isNull(personAddressTable.endDate) },
+        addresses: { where: isNull(PersonAddress.endDate) },
       },
     },
     beneficiaryAccount: true,
@@ -832,18 +832,18 @@ const application = await db.query.applicationTable.findFirst({
 #### Person with Household and Family
 
 ```typescript
-const person = await db.query.personTable.findFirst({
-  where: eq(personTable.id, personId),
+const person = await db.query.Person.findFirst({
+  where: eq(Person.id, personId),
   with: {
-    contacts: { where: eq(personContactTable.isPrimary, true) },
-    addresses: { where: isNull(personAddressTable.endDate) },
+    contacts: { where: eq(PersonContact.isPrimary, true) },
+    addresses: { where: isNull(PersonAddress.endDate) },
     householdMemberships: {
-      where: isNull(householdMemberTable.endDate),
+      where: isNull(HouseholdMember.endDate),
       with: {
         household: {
           with: {
             members: {
-              where: isNull(householdMemberTable.endDate),
+              where: isNull(HouseholdMember.endDate),
               with: { person: true },
             },
           },
@@ -862,15 +862,15 @@ const person = await db.query.personTable.findFirst({
 #### Program with Requirements
 
 ```typescript
-const programVersion = await db.query.programVersionTable.findFirst({
-  where: eq(programVersionTable.id, versionId),
+const programVersion = await db.query.ProgramVersion.findFirst({
+  where: eq(ProgramVersion.id, versionId),
   with: {
     program: true,
     eligibilityCriteria: {
-      orderBy: [asc(eligibilityCriteriaTable.displayOrder)],
+      orderBy: [asc(EligibilityCriteria.displayOrder)],
     },
     documentRequirements: {
-      orderBy: [asc(programDocumentRequirementTable.displayOrder)],
+      orderBy: [asc(ProgramDocumentRequirement.displayOrder)],
       with: {
         documentType: true,
       },
@@ -893,13 +893,13 @@ export const applicationStatusEnum = pgEnum("application_status", [
 ]);
 
 // TypeScript type inference
-type ApplicationStatus = typeof applicationTable.$inferSelect.status;
+type ApplicationStatus = typeof Application.$inferSelect.status;
 // => "draft" | "submitted" | "under_review" | ...
 
 // Usage in queries
-await db.update(applicationTable)
+await db.update(Application)
   .set({ status: "approved" }) // Type-checked!
-  .where(eq(applicationTable.id, id));
+  .where(eq(Application.id, id));
 ```
 
 ### Key Enums
@@ -1035,12 +1035,12 @@ Use separate audit records instead of updates:
 
 ```typescript
 // DON'T: Update calculation
-await db.update(applicationCalculationTable)
+await db.update(ApplicationCalculation)
   .set({ finalAmount: newAmount })
-  .where(eq(applicationCalculationTable.id, calcId));
+  .where(eq(ApplicationCalculation.id, calcId));
 
 // DO: Create new calculation record
-await db.insert(applicationCalculationTable).values({
+await db.insert(ApplicationCalculation).values({
   applicationId,
   formulaUsed: previousCalc.formulaUsed,
   inputValues: newInputValues,
@@ -1086,7 +1086,7 @@ Create seed script for system-defined data:
 
 ```typescript
 // seed-system-data.ts
-await db.insert(documentTypeTable).values([
+await db.insert(DocumentType).values([
   { name: 'national_id', isSystemDefined: true, description: 'National ID card or SSN' },
   { name: 'proof_of_residence', isSystemDefined: true, description: 'Utility bill or lease agreement' },
   { name: 'bank_statement', isSystemDefined: true, description: 'Recent bank statement' },
@@ -1095,7 +1095,7 @@ await db.insert(documentTypeTable).values([
   { name: 'birth_certificate', isSystemDefined: true, description: 'Birth certificate for children' },
 ]);
 
-await db.insert(organizationTypeTable).values([
+await db.insert(OrganizationType).values([
   { name: 'synagogue', isSystemDefined: true },
   { name: 'chabad_house', isSystemDefined: true },
   { name: 'kollel', isSystemDefined: true },
@@ -1123,7 +1123,7 @@ Example migration with data:
 
 ```typescript
 // migration: add-household-income.ts
-await db.schema.alterTable('household').addColumn(
+await db.schema.Alter('household').addColumn(
   'totalIncome',
   'numeric(10,2)'
 );
@@ -1146,13 +1146,13 @@ await db.execute(sql`
 
 ```typescript
 // Cursor-based pagination for applications
-const applications = await db.query.applicationTable.findMany({
+const applications = await db.query.Application.findMany({
   where: and(
-    eq(applicationTable.status, 'submitted'),
-    cursorId ? lt(applicationTable.id, cursorId) : undefined
+    eq(Application.status, 'submitted'),
+    cursorId ? lt(Application.id, cursorId) : undefined
   ),
   limit: 20,
-  orderBy: [desc(applicationTable.createdAt)],
+  orderBy: [desc(Application.createdAt)],
   with: {
     person: true,
     programVersion: { with: { program: true } },
@@ -1166,34 +1166,34 @@ const applications = await db.query.applicationTable.findMany({
 // Payment totals by program version
 const paymentSummary = await db
   .select({
-    programVersionId: paymentTable.programVersionId,
-    totalAmount: sql<number>`SUM(${paymentTable.amount})`,
+    programVersionId: Payment.programVersionId,
+    totalAmount: sql<number>`SUM(${Payment.amount})`,
     paymentCount: sql<number>`COUNT(*)`,
-    status: paymentTable.status,
+    status: Payment.status,
   })
-  .from(paymentTable)
-  .where(eq(paymentTable.programVersionId, versionId))
-  .groupBy(paymentTable.programVersionId, paymentTable.status);
+  .from(Payment)
+  .where(eq(Payment.programVersionId, versionId))
+  .groupBy(Payment.programVersionId, Payment.status);
 ```
 
 ### Complex Filters
 
 ```typescript
 // Applications needing review with specific criteria
-const needsReview = await db.query.applicationTable.findMany({
+const needsReview = await db.query.Application.findMany({
   where: and(
-    inArray(applicationTable.status, ['submitted', 'under_review']),
-    gte(applicationTable.submittedAt, thirtyDaysAgo),
-    isNull(applicationTable.reviewedByUserId)
+    inArray(Application.status, ['submitted', 'under_review']),
+    gte(Application.submittedAt, thirtyDaysAgo),
+    isNull(Application.reviewedByUserId)
   ),
   with: {
     person: true,
     programVersion: true,
     documents: {
-      where: eq(applicationDocumentTable.status, 'pending'),
+      where: eq(ApplicationDocument.status, 'pending'),
     },
   },
-  orderBy: [asc(applicationTable.submittedAt)],
+  orderBy: [asc(Application.submittedAt)],
 });
 ```
 
@@ -1203,16 +1203,16 @@ const needsReview = await db.query.applicationTable.findMany({
 // Programs with active versions
 const activePrograms = await db
   .select()
-  .from(programTable)
+  .from(Program)
   .where(
     exists(
-      db.select().from(programVersionTable)
+      db.select().from(ProgramVersion)
         .where(
           and(
-            eq(programVersionTable.programId, programTable.id),
-            eq(programVersionTable.isActive, true),
-            lte(programVersionTable.startDate, new Date()),
-            gte(programVersionTable.endDate, new Date())
+            eq(ProgramVersion.programId, Program.id),
+            eq(ProgramVersion.isActive, true),
+            lte(ProgramVersion.startDate, new Date()),
+            gte(ProgramVersion.endDate, new Date())
           )
         )
     )
@@ -1226,18 +1226,18 @@ const activePrograms = await db
 ```typescript
 await db.transaction(async (tx) => {
   // Create application
-  const [application] = await tx.insert(applicationTable)
+  const [application] = await tx.insert(Application)
     .values({ ... })
     .returning();
 
   // Create calculation
-  await tx.insert(applicationCalculationTable)
+  await tx.insert(ApplicationCalculation)
     .values({ applicationId: application.id, ... });
 
   // Update status
-  await tx.update(applicationTable)
+  await tx.update(Application)
     .set({ status: 'approved' })
-    .where(eq(applicationTable.id, application.id));
+    .where(eq(Application.id, application.id));
 });
 ```
 
@@ -1245,11 +1245,11 @@ await db.transaction(async (tx) => {
 
 ```typescript
 // Before creating household membership
-const existing = await db.query.householdMemberTable.findFirst({
+const existing = await db.query.HouseholdMember.findFirst({
   where: and(
-    eq(householdMemberTable.householdId, householdId),
-    eq(householdMemberTable.personId, personId),
-    isNull(householdMemberTable.endDate)
+    eq(HouseholdMember.householdId, householdId),
+    eq(HouseholdMember.personId, personId),
+    isNull(HouseholdMember.endDate)
   ),
 });
 
@@ -1262,12 +1262,12 @@ if (existing) {
 
 ```typescript
 // Let Drizzle infer types
-type Application = typeof applicationTable.$inferSelect;
-type NewApplication = typeof applicationTable.$inferInsert;
+type Application = typeof Application.$inferSelect;
+type NewApplication = typeof Application.$inferInsert;
 
 // Use in functions
 async function createApplication(data: NewApplication): Promise<Application> {
-  const [application] = await db.insert(applicationTable)
+  const [application] = await db.insert(Application)
     .values(data)
     .returning();
   return application;
@@ -1278,15 +1278,15 @@ async function createApplication(data: NewApplication): Promise<Application> {
 
 ```typescript
 // DON'T: N+1 queries
-const applications = await db.query.applicationTable.findMany();
+const applications = await db.query.Application.findMany();
 for (const app of applications) {
-  const person = await db.query.personTable.findFirst({
-    where: eq(personTable.id, app.personId),
+  const person = await db.query.Person.findFirst({
+    where: eq(Person.id, app.personId),
   });
 }
 
 // DO: Eager load with 'with'
-const applications = await db.query.applicationTable.findMany({
+const applications = await db.query.Application.findMany({
   with: { person: true },
 });
 ```
@@ -1295,14 +1295,14 @@ const applications = await db.query.applicationTable.findMany({
 
 ```typescript
 // Always filter out archived records
-const activePrograms = await db.query.programTable.findMany({
-  where: isNull(programTable.archivedAt),
+const activePrograms = await db.query.Program.findMany({
+  where: isNull(Program.archivedAt),
 });
 
 // Soft delete instead of hard delete
-await db.update(programTable)
+await db.update(Program)
   .set({ archivedAt: new Date() })
-  .where(eq(programTable.id, programId));
+  .where(eq(Program.id, programId));
 ```
 
 ### 6. Validate Before Insert
@@ -1313,8 +1313,8 @@ async function validateEligibility(
   personId: number,
   programVersionId: number
 ): Promise<boolean> {
-  const criteria = await db.query.eligibilityCriteriaTable.findMany({
-    where: eq(eligibilityCriteriaTable.programVersionId, programVersionId),
+  const criteria = await db.query.EligibilityCriteria.findMany({
+    where: eq(EligibilityCriteria.programVersionId, programVersionId),
   });
 
   const person = await getPersonWithHousehold(personId);
@@ -1332,8 +1332,8 @@ async function validateEligibility(
 ### 7. Use Prepared Statements for Repeated Queries
 
 ```typescript
-const getApplicationById = db.query.applicationTable.findFirst({
-  where: eq(applicationTable.id, sql.placeholder('id')),
+const getApplicationById = db.query.Application.findFirst({
+  where: eq(Application.id, sql.placeholder('id')),
   with: {
     person: true,
     programVersion: { with: { program: true } },
@@ -1366,17 +1366,17 @@ async function addToHousehold(
 ) {
   await db.transaction(async (tx) => {
     // End previous memberships
-    await tx.update(householdMemberTable)
+    await tx.update(HouseholdMember)
       .set({ endDate: new Date(), endReason: 'Moved to new household' })
       .where(
         and(
-          eq(householdMemberTable.personId, personId),
-          isNull(householdMemberTable.endDate)
+          eq(HouseholdMember.personId, personId),
+          isNull(HouseholdMember.endDate)
         )
       );
 
     // Create new membership
-    await tx.insert(householdMemberTable).values({
+    await tx.insert(HouseholdMember).values({
       householdId,
       personId,
       role,

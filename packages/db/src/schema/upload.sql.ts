@@ -3,8 +3,8 @@ import { bigint, boolean, index, pgEnum, text } from "drizzle-orm/pg-core";
 
 import { createTable } from "../create-table";
 import { ulid } from "../types";
-import { beneficiaryAccountTable } from "./beneficiary-auth.sql";
-import { userTable } from "./dashboard-auth.sql";
+import { BeneficiaryAccount } from "./beneficiary-auth.sql";
+import { User } from "./dashboard-auth.sql";
 
 export const uploadSensitivityLevelEnum = pgEnum("upload_sensitivity_level", [
   "public",
@@ -18,7 +18,7 @@ export const uploadStatusEnum = pgEnum("upload_status", [
   "deleted", // The upload has been deleted by the user or the system.
 ]);
 
-export const uploadTable = createTable(
+export const Upload = createTable(
   "upload",
   {
     id: ulid("upload").primaryKey(),
@@ -31,10 +31,10 @@ export const uploadTable = createTable(
     checksum: text().notNull(),
     objectUrl: text().notNull(),
     uploadedByBeneficiaryAccountId: ulid("beneficiaryAccount").references(
-      () => beneficiaryAccountTable.id,
+      () => BeneficiaryAccount.id,
       { onDelete: "set null" },
     ),
-    uploadedByUserId: ulid("user").references(() => userTable.id, {
+    uploadedByUserId: ulid("user").references(() => User.id, {
       onDelete: "set null",
     }),
     public: boolean().notNull().default(false),
@@ -51,13 +51,13 @@ export const uploadTable = createTable(
 /**
  * Relations
  */
-export const uploadRelations = relations(uploadTable, ({ one }) => ({
-  uploadedByBeneficiaryAccount: one(beneficiaryAccountTable, {
-    fields: [uploadTable.uploadedByBeneficiaryAccountId],
-    references: [beneficiaryAccountTable.id],
+export const uploadRelations = relations(Upload, ({ one }) => ({
+  uploadedByBeneficiaryAccount: one(BeneficiaryAccount, {
+    fields: [Upload.uploadedByBeneficiaryAccountId],
+    references: [BeneficiaryAccount.id],
   }),
-  uploadedByUser: one(userTable, {
-    fields: [uploadTable.uploadedByUserId],
-    references: [userTable.id],
+  uploadedByUser: one(User, {
+    fields: [Upload.uploadedByUserId],
+    references: [User.id],
   }),
 }));

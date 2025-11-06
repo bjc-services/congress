@@ -30,9 +30,12 @@
     "@trpc/server": "catalog:",
     "@trpc/tanstack-react-query": "catalog:",
     "better-auth": "catalog:",
+    "i18next": "catalog:",
+    "i18next-browser-languagedetector": "catalog:",
     "nitro": "npm:nitro-nightly@latest",
     "react": "catalog:react19",
     "react-dom": "catalog:react19",
+    "react-i18next": "catalog:",
     "superjson": "2.2.3",
     "zod": "catalog:"
   },

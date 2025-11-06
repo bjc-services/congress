@@ -12,28 +12,28 @@ import {
 
 import { createTable } from "../create-table";
 import { ulid } from "../types";
-import { applicationTable } from "./application.sql";
-import { userTable } from "./dashboard-auth.sql";
-import { programVersionTable } from "./program.sql";
+import { Application } from "./application.sql";
+import { User } from "./dashboard-auth.sql";
+import { ProgramVersion } from "./program.sql";
 
 /**
  * program_payment_formula table - Base amount and field-based calculation
  * Stores the formula definition for calculating suggested payment amounts
  * Example formula_fields: [{"field": "numberOfPersons", "multiplier": 100}, {"field": "hasSpecialNeeds", "bonus": 500}]
  */
-export const programPaymentFormulaTable = createTable(
+export const ProgramPaymentFormula = createTable(
   "program_payment_formula",
   {
     id: bigserial({ mode: "number" }).primaryKey(),
     programVersionId: bigint("program_version_id", { mode: "number" })
       .notNull()
-      .references(() => programVersionTable.id, { onDelete: "cascade" }),
+      .references(() => ProgramVersion.id, { onDelete: "cascade" }),
     baseAmount: numeric("base_amount", { precision: 10, scale: 2 }).notNull(),
     formulaFields: jsonb("formula_fields"), // Array of field calculations: [{field: "numberOfPersons", multiplier: 100}, ...]
     description: text("description"),
     createdByUserId: ulid("user")
       .notNull()
-      .references(() => userTable.id, { onDelete: "set null" }),
+      .references(() => User.id, { onDelete: "set null" }),
   },
   (table) => [
     uniqueIndex("program_payment_formula_program_version_id_unique").on(
@@ -47,13 +47,13 @@ export const programPaymentFormulaTable = createTable(
  * Stores a snapshot of the formula used, actual input values, and calculated result
  * This provides a complete audit trail showing how amounts were calculated
  */
-export const applicationCalculationTable = createTable(
+export const ApplicationCalculation = createTable(
   "application_calculation",
   {
     id: bigserial({ mode: "number" }).primaryKey(),
     applicationId: bigint("application_id", { mode: "number" })
       .notNull()
-      .references(() => applicationTable.id, { onDelete: "cascade" }),
+      .references(() => Application.id, { onDelete: "cascade" }),
     formulaUsed: jsonb("formula_used").notNull(), // Snapshot of formula at calculation time
     inputValues: jsonb("input_values").notNull(), // Actual values used: {numberOfPersons: 5, maritalStatus: "married", ...}
     calculatedAmount: numeric("calculated_amount", {
@@ -64,7 +64,7 @@ export const applicationCalculationTable = createTable(
     adjustmentReason: text("adjustment_reason"), // Required if final differs from calculated
     calculatedByUserId: ulid("user")
       .notNull()
-      .references(() => userTable.id, { onDelete: "set null" }),
+      .references(() => User.id, { onDelete: "set null" }),
     timeCalculated: timestamp("time_calculated").notNull().defaultNow(),
   },
   (table) => [
@@ -81,29 +81,29 @@ export const applicationCalculationTable = createTable(
  * Relations
  */
 export const programPaymentFormulaRelations = relations(
-  programPaymentFormulaTable,
+  ProgramPaymentFormula,
   ({ one }) => ({
-    programVersion: one(programVersionTable, {
-      fields: [programPaymentFormulaTable.programVersionId],
-      references: [programVersionTable.id],
+    programVersion: one(ProgramVersion, {
+      fields: [ProgramPaymentFormula.programVersionId],
+      references: [ProgramVersion.id],
     }),
-    createdBy: one(userTable, {
-      fields: [programPaymentFormulaTable.createdByUserId],
-      references: [userTable.id],
+    createdBy: one(User, {
+      fields: [ProgramPaymentFormula.createdByUserId],
+      references: [User.id],
     }),
   }),
 );
 
 export const applicationCalculationRelations = relations(
-  applicationCalculationTable,
+  ApplicationCalculation,
   ({ one }) => ({
-    application: one(applicationTable, {
-      fields: [applicationCalculationTable.applicationId],
-      references: [applicationTable.id],
+    application: one(Application, {
+      fields: [ApplicationCalculation.applicationId],
+      references: [Application.id],
     }),
-    calculatedBy: one(userTable, {
-      fields: [applicationCalculationTable.calculatedByUserId],
-      references: [userTable.id],
+    calculatedBy: one(User, {
+      fields: [ApplicationCalculation.calculatedByUserId],
+      references: [User.id],
     }),
   }),
 );

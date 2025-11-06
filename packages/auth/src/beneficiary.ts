@@ -5,9 +5,9 @@ import { SignJWT } from "jose";
 import { and, createID, eq, gt, isNull } from "@acme/db";
 import { db } from "@acme/db/client";
 import {
-  beneficiaryAccountTable,
-  beneficiaryPasswordResetTable,
-  beneficiarySessionTable,
+  BeneficiaryAccount,
+  BeneficiaryPasswordReset,
+  BeneficiarySession,
 } from "@acme/db/schema";
 
 import { authEnv } from "../env";
@@ -87,7 +87,7 @@ export async function createSession(
 ): Promise<void> {
   const expiresAt = new Date(Date.now() + SESSION_EXPIRES_IN_MS);
 
-  await db.insert(beneficiarySessionTable).values({
+  await db.insert(BeneficiarySession).values({
     id: createID("beneficiarySession"),
     accountId,
     token,
@@ -102,10 +102,10 @@ export async function getSession(token: string): Promise<{
   accountId: string;
   expiresAt: Date;
 } | null> {
-  const session = await db.query.beneficiarySessionTable.findFirst({
+  const session = await db.query.BeneficiarySession.findFirst({
     where: and(
-      eq(beneficiarySessionTable.token, token),
-      gt(beneficiarySessionTable.expiresAt, new Date()),
+      eq(BeneficiarySession.token, token),
+      gt(BeneficiarySession.expiresAt, new Date()),
     ),
   });
 
@@ -122,14 +122,14 @@ export async function getSession(token: string): Promise<{
 
 export async function deleteSession(token: string): Promise<void> {
   await db
-    .delete(beneficiarySessionTable)
-    .where(eq(beneficiarySessionTable.token, token));
+    .delete(BeneficiarySession)
+    .where(eq(BeneficiarySession.token, token));
 }
 
 export async function deleteAllSessions(accountId: string): Promise<void> {
   await db
-    .delete(beneficiarySessionTable)
-    .where(eq(beneficiarySessionTable.accountId, accountId));
+    .delete(BeneficiarySession)
+    .where(eq(BeneficiarySession.accountId, accountId));
 }
 
 /**
@@ -142,7 +142,7 @@ export async function createPasswordResetToken(
   const token = randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + 1000 * 60 * 15); // 15 minutes
 
-  await db.insert(beneficiaryPasswordResetTable).values({
+  await db.insert(BeneficiaryPasswordReset).values({
     accountId,
     token,
     expiresAt,
@@ -155,11 +155,11 @@ export async function createPasswordResetToken(
 export async function verifyPasswordResetToken(
   token: string,
 ): Promise<string | null> {
-  const reset = await db.query.beneficiaryPasswordResetTable.findFirst({
+  const reset = await db.query.BeneficiaryPasswordReset.findFirst({
     where: and(
-      eq(beneficiaryPasswordResetTable.token, token),
-      gt(beneficiaryPasswordResetTable.expiresAt, new Date()),
-      isNull(beneficiaryPasswordResetTable.usedAt),
+      eq(BeneficiaryPasswordReset.token, token),
+      gt(BeneficiaryPasswordReset.expiresAt, new Date()),
+      isNull(BeneficiaryPasswordReset.usedAt),
     ),
   });
 
@@ -172,9 +172,9 @@ export async function verifyPasswordResetToken(
 
 export async function markPasswordResetTokenUsed(token: string): Promise<void> {
   await db
-    .update(beneficiaryPasswordResetTable)
+    .update(BeneficiaryPasswordReset)
     .set({ usedAt: new Date() })
-    .where(eq(beneficiaryPasswordResetTable.token, token));
+    .where(eq(BeneficiaryPasswordReset.token, token));
 }
 
 /**
@@ -186,8 +186,8 @@ const LOCK_DURATION_MS = 1000 * 60 * 30; // 30 minutes
 export async function incrementFailedLoginAttempts(
   accountId: string,
 ): Promise<void> {
-  const account = await db.query.beneficiaryAccountTable.findFirst({
-    where: eq(beneficiaryAccountTable.id, accountId),
+  const account = await db.query.BeneficiaryAccount.findFirst({
+    where: eq(BeneficiaryAccount.id, accountId),
   });
 
   if (!account) {
@@ -207,27 +207,27 @@ export async function incrementFailedLoginAttempts(
   }
 
   await db
-    .update(beneficiaryAccountTable)
+    .update(BeneficiaryAccount)
     .set(updates)
-    .where(eq(beneficiaryAccountTable.id, accountId));
+    .where(eq(BeneficiaryAccount.id, accountId));
 }
 
 export async function resetFailedLoginAttempts(
   accountId: string,
 ): Promise<void> {
   await db
-    .update(beneficiaryAccountTable)
+    .update(BeneficiaryAccount)
     .set({
       failedLoginAttempts: 0,
       lockedUntil: null,
-      lastLoginAt: new Date(),
+      lastLoginTime: new Date(),
     })
-    .where(eq(beneficiaryAccountTable.id, accountId));
+    .where(eq(BeneficiaryAccount.id, accountId));
 }
 
 export async function isAccountLocked(accountId: string): Promise<boolean> {
-  const account = await db.query.beneficiaryAccountTable.findFirst({
-    where: eq(beneficiaryAccountTable.id, accountId),
+  const account = await db.query.BeneficiaryAccount.findFirst({
+    where: eq(BeneficiaryAccount.id, accountId),
   });
 
   if (!account) {

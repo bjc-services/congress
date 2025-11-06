@@ -13,7 +13,7 @@ import {
 
 import { createTable } from "../create-table";
 import { ulid } from "../types";
-import { userTable } from "./dashboard-auth.sql";
+import { User } from "./dashboard-auth.sql";
 
 /**
  * Enrollment type enum
@@ -29,7 +29,7 @@ export const enrollmentTypeEnum = pgEnum("enrollment_type", [
  * program table - Base program template
  * Examples: "Avrechim Grant", "Community Need Assistance"
  */
-export const programTable = createTable(
+export const Program = createTable(
   "program",
   {
     id: bigserial({ mode: "number" }).primaryKey(),
@@ -42,7 +42,7 @@ export const programTable = createTable(
     isVisibleInPortal: boolean("is_visible_in_portal").notNull().default(true),
     createdByUserId: ulid("user")
       .notNull()
-      .references(() => userTable.id, { onDelete: "set null" }),
+      .references(() => User.id, { onDelete: "set null" }),
     timeArchived: timestamp("time_archived"),
   },
   (table) => [index("program_name_index").on(table.name)],
@@ -53,13 +53,13 @@ export const programTable = createTable(
  * Examples: "Pesach 2026", "Chanukah 2025"
  * Each version has a specific enrollment period with start and end dates
  */
-export const programVersionTable = createTable(
+export const ProgramVersion = createTable(
   "program_version",
   {
     id: bigserial({ mode: "number" }).primaryKey(),
     programId: bigint("program_id", { mode: "number" })
       .notNull()
-      .references(() => programTable.id, { onDelete: "cascade" }),
+      .references(() => Program.id, { onDelete: "cascade" }),
     versionName: text("version_name").notNull(),
     description: text("description"),
     startDate: date("start_date", { mode: "date" }).notNull(),
@@ -67,7 +67,7 @@ export const programVersionTable = createTable(
     isActive: boolean("is_active").notNull().default(true),
     createdByUserId: ulid("user")
       .notNull()
-      .references(() => userTable.id, { onDelete: "set null" }),
+      .references(() => User.id, { onDelete: "set null" }),
   },
   (table) => [
     uniqueIndex("program_version_program_id_version_name_unique").on(
@@ -84,24 +84,21 @@ export const programVersionTable = createTable(
 /**
  * Relations
  */
-export const programRelations = relations(programTable, ({ one, many }) => ({
-  createdBy: one(userTable, {
-    fields: [programTable.createdByUserId],
-    references: [userTable.id],
+export const programRelations = relations(Program, ({ one, many }) => ({
+  createdBy: one(User, {
+    fields: [Program.createdByUserId],
+    references: [User.id],
   }),
-  versions: many(programVersionTable),
+  versions: many(ProgramVersion),
 }));
 
-export const programVersionRelations = relations(
-  programVersionTable,
-  ({ one }) => ({
-    program: one(programTable, {
-      fields: [programVersionTable.programId],
-      references: [programTable.id],
-    }),
-    createdBy: one(userTable, {
-      fields: [programVersionTable.createdByUserId],
-      references: [userTable.id],
-    }),
+export const programVersionRelations = relations(ProgramVersion, ({ one }) => ({
+  program: one(Program, {
+    fields: [ProgramVersion.programId],
+    references: [Program.id],
   }),
-);
+  createdBy: one(User, {
+    fields: [ProgramVersion.createdByUserId],
+    references: [User.id],
+  }),
+}));

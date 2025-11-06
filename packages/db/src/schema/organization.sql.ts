@@ -12,14 +12,14 @@ import {
 
 import { createTable } from "../create-table";
 import { ulid } from "../types";
-import { userTable } from "./dashboard-auth.sql";
-import { personTable } from "./person.sql";
+import { User } from "./dashboard-auth.sql";
+import { Person } from "./person.sql";
 
 /**
  * organization_type table - Flexible community types
  * System-defined types created during migration, staff can create custom types
  */
-export const organizationTypeTable = createTable(
+export const OrganizationType = createTable(
   "organization_type",
   {
     id: bigserial({ mode: "number" }).primaryKey(),
@@ -40,14 +40,14 @@ export const organizationTypeTable = createTable(
  * organization table - Communities/organizations
  * Represents synagogues, chabad houses, kollels, local communities, etc.
  */
-export const organizationTable = createTable(
+export const Organization = createTable(
   "organization",
   {
     id: bigserial({ mode: "number" }).primaryKey(),
     name: text("name").notNull(),
     organizationTypeId: bigint("organization_type_id", { mode: "number" })
       .notNull()
-      .references(() => organizationTypeTable.id, { onDelete: "restrict" }),
+      .references(() => OrganizationType.id, { onDelete: "restrict" }),
     organizationNumber: text("organization_number"), // Government registration number
     addressLine1: text("address_line1"),
     addressLine2: text("address_line2"),
@@ -70,17 +70,17 @@ export const organizationTable = createTable(
  * coordinator table - Organization coordinators
  * Links people to organizations they coordinate, can optionally have dashboard access
  */
-export const coordinatorTable = createTable(
+export const Coordinator = createTable(
   "coordinator",
   {
     id: bigserial({ mode: "number" }).primaryKey(),
     organizationId: bigint("organization_id", { mode: "number" })
       .notNull()
-      .references(() => organizationTable.id, { onDelete: "cascade" }),
+      .references(() => Organization.id, { onDelete: "cascade" }),
     personId: bigint("person_id", { mode: "number" })
       .notNull()
-      .references(() => personTable.id, { onDelete: "restrict" }),
-    userId: ulid("user").references(() => userTable.id, {
+      .references(() => Person.id, { onDelete: "restrict" }),
+    userId: ulid("user").references(() => User.id, {
       onDelete: "set null",
     }), // Dashboard user if they have access
     startDate: date("start_date", { mode: "date" }).notNull(),
@@ -100,16 +100,16 @@ export const coordinatorTable = createTable(
  * committee_member table - Committee members per coordinator
  * Each coordinator can have committee members (typically 3)
  */
-export const committeeMemberTable = createTable(
+export const CommitteeMember = createTable(
   "committee_member",
   {
     id: bigserial({ mode: "number" }).primaryKey(),
     coordinatorId: bigint("coordinator_id", { mode: "number" })
       .notNull()
-      .references(() => coordinatorTable.id, { onDelete: "cascade" }),
+      .references(() => Coordinator.id, { onDelete: "cascade" }),
     personId: bigint("person_id", { mode: "number" })
       .notNull()
-      .references(() => personTable.id, { onDelete: "restrict" }),
+      .references(() => Person.id, { onDelete: "restrict" }),
     position: text("position"), // e.g., "Chair", "Member 1", "Member 2"
     startDate: date("start_date", { mode: "date" }).notNull(),
     endDate: date("end_date", { mode: "date" }),
@@ -124,52 +124,49 @@ export const committeeMemberTable = createTable(
  * Relations
  */
 export const organizationTypeRelations = relations(
-  organizationTypeTable,
+  OrganizationType,
   ({ many }) => ({
-    organizations: many(organizationTable),
+    organizations: many(Organization),
   }),
 );
 
 export const organizationRelations = relations(
-  organizationTable,
+  Organization,
   ({ one, many }) => ({
-    organizationType: one(organizationTypeTable, {
-      fields: [organizationTable.organizationTypeId],
-      references: [organizationTypeTable.id],
+    organizationType: one(OrganizationType, {
+      fields: [Organization.organizationTypeId],
+      references: [OrganizationType.id],
     }),
-    coordinators: many(coordinatorTable),
+    coordinators: many(Coordinator),
   }),
 );
 
-export const coordinatorRelations = relations(
-  coordinatorTable,
-  ({ one, many }) => ({
-    organization: one(organizationTable, {
-      fields: [coordinatorTable.organizationId],
-      references: [organizationTable.id],
-    }),
-    person: one(personTable, {
-      fields: [coordinatorTable.personId],
-      references: [personTable.id],
-    }),
-    user: one(userTable, {
-      fields: [coordinatorTable.userId],
-      references: [userTable.id],
-    }),
-    committeeMembers: many(committeeMemberTable),
+export const coordinatorRelations = relations(Coordinator, ({ one, many }) => ({
+  organization: one(Organization, {
+    fields: [Coordinator.organizationId],
+    references: [Organization.id],
   }),
-);
+  person: one(Person, {
+    fields: [Coordinator.personId],
+    references: [Person.id],
+  }),
+  user: one(User, {
+    fields: [Coordinator.userId],
+    references: [User.id],
+  }),
+  committeeMembers: many(CommitteeMember),
+}));
 
 export const committeeMemberRelations = relations(
-  committeeMemberTable,
+  CommitteeMember,
   ({ one }) => ({
-    coordinator: one(coordinatorTable, {
-      fields: [committeeMemberTable.coordinatorId],
-      references: [coordinatorTable.id],
+    coordinator: one(Coordinator, {
+      fields: [CommitteeMember.coordinatorId],
+      references: [Coordinator.id],
     }),
-    person: one(personTable, {
-      fields: [committeeMemberTable.personId],
-      references: [personTable.id],
+    person: one(Person, {
+      fields: [CommitteeMember.personId],
+      references: [Person.id],
     }),
   }),
 );

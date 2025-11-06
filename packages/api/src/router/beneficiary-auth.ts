@@ -18,11 +18,7 @@ import {
 } from "@acme/auth/beneficiary";
 import { createID, eq } from "@acme/db";
 import { db } from "@acme/db/client";
-import {
-  beneficiaryAccountTable,
-  personContactTable,
-  personTable,
-} from "@acme/db/schema";
+import { BeneficiaryAccount, Person, PersonContact } from "@acme/db/schema";
 
 import { publicProcedure } from "../trpc";
 
@@ -73,8 +69,8 @@ export const beneficiaryAuthRouter = {
     .input(signupSchema)
     .mutation(async ({ input }) => {
       // Check if account already exists
-      const existingAccount = await db.query.beneficiaryAccountTable.findFirst({
-        where: eq(beneficiaryAccountTable.nationalId, input.nationalId),
+      const existingAccount = await db.query.BeneficiaryAccount.findFirst({
+        where: eq(BeneficiaryAccount.nationalId, input.nationalId),
       });
 
       if (existingAccount) {
@@ -85,14 +81,14 @@ export const beneficiaryAuthRouter = {
       }
 
       // Check if person exists (should exist or create)
-      let person = await db.query.personTable.findFirst({
-        where: eq(personTable.nationalId, input.nationalId),
+      let person = await db.query.Person.findFirst({
+        where: eq(Person.nationalId, input.nationalId),
       });
 
       if (!person) {
         // Create person if doesn't exist
         const [newPerson] = await db
-          .insert(personTable)
+          .insert(Person)
           .values({
             nationalId: input.nationalId,
             firstName: input.firstName,
@@ -108,7 +104,7 @@ export const beneficiaryAuthRouter = {
           });
         }
         // Create phone contact
-        await db.insert(personContactTable).values({
+        await db.insert(PersonContact).values({
           id: createID("personContact"),
           personId: person.id,
           value: input.phoneNumber,
@@ -122,7 +118,7 @@ export const beneficiaryAuthRouter = {
 
       // Create account
       const accountId = createID("beneficiaryAccount");
-      await db.insert(beneficiaryAccountTable).values({
+      await db.insert(BeneficiaryAccount).values({
         id: accountId,
         nationalId: input.nationalId,
         phoneNumber: input.phoneNumber,
@@ -130,21 +126,22 @@ export const beneficiaryAuthRouter = {
         status: "pending",
       });
 
-      // Upload documents
-      if (input.documents.length > 0) {
-        await db.insert(beneficiaryDocumentTable).values(
-          input.documents.map((doc) => ({
-            id: createID("beneficiaryDocument"),
-            accountId,
-            documentType: doc.documentType,
-            fileUrl: doc.fileUrl,
-            fileName: doc.fileName,
-            fileSize: doc.fileSize,
-            mimeType: doc.mimeType,
-            status: "pending" as const,
-          })),
-        );
-      }
+      // TODO: Implement document upload
+      // // Upload documents
+      // if (input.documents.length > 0) {
+      //   await db.insert(BeneficiaryDocument).values(
+      //     input.documents.map((doc) => ({
+      //       id: createID("beneficiaryDocument"),
+      //       accountId,
+      //       documentType: doc.documentType,
+      //       fileUrl: doc.fileUrl,
+      //       fileName: doc.fileName,
+      //       fileSize: doc.fileSize,
+      //       mimeType: doc.mimeType,
+      //       status: "pending" as const,
+      //     })),
+      //   );
+      // }
 
       return {
         success: true,
@@ -161,8 +158,8 @@ export const beneficiaryAuthRouter = {
     .input(loginSchema)
     .mutation(async ({ ctx, input }) => {
       // Find account by national ID
-      const account = await db.query.beneficiaryAccountTable.findFirst({
-        where: eq(beneficiaryAccountTable.nationalId, input.nationalId),
+      const account = await db.query.BeneficiaryAccount.findFirst({
+        where: eq(BeneficiaryAccount.nationalId, input.nationalId),
       });
 
       if (!account) {
@@ -257,8 +254,8 @@ export const beneficiaryAuthRouter = {
       return null;
     }
 
-    const account = await db.query.beneficiaryAccountTable.findFirst({
-      where: eq(beneficiaryAccountTable.id, session.accountId),
+    const account = await db.query.BeneficiaryAccount.findFirst({
+      where: eq(BeneficiaryAccount.id, session.accountId),
     });
 
     if (!account?.status || account.status !== "approved") {
@@ -294,8 +291,8 @@ export const beneficiaryAuthRouter = {
   requestPasswordReset: publicProcedure({ captcha: true })
     .input(requestPasswordResetSchema)
     .mutation(async ({ ctx, input }) => {
-      const account = await db.query.beneficiaryAccountTable.findFirst({
-        where: eq(beneficiaryAccountTable.nationalId, input.nationalId),
+      const account = await db.query.BeneficiaryAccount.findFirst({
+        where: eq(BeneficiaryAccount.nationalId, input.nationalId),
       });
 
       if (!account) {
@@ -355,9 +352,9 @@ export const beneficiaryAuthRouter = {
       // Update password and mark token as used
       await Promise.all([
         db
-          .update(beneficiaryAccountTable)
+          .update(BeneficiaryAccount)
           .set({ passwordHash })
-          .where(eq(beneficiaryAccountTable.id, accountId)),
+          .where(eq(BeneficiaryAccount.id, accountId)),
         markPasswordResetTokenUsed(input.token),
         resetFailedLoginAttempts(accountId), // Reset failed attempts
       ]);
@@ -375,8 +372,8 @@ export const beneficiaryAuthRouter = {
   checkAccountStatus: publicProcedure({ captcha: true })
     .input(z.object({ nationalId: nationalIdSchema }))
     .query(async ({ input }) => {
-      const account = await db.query.beneficiaryAccountTable.findFirst({
-        where: eq(beneficiaryAccountTable.nationalId, input.nationalId),
+      const account = await db.query.BeneficiaryAccount.findFirst({
+        where: eq(BeneficiaryAccount.nationalId, input.nationalId),
       });
 
       if (!account) {

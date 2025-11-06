@@ -11,7 +11,7 @@ import {
 
 import { createTable } from "../create-table";
 import { ulid } from "../types";
-import { userTable } from "./dashboard-auth.sql";
+import { User } from "./dashboard-auth.sql";
 
 /**
  * Account status enum
@@ -37,7 +37,7 @@ export const beneficiaryDocumentStatusEnum = pgEnum(
  * beneficiary account table
  * Links to person table via national_id
  */
-export const beneficiaryAccountTable = createTable(
+export const BeneficiaryAccount = createTable(
   "beneficiary_account",
   {
     id: ulid("beneficiaryAccount").primaryKey(),
@@ -46,7 +46,7 @@ export const beneficiaryAccountTable = createTable(
     passwordHash: text("password_hash").notNull(),
     status: beneficiaryAccountStatusEnum("status").notNull().default("pending"),
     timeApproved: timestamp("time_approved"),
-    approvedBy: ulid("user").references(() => userTable.id, {
+    approvedBy: ulid("user").references(() => User.id, {
       onDelete: "set null",
     }),
     rejectionReason: text("rejection_reason"),
@@ -66,13 +66,13 @@ export const beneficiaryAccountTable = createTable(
  * beneficiary session table
  * Stores JWT tokens or session IDs for authentication
  */
-export const beneficiarySessionTable = createTable(
+export const BeneficiarySession = createTable(
   "beneficiary_session",
   {
     id: ulid("beneficiarySession").primaryKey(),
     accountId: text("account_id")
       .notNull()
-      .references(() => beneficiaryAccountTable.id, { onDelete: "cascade" }),
+      .references(() => BeneficiaryAccount.id, { onDelete: "cascade" }),
     token: text("token").notNull().unique(),
     expiresAt: timestamp("expires_at").notNull(),
     ipAddress: text("ip_address"),
@@ -89,13 +89,13 @@ export const beneficiarySessionTable = createTable(
  * Password reset token table
  * Stores temporary tokens for password resets (sent via voice call)
  */
-export const beneficiaryPasswordResetTable = createTable(
+export const BeneficiaryPasswordReset = createTable(
   "beneficiary_password_reset",
   {
     id: bigserial("id", { mode: "number" }).primaryKey(),
     accountId: text("account_id")
       .notNull()
-      .references(() => beneficiaryAccountTable.id, { onDelete: "cascade" }),
+      .references(() => BeneficiaryAccount.id, { onDelete: "cascade" }),
     token: text("token").notNull().unique(),
     expiresAt: timestamp("expires_at").notNull(),
     usedAt: timestamp("used_at"),
@@ -112,29 +112,29 @@ export const beneficiaryPasswordResetTable = createTable(
  * Relations
  */
 export const beneficiaryAccountRelations = relations(
-  beneficiaryAccountTable,
+  BeneficiaryAccount,
   ({ many }) => ({
-    sessions: many(beneficiarySessionTable),
-    passwordResets: many(beneficiaryPasswordResetTable),
+    sessions: many(BeneficiarySession),
+    passwordResets: many(BeneficiaryPasswordReset),
   }),
 );
 
 export const beneficiarySessionRelations = relations(
-  beneficiarySessionTable,
+  BeneficiarySession,
   ({ one }) => ({
-    account: one(beneficiaryAccountTable, {
-      fields: [beneficiarySessionTable.accountId],
-      references: [beneficiaryAccountTable.id],
+    account: one(BeneficiaryAccount, {
+      fields: [BeneficiarySession.accountId],
+      references: [BeneficiaryAccount.id],
     }),
   }),
 );
 
 export const beneficiaryPasswordResetRelations = relations(
-  beneficiaryPasswordResetTable,
+  BeneficiaryPasswordReset,
   ({ one }) => ({
-    account: one(beneficiaryAccountTable, {
-      fields: [beneficiaryPasswordResetTable.accountId],
-      references: [beneficiaryAccountTable.id],
+    account: one(BeneficiaryAccount, {
+      fields: [BeneficiaryPasswordReset.accountId],
+      references: [BeneficiaryAccount.id],
     }),
   }),
 );

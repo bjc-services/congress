@@ -12,7 +12,7 @@ import {
 
 import { createTable } from "../create-table";
 import { ulid } from "../types";
-import { personAddressTable, personTable } from "./person.sql";
+import { Person, PersonAddress } from "./person.sql";
 
 /**
  * Household member role enum
@@ -33,12 +33,11 @@ export const householdMemberRoleEnum = pgEnum("household_member_role", [
  * Represents a group of people living together
  * Separate from family relationships - this is about who lives together
  */
-export const householdTable = createTable("household", {
+export const Household = createTable("household", {
   id: bigserial({ mode: "number" }).primaryKey(),
-  primaryAddressId: ulid("personAddress").references(
-    () => personAddressTable.id,
-    { onDelete: "set null" },
-  ),
+  primaryAddressId: ulid("personAddress").references(() => PersonAddress.id, {
+    onDelete: "set null",
+  }),
   name: text("name"), // Optional name like "Cohen Household"
 });
 
@@ -47,16 +46,16 @@ export const householdTable = createTable("household", {
  * Tracks household membership over time with start/end dates
  * One primary member per household (typically head of household)
  */
-export const householdMemberTable = createTable(
+export const HouseholdMember = createTable(
   "household_member",
   {
     id: bigserial({ mode: "number" }).primaryKey(),
     householdId: bigint("household_id", { mode: "number" })
       .notNull()
-      .references(() => householdTable.id, { onDelete: "cascade" }),
+      .references(() => Household.id, { onDelete: "cascade" }),
     personId: bigint("person_id", { mode: "number" })
       .notNull()
-      .references(() => personTable.id, { onDelete: "restrict" }),
+      .references(() => Person.id, { onDelete: "restrict" }),
     role: householdMemberRoleEnum("role").notNull(),
     isPrimary: boolean("is_primary").notNull().default(false),
     startDate: date("start_date", { mode: "date" }).notNull(),
@@ -79,27 +78,24 @@ export const householdMemberTable = createTable(
 /**
  * Relations
  */
-export const householdRelations = relations(
-  householdTable,
-  ({ one, many }) => ({
-    primaryAddress: one(personAddressTable, {
-      fields: [householdTable.primaryAddressId],
-      references: [personAddressTable.id],
-    }),
-    members: many(householdMemberTable),
+export const householdRelations = relations(Household, ({ one, many }) => ({
+  primaryAddress: one(PersonAddress, {
+    fields: [Household.primaryAddressId],
+    references: [PersonAddress.id],
   }),
-);
+  members: many(HouseholdMember),
+}));
 
 export const householdMemberRelations = relations(
-  householdMemberTable,
+  HouseholdMember,
   ({ one }) => ({
-    household: one(householdTable, {
-      fields: [householdMemberTable.householdId],
-      references: [householdTable.id],
+    household: one(Household, {
+      fields: [HouseholdMember.householdId],
+      references: [Household.id],
     }),
-    person: one(personTable, {
-      fields: [householdMemberTable.personId],
-      references: [personTable.id],
+    person: one(Person, {
+      fields: [HouseholdMember.personId],
+      references: [Person.id],
     }),
   }),
 );

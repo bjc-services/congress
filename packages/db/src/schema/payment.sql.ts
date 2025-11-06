@@ -12,11 +12,11 @@ import {
 
 import { createTable } from "../create-table";
 import { ulid } from "../types";
-import { applicationTable } from "./application.sql";
-import { userTable } from "./dashboard-auth.sql";
-import { personTable } from "./person.sql";
-import { programVersionTable } from "./program.sql";
-import { uploadTable } from "./upload.sql";
+import { Application } from "./application.sql";
+import { User } from "./dashboard-auth.sql";
+import { Person } from "./person.sql";
+import { ProgramVersion } from "./program.sql";
+import { Upload } from "./upload.sql";
 
 /**
  * Payment method enum - How the payment was made
@@ -45,26 +45,26 @@ export const paymentStatusEnum = pgEnum("payment_status", [
  * Can be linked to an application or standalone (ad-hoc payments)
  * Staff has flexibility to record payments without linking to any program/application
  */
-export const paymentTable = createTable(
+export const Payment = createTable(
   "payment",
   {
     id: bigserial({ mode: "number" }).primaryKey(),
     personId: bigint("person_id", { mode: "number" })
       .notNull()
-      .references(() => personTable.id, { onDelete: "restrict" }),
+      .references(() => Person.id, { onDelete: "restrict" }),
     applicationId: bigint("application_id", { mode: "number" }).references(
-      () => applicationTable.id,
+      () => Application.id,
       { onDelete: "set null" },
     ), // Nullable for ad-hoc payments
     programVersionId: bigint("program_version_id", {
       mode: "number",
-    }).references(() => programVersionTable.id, { onDelete: "set null" }), // For reporting, nullable
+    }).references(() => ProgramVersion.id, { onDelete: "set null" }), // For reporting, nullable
     amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
     paymentMethod: paymentMethodEnum("payment_method").notNull(),
     paymentDate: date("payment_date", { mode: "date" }).notNull(),
     status: paymentStatusEnum("status").notNull().default("pending"),
     receiverName: text("receiver_name"), // Who physically received the payment
-    receiverSignatureUploadId: ulid("upload").references(() => uploadTable.id, {
+    receiverSignatureUploadId: ulid("upload").references(() => Upload.id, {
       onDelete: "set null",
     }),
     referenceNumber: text("reference_number"), // Check number, transaction ID, etc.
@@ -72,7 +72,7 @@ export const paymentTable = createTable(
     notes: text("notes"), // Staff notes about the payment
     recordedByUserId: ulid("user")
       .notNull()
-      .references(() => userTable.id, { onDelete: "set null" }),
+      .references(() => User.id, { onDelete: "set null" }),
   },
   (table) => [
     index("payment_person_id_index").on(table.personId),
@@ -87,25 +87,25 @@ export const paymentTable = createTable(
 /**
  * Relations
  */
-export const paymentRelations = relations(paymentTable, ({ one }) => ({
-  person: one(personTable, {
-    fields: [paymentTable.personId],
-    references: [personTable.id],
+export const paymentRelations = relations(Payment, ({ one }) => ({
+  person: one(Person, {
+    fields: [Payment.personId],
+    references: [Person.id],
   }),
-  application: one(applicationTable, {
-    fields: [paymentTable.applicationId],
-    references: [applicationTable.id],
+  application: one(Application, {
+    fields: [Payment.applicationId],
+    references: [Application.id],
   }),
-  programVersion: one(programVersionTable, {
-    fields: [paymentTable.programVersionId],
-    references: [programVersionTable.id],
+  programVersion: one(ProgramVersion, {
+    fields: [Payment.programVersionId],
+    references: [ProgramVersion.id],
   }),
-  receiverSignature: one(uploadTable, {
-    fields: [paymentTable.receiverSignatureUploadId],
-    references: [uploadTable.id],
+  receiverSignature: one(Upload, {
+    fields: [Payment.receiverSignatureUploadId],
+    references: [Upload.id],
   }),
-  recordedBy: one(userTable, {
-    fields: [paymentTable.recordedByUserId],
-    references: [userTable.id],
+  recordedBy: one(User, {
+    fields: [Payment.recordedByUserId],
+    references: [User.id],
   }),
 }));

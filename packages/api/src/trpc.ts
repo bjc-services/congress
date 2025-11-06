@@ -14,7 +14,7 @@ import type { DashboardAuth, DashboardSession } from "@acme/auth";
 import * as beneficiaryAuth from "@acme/auth/beneficiary";
 import { eq } from "@acme/db";
 import { db } from "@acme/db/client";
-import { beneficiaryAccountTable } from "@acme/db/schema";
+import { BeneficiaryAccount } from "@acme/db/schema";
 
 const getSession = async (
   authApi: DashboardAuth,
@@ -140,8 +140,8 @@ export const beneficiaryProtectedProcedure = t.procedure.use(
 
     const [account] = await db
       .select()
-      .from(beneficiaryAccountTable)
-      .where(eq(beneficiaryAccountTable.id, session.accountId))
+      .from(BeneficiaryAccount)
+      .where(eq(BeneficiaryAccount.id, session.accountId))
       .limit(1);
 
     if (!account?.status || account.status !== "approved") {

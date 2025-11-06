@@ -21,7 +21,7 @@ import {
 import { createTable } from "../create-table";
 import { timestamp, ulid } from "../types";
 
-export const personTable = createTable(
+export const Person = createTable(
   "person",
   {
     id: bigserial({ mode: "number" }).primaryKey(),
@@ -36,7 +36,7 @@ export const personTable = createTable(
 
 export const contactTypeEnum = pgEnum("contact_type", personContactTypes);
 
-export const personContactTable = createTable(
+export const PersonContact = createTable(
   "person_contact",
   {
     id: ulid("personContact").primaryKey(),
@@ -57,7 +57,7 @@ export const personContactTable = createTable(
   ],
 );
 
-export const personAddressTable = createTable(
+export const PersonAddress = createTable(
   "person_address",
   {
     id: ulid("personAddress").primaryKey(),
@@ -95,16 +95,16 @@ export const relationshipTypeEnum = pgEnum(
  *
  * Siblings are implicitly created when a parent creates a relationship with multiple children.
  */
-export const personRelationshipTable = createTable(
+export const PersonRelationship = createTable(
   "person_relationship",
   {
     id: ulid("personRelationship").primaryKey(),
     personId: bigint({ mode: "number" })
       .notNull()
-      .references(() => personTable.id, { onDelete: "cascade" }),
+      .references(() => Person.id, { onDelete: "cascade" }),
     relatedPersonId: bigint({ mode: "number" })
       .notNull()
-      .references(() => personTable.id, { onDelete: "cascade" }),
+      .references(() => Person.id, { onDelete: "cascade" }),
     relationshipType: relationshipTypeEnum(),
     startDate: timestamp("start_date").notNull().defaultNow(),
     endDate: timestamp("end_date"),

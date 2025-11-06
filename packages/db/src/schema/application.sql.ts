@@ -10,12 +10,12 @@ import {
 
 import { createTable } from "../create-table";
 import { ulid } from "../types";
-import { beneficiaryAccountTable } from "./beneficiary-auth.sql";
-import { userTable } from "./dashboard-auth.sql";
-import { personTable } from "./person.sql";
-import { documentTypeTable } from "./program-requirements.sql";
-import { programVersionTable } from "./program.sql";
-import { uploadTable } from "./upload.sql";
+import { BeneficiaryAccount } from "./beneficiary-auth.sql";
+import { User } from "./dashboard-auth.sql";
+import { Person } from "./person.sql";
+import { DocumentType } from "./program-requirements.sql";
+import { ProgramVersion } from "./program.sql";
+import { Upload } from "./upload.sql";
 
 /**
  * Application status enum - Lifecycle states for applications
@@ -35,30 +35,30 @@ export const applicationStatusEnum = pgEnum("application_status", [
  * application table - Core application record
  * Can be self-enrolled (beneficiary submits) or committee-enrolled (staff submits)
  */
-export const applicationTable = createTable(
+export const Application = createTable(
   "application",
   {
     id: bigserial({ mode: "number" }).primaryKey(),
     programVersionId: bigint("program_version_id", { mode: "number" })
       .notNull()
-      .references(() => programVersionTable.id, { onDelete: "restrict" }),
+      .references(() => ProgramVersion.id, { onDelete: "restrict" }),
     personId: bigint("person_id", { mode: "number" })
       .notNull()
-      .references(() => personTable.id, { onDelete: "restrict" }),
+      .references(() => Person.id, { onDelete: "restrict" }),
     beneficiaryAccountId: ulid("beneficiaryAccount").references(
-      () => beneficiaryAccountTable.id,
+      () => BeneficiaryAccount.id,
       { onDelete: "set null" },
     ), // Null for committee-enrolled
     status: applicationStatusEnum("status").notNull().default("draft"),
     timeSubmitted: timestamp("time_submitted"),
-    submittedByUserId: ulid("user").references(() => userTable.id, {
+    submittedByUserId: ulid("user").references(() => User.id, {
       onDelete: "set null",
     }), // Staff member who submitted for committee
-    reviewedByUserId: ulid("user").references(() => userTable.id, {
+    reviewedByUserId: ulid("user").references(() => User.id, {
       onDelete: "set null",
     }),
     timeReviewed: timestamp("time_reviewed"),
-    approvedByUserId: ulid("user").references(() => userTable.id, {
+    approvedByUserId: ulid("user").references(() => User.id, {
       onDelete: "set null",
     }),
     timeApproved: timestamp("time_approved"),
@@ -88,23 +88,23 @@ export const applicationDocumentStatusEnum = pgEnum(
  * application_document table - Links uploaded documents to applications
  * Tracks which documents were provided for which application
  */
-export const applicationDocumentTable = createTable(
+export const ApplicationDocument = createTable(
   "application_document",
   {
     id: bigserial({ mode: "number" }).primaryKey(),
     applicationId: bigint("application_id", { mode: "number" })
       .notNull()
-      .references(() => applicationTable.id, { onDelete: "cascade" }),
+      .references(() => Application.id, { onDelete: "cascade" }),
     documentTypeId: bigint("document_type_id", { mode: "number" })
       .notNull()
-      .references(() => documentTypeTable.id, { onDelete: "restrict" }),
+      .references(() => DocumentType.id, { onDelete: "restrict" }),
     uploadId: ulid("upload")
       .notNull()
-      .references(() => uploadTable.id, { onDelete: "restrict" }),
+      .references(() => Upload.id, { onDelete: "restrict" }),
     status: applicationDocumentStatusEnum("status")
       .notNull()
       .default("pending"),
-    reviewedByUserId: ulid("user").references(() => userTable.id, {
+    reviewedByUserId: ulid("user").references(() => User.id, {
       onDelete: "set null",
     }),
     timeReviewed: timestamp("time_reviewed"),
@@ -120,58 +120,55 @@ export const applicationDocumentTable = createTable(
 /**
  * Relations
  */
-export const applicationRelations = relations(
-  applicationTable,
-  ({ one, many }) => ({
-    programVersion: one(programVersionTable, {
-      fields: [applicationTable.programVersionId],
-      references: [programVersionTable.id],
-    }),
-    person: one(personTable, {
-      fields: [applicationTable.personId],
-      references: [personTable.id],
-    }),
-    beneficiaryAccount: one(beneficiaryAccountTable, {
-      fields: [applicationTable.beneficiaryAccountId],
-      references: [beneficiaryAccountTable.id],
-    }),
-    submittedBy: one(userTable, {
-      fields: [applicationTable.submittedByUserId],
-      references: [userTable.id],
-      relationName: "application_submitted_by",
-    }),
-    reviewedBy: one(userTable, {
-      fields: [applicationTable.reviewedByUserId],
-      references: [userTable.id],
-      relationName: "application_reviewed_by",
-    }),
-    approvedBy: one(userTable, {
-      fields: [applicationTable.approvedByUserId],
-      references: [userTable.id],
-      relationName: "application_approved_by",
-    }),
-    documents: many(applicationDocumentTable),
+export const applicationRelations = relations(Application, ({ one, many }) => ({
+  programVersion: one(ProgramVersion, {
+    fields: [Application.programVersionId],
+    references: [ProgramVersion.id],
   }),
-);
+  person: one(Person, {
+    fields: [Application.personId],
+    references: [Person.id],
+  }),
+  beneficiaryAccount: one(BeneficiaryAccount, {
+    fields: [Application.beneficiaryAccountId],
+    references: [BeneficiaryAccount.id],
+  }),
+  submittedBy: one(User, {
+    fields: [Application.submittedByUserId],
+    references: [User.id],
+    relationName: "application_submitted_by",
+  }),
+  reviewedBy: one(User, {
+    fields: [Application.reviewedByUserId],
+    references: [User.id],
+    relationName: "application_reviewed_by",
+  }),
+  approvedBy: one(User, {
+    fields: [Application.approvedByUserId],
+    references: [User.id],
+    relationName: "application_approved_by",
+  }),
+  documents: many(ApplicationDocument),
+}));
 
 export const applicationDocumentRelations = relations(
-  applicationDocumentTable,
+  ApplicationDocument,
   ({ one }) => ({
-    application: one(applicationTable, {
-      fields: [applicationDocumentTable.applicationId],
-      references: [applicationTable.id],
+    application: one(Application, {
+      fields: [ApplicationDocument.applicationId],
+      references: [Application.id],
     }),
-    documentType: one(documentTypeTable, {
-      fields: [applicationDocumentTable.documentTypeId],
-      references: [documentTypeTable.id],
+    documentType: one(DocumentType, {
+      fields: [ApplicationDocument.documentTypeId],
+      references: [DocumentType.id],
     }),
-    upload: one(uploadTable, {
-      fields: [applicationDocumentTable.uploadId],
-      references: [uploadTable.id],
+    upload: one(Upload, {
+      fields: [ApplicationDocument.uploadId],
+      references: [Upload.id],
     }),
-    reviewedBy: one(userTable, {
-      fields: [applicationDocumentTable.reviewedByUserId],
-      references: [userTable.id],
+    reviewedBy: one(User, {
+      fields: [ApplicationDocument.reviewedByUserId],
+      references: [User.id],
     }),
   }),
 );

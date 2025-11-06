@@ -7,6 +7,8 @@ import SuperJSON from "superjson";
 import { trpcClient, TRPCProvider } from "~/lib/trpc";
 import { routeTree } from "./routeTree.gen";
 
+import "~/lib/i18n";
+
 export function getRouter() {
   const queryClient = new QueryClient({
     defaultOptions: {
