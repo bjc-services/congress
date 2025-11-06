@@ -43,7 +43,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   const { i18n } = useTranslation();
   return (
     <ThemeProvider>
-      <html lang={i18n.language} suppressHydrationWarning>
+      <html lang={i18n.language} dir={i18n.dir()} suppressHydrationWarning>
         <head>
           <HeadContent />
         </head>
