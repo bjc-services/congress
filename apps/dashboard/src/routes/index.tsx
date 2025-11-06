@@ -24,8 +24,11 @@ import { toast } from "@acme/ui/toast";
 import { AuthShowcase } from "~/component/auth-showcase";
 import { useTRPC } from "~/lib/trpc";
 
+const DISABLE_POST_LIST = true as boolean;
+
 export const Route = createFileRoute("/")({
   loader: ({ context }) => {
+    if (DISABLE_POST_LIST) return;
     const { trpc, queryClient } = context;
     void queryClient.prefetchQuery(trpc.post.all.queryOptions());
   },
@@ -52,7 +55,11 @@ function RouteComponent() {
               </div>
             }
           >
-            <PostList />
+            {DISABLE_POST_LIST ? (
+              <div>Post list is disabled</div>
+            ) : (
+              <PostList />
+            )}
           </Suspense>
         </div>
       </div>

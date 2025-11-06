@@ -9,17 +9,22 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { useTranslation } from "react-i18next";
 
 import type { AppRouter } from "@acme/api";
 import { ThemeProvider, ThemeToggle } from "@acme/ui/theme";
 import { Toaster } from "@acme/ui/toast";
 
+import { setSSRLanguage } from "~/lib/i18n";
 import appCss from "~/styles.css?url";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
   trpc: TRPCOptionsProxy<AppRouter>;
 }>()({
+  beforeLoad: async () => {
+    await setSSRLanguage();
+  },
   head: () => ({
     links: [{ rel: "stylesheet", href: appCss }],
   }),
@@ -35,9 +40,10 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const { i18n } = useTranslation();
   return (
     <ThemeProvider>
-      <html lang="en" suppressHydrationWarning>
+      <html lang={i18n.language} suppressHydrationWarning>
         <head>
           <HeadContent />
         </head>

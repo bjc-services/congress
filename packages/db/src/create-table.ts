@@ -91,7 +91,7 @@ export function createTable<
   const enhancedColumns = {
     ...columns,
     ...timestamps,
-    ...timeArchived,
+    timeArchived,
   } as unknown as EnhancedColumns<TColumnsMap>;
 
   return pgTable(name, enhancedColumns, (table) => {
