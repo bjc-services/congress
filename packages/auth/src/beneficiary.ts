@@ -6,6 +6,7 @@ import { and, createID, eq, gt, isNull } from "@acme/db";
 import { db } from "@acme/db/client";
 import {
   BeneficiaryAccount,
+  BeneficiaryOTP,
   BeneficiaryPasswordReset,
   BeneficiarySession,
 } from "@acme/db/schema";
@@ -239,4 +240,77 @@ export async function isAccountLocked(accountId: string): Promise<boolean> {
   }
 
   return false;
+}
+
+/**
+ * OTP (One-Time Password) utilities
+ */
+const OTP_EXPIRES_IN_MS = 1000 * 60 * 10; // 10 minutes
+
+/**
+ * Generate a 6-digit OTP code
+ */
+function generateOTPCode(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+/**
+ * Create and store an OTP code for an account
+ */
+export async function createOTP(
+  accountId: string,
+  options?: { ipAddress?: string },
+): Promise<string> {
+  const code = generateOTPCode();
+  const expiresAt = new Date(Date.now() + OTP_EXPIRES_IN_MS);
+
+  // Invalidate any existing unused OTPs for this account
+  await db
+    .update(BeneficiaryOTP)
+    .set({ usedAt: new Date() })
+    .where(
+      and(
+        eq(BeneficiaryOTP.accountId, accountId),
+        isNull(BeneficiaryOTP.usedAt),
+        gt(BeneficiaryOTP.expiresAt, new Date()),
+      ),
+    );
+
+  await db.insert(BeneficiaryOTP).values({
+    accountId,
+    code,
+    expiresAt,
+    ipAddress: options?.ipAddress,
+  });
+
+  return code;
+}
+
+/**
+ * Verify an OTP code
+ */
+export async function verifyOTP(
+  accountId: string,
+  code: string,
+): Promise<boolean> {
+  const otp = await db.query.BeneficiaryOTP.findFirst({
+    where: and(
+      eq(BeneficiaryOTP.accountId, accountId),
+      eq(BeneficiaryOTP.code, code),
+      gt(BeneficiaryOTP.expiresAt, new Date()),
+      isNull(BeneficiaryOTP.usedAt),
+    ),
+  });
+
+  if (!otp) {
+    return false;
+  }
+
+  // Mark OTP as used
+  await db
+    .update(BeneficiaryOTP)
+    .set({ usedAt: new Date() })
+    .where(eq(BeneficiaryOTP.id, otp.id));
+
+  return true;
 }

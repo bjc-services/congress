@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { useForm } from "@tanstack/react-form";
 import {
   useMutation,
+  useQuery,
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
@@ -22,7 +23,8 @@ import {
 import { Input } from "@acme/ui/input";
 import { toast } from "@acme/ui/toast";
 
-import { AuthShowcase } from "~/component/auth-showcase";
+import { BeneficiaryLoginFlow } from "~/component/beneficiary-login-flow";
+import { getAuthToken, removeAuthToken } from "~/lib/beneficiary-auth";
 import { useTRPC } from "~/lib/trpc";
 
 const DISABLE_POST_LIST = true as boolean;
@@ -38,13 +40,58 @@ export const Route = createFileRoute("/")({
 
 function RouteComponent() {
   const { t } = useTranslation();
+  const trpc = useTRPC();
+  const token = getAuthToken();
+
+  // Check session if token exists
+  const { data: session } = useQuery(
+    trpc.beneficiaryAuth.getSession.queryOptions(undefined, {
+      enabled: !!token,
+      retry: false,
+    }),
+  );
+
+  const logoutMutation = useMutation(
+    trpc.beneficiaryAuth.logout.mutationOptions({
+      onSuccess: () => {
+        removeAuthToken();
+        window.location.reload();
+      },
+    }),
+  );
+
+  // If no token or no valid session, show login
+  if (!token || !session) {
+    return (
+      <main className="container flex h-screen items-center justify-center py-16">
+        <BeneficiaryLoginFlow />
+      </main>
+    );
+  }
+
+  // User is authenticated, show main app
   return (
     <main className="container h-screen py-16">
       <div className="flex flex-col items-center justify-center gap-4">
-        <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-          {t("create_t3_turbo")}
-        </h1>
-        <AuthShowcase />
+        <div className="flex w-full items-center justify-between">
+          <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
+            {t("create_t3_turbo")}
+          </h1>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              logoutMutation.mutate();
+            }}
+          >
+            {t("logout")}
+          </Button>
+        </div>
+        {session.account.status === "pending" && (
+          <div className="w-full max-w-2xl rounded-lg border border-yellow-500 bg-yellow-50 p-4 text-yellow-800">
+            <p className="font-semibold">{t("account_pending_verification")}</p>
+            <p className="text-sm">{t("account_pending_message")}</p>
+          </div>
+        )}
 
         <CreatePostForm />
         <div className="w-full max-w-2xl overflow-y-scroll">

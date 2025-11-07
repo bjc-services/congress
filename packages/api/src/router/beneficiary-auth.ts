@@ -3,6 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod/v4";
 
 import {
+  createOTP,
   createPasswordResetToken,
   createSession,
   createSessionToken,
@@ -13,14 +14,54 @@ import {
   isAccountLocked,
   markPasswordResetTokenUsed,
   resetFailedLoginAttempts,
+  verifyOTP,
   verifyPassword,
   verifyPasswordResetToken,
 } from "@acme/auth/beneficiary";
 import { createID, eq } from "@acme/db";
 import { db } from "@acme/db/client";
 import { BeneficiaryAccount, Person, PersonContact } from "@acme/db/schema";
+import { sendVoiceOTP } from "@acme/transactional/twilio";
 
 import { publicProcedure } from "../trpc";
+
+function maskPhoneNumber(phoneNumber: string): string {
+  if (!phoneNumber) return "05*****00";
+
+  // Keep leading + if present, then digits; otherwise just digits
+  const trimmed = phoneNumber.trim();
+  const hasPlus = trimmed.startsWith("+");
+  const digits = (hasPlus ? "+" : "") + trimmed.replace(/[^\d+]/g, "");
+
+  // Normalize to local Israeli format: 0XXXXXXXXX (10 digits)
+  // Acceptable inputs:
+  // - +9725XXXXXXXX (e.g., +972533505770) -> 05XXXXXXXX
+  // - 9725XXXXXXXX  (e.g., 972533505770)  -> 05XXXXXXXX
+  // - 05XXXXXXXX    (e.g., 0533505770)    -> 05XXXXXXXX
+  // - 5XXXXXXXX     (e.g., 533505770)     -> 05XXXXXXXX
+  let local: string | null = null;
+
+  if (digits.startsWith("+972")) {
+    const rest = digits.slice(4); // after +972
+    if (/^5\d{8}$/.test(rest)) local = "0" + rest; // 05XXXXXXXX
+  } else if (digits.startsWith("972")) {
+    const rest = digits.slice(3); // after 972
+    if (/^5\d{8}$/.test(rest)) local = "0" + rest;
+  } else if (/^05\d{8}$/.test(digits)) {
+    local = digits;
+  } else if (/^5\d{8}$/.test(digits)) {
+    local = "0" + digits;
+  }
+
+  if (!local) {
+    // Fallback predictable mask
+    return "05********";
+  }
+
+  const first3 = local.slice(0, 3); // e.g., 053
+  const last2 = local.slice(-2); // e.g., 70
+  return `${first3}*****${last2}`;
+}
 
 /**
  * Validators for beneficiary auth
@@ -32,7 +73,6 @@ const passwordSchema = z.string().min(8).max(128);
 const signupSchema = z.object({
   nationalId: nationalIdSchema,
   phoneNumber: phoneNumberSchema,
-  password: passwordSchema,
   firstName: z.string().min(1).optional(),
   lastName: z.string().min(1).optional(),
   documents: z.array(
@@ -60,14 +100,146 @@ const resetPasswordSchema = z.object({
   newPassword: passwordSchema,
 });
 
+const verifyOTPSchema = z.object({
+  nationalId: nationalIdSchema,
+  code: z.string().length(6),
+  newPassword: passwordSchema,
+});
+
 export const beneficiaryAuthRouter = {
   /**
-   * Signup - Create a new beneficiary account
+   * Check national ID - Check if account exists and if it has a password
+   * Returns account status and whether password is set
+   */
+  checkNationalId: publicProcedure({ captcha: false })
+    .input(z.object({ nationalId: nationalIdSchema }))
+    .query(async ({ input }) => {
+      const account = await db.query.BeneficiaryAccount.findFirst({
+        where: eq(BeneficiaryAccount.nationalId, input.nationalId),
+      });
+
+      if (!account) {
+        return {
+          exists: false,
+          hasPassword: false,
+          phoneNumberMasked: null,
+        };
+      }
+
+      return {
+        exists: true,
+        hasPassword: !!account.passwordHash,
+        phoneNumberMasked: maskPhoneNumber(account.phoneNumber),
+        status: account.status,
+      };
+    }),
+
+  /**
+   * Send OTP - Send one-time code via Twilio voice call
+   */
+  sendOTP: publicProcedure({ captcha: true })
+    .input(z.object({ nationalId: nationalIdSchema }))
+    .mutation(async ({ ctx, input }) => {
+      const account = await db.query.BeneficiaryAccount.findFirst({
+        where: eq(BeneficiaryAccount.nationalId, input.nationalId),
+      });
+
+      if (!account) {
+        // Don't reveal if account exists for security
+        return {
+          success: true,
+          message:
+            "If an account exists with this national ID, a verification code has been sent to your phone.",
+          phoneNumberMasked: null,
+        };
+      }
+
+      // Generate and store OTP
+      const code = await createOTP(account.id, {
+        ipAddress: ctx.headers.get("x-forwarded-for") ?? undefined,
+      });
+
+      // Send OTP via Twilio
+      await sendVoiceOTP({
+        to: account.phoneNumber,
+        code,
+      });
+
+      return {
+        success: true,
+        message:
+          "A verification code has been sent to your phone via voice call.",
+        phoneNumberMasked: maskPhoneNumber(account.phoneNumber),
+        // In development, return the code for testing
+        devCode: process.env.NODE_ENV === "development" ? code : undefined,
+      };
+    }),
+
+  /**
+   * Verify OTP and set password - Verify OTP code and set/update password
+   */
+  verifyOTPAndSetPassword: publicProcedure({ captcha: true })
+    .input(verifyOTPSchema)
+    .mutation(async ({ ctx, input }) => {
+      const account = await db.query.BeneficiaryAccount.findFirst({
+        where: eq(BeneficiaryAccount.nationalId, input.nationalId),
+      });
+
+      if (!account) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Account not found",
+        });
+      }
+
+      // Verify OTP
+      const isValidOTP = await verifyOTP(account.id, input.code);
+
+      if (!isValidOTP) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid or expired verification code",
+        });
+      }
+
+      // Hash and set password
+      const passwordHash = await hashPassword(input.newPassword);
+
+      await db
+        .update(BeneficiaryAccount)
+        .set({ passwordHash })
+        .where(eq(BeneficiaryAccount.id, account.id));
+
+      // Reset failed attempts
+      await resetFailedLoginAttempts(account.id);
+
+      // Create session and log in
+      const token = await createSessionToken(account.id);
+      await createSession(account.id, token, {
+        ipAddress: ctx.headers.get("x-forwarded-for") ?? undefined,
+        userAgent: ctx.headers.get("user-agent") ?? undefined,
+      });
+
+      return {
+        success: true,
+        message: "Password set successfully. You are now logged in.",
+        token,
+        account: {
+          id: account.id,
+          nationalId: account.nationalId,
+          status: account.status,
+        },
+      };
+    }),
+
+  /**
+   * Signup - Create a new beneficiary account without password
    * Account will be in "pending" status until approved by admin
+   * User is logged in immediately after signup
    */
   signup: publicProcedure({ captcha: true })
     .input(signupSchema)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
       // Check if account already exists
       const existingAccount = await db.query.BeneficiaryAccount.findFirst({
         where: eq(BeneficiaryAccount.nationalId, input.nationalId),
@@ -113,16 +285,13 @@ export const beneficiaryAuthRouter = {
         });
       }
 
-      // Hash password
-      const passwordHash = await hashPassword(input.password);
-
-      // Create account
+      // Create account WITHOUT password (will be set via OTP flow)
       const accountId = createID("beneficiaryAccount");
       await db.insert(BeneficiaryAccount).values({
         id: accountId,
         nationalId: input.nationalId,
         phoneNumber: input.phoneNumber,
-        passwordHash,
+        passwordHash: null, // No password initially
         status: "pending",
       });
 
@@ -143,11 +312,23 @@ export const beneficiaryAuthRouter = {
       //   );
       // }
 
+      // Log in immediately after signup
+      const token = await createSessionToken(accountId);
+      await createSession(accountId, token, {
+        ipAddress: ctx.headers.get("x-forwarded-for") ?? undefined,
+        userAgent: ctx.headers.get("user-agent") ?? undefined,
+      });
+
       return {
         success: true,
         message:
-          "Account created successfully. Please wait for admin approval before you can login.",
-        accountId,
+          "Account created successfully. Your account is pending verification, but you can still apply for programs.",
+        token,
+        account: {
+          id: accountId,
+          nationalId: input.nationalId,
+          status: "pending" as const,
+        },
       };
     }),
 
@@ -178,14 +359,17 @@ export const beneficiaryAuthRouter = {
         });
       }
 
-      // Check account status
-      if (account.status === "pending") {
+      // Check if account has a password
+      if (!account.passwordHash) {
         throw new TRPCError({
-          code: "FORBIDDEN",
+          code: "BAD_REQUEST",
           message:
-            "Your account is pending approval. Please wait for admin review.",
+            "Account does not have a password set. Please use the forgot password flow to set one.",
         });
       }
+
+      // Allow login even if account is pending (but submissions won't be processed)
+      // Only reject if account is rejected or suspended
 
       if (account.status === "rejected") {
         throw new TRPCError({
@@ -258,7 +442,8 @@ export const beneficiaryAuthRouter = {
       where: eq(BeneficiaryAccount.id, session.accountId),
     });
 
-    if (!account?.status || account.status !== "approved") {
+    // Return session even for pending accounts (they can still use the app)
+    if (!account) {
       return null;
     }
 

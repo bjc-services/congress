@@ -43,7 +43,7 @@ export const BeneficiaryAccount = createTable(
     id: ulid("beneficiaryAccount").primaryKey(),
     nationalId: varchar("national_id", { length: 10 }).notNull().unique(), // 10 digits
     phoneNumber: varchar("phone_number", { length: 15 }).notNull().unique(), // E.164 format +972501234567
-    passwordHash: text("password_hash").notNull(),
+    passwordHash: text("password_hash"), // Nullable - accounts can be created without password initially
     status: beneficiaryAccountStatusEnum("status").notNull().default("pending"),
     timeApproved: timestamp("time_approved"),
     approvedBy: ulid("user").references(() => User.id, {
@@ -109,6 +109,29 @@ export const BeneficiaryPasswordReset = createTable(
 );
 
 /**
+ * OTP (One-Time Password) table
+ * Stores OTP codes for password setup/reset (sent via Twilio voice call)
+ */
+export const BeneficiaryOTP = createTable(
+  "beneficiary_otp",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    accountId: text("account_id")
+      .notNull()
+      .references(() => BeneficiaryAccount.id, { onDelete: "cascade" }),
+    code: varchar("code", { length: 6 }).notNull(), // 6-digit OTP code
+    expiresAt: timestamp("expires_at").notNull(),
+    usedAt: timestamp("used_at"),
+    ipAddress: text("ip_address"),
+  },
+  (table) => [
+    index("beneficiary_otp_account_id_index").on(table.accountId),
+    index("beneficiary_otp_code_index").on(table.code),
+    index("beneficiary_otp_expires_at_index").on(table.expiresAt),
+  ],
+);
+
+/**
  * Relations
  */
 export const beneficiaryAccountRelations = relations(
@@ -116,6 +139,7 @@ export const beneficiaryAccountRelations = relations(
   ({ many }) => ({
     sessions: many(BeneficiarySession),
     passwordResets: many(BeneficiaryPasswordReset),
+    otps: many(BeneficiaryOTP),
   }),
 );
 
@@ -134,6 +158,16 @@ export const beneficiaryPasswordResetRelations = relations(
   ({ one }) => ({
     account: one(BeneficiaryAccount, {
       fields: [BeneficiaryPasswordReset.accountId],
+      references: [BeneficiaryAccount.id],
+    }),
+  }),
+);
+
+export const beneficiaryOTPRelations = relations(
+  BeneficiaryOTP,
+  ({ one }) => ({
+    account: one(BeneficiaryAccount, {
+      fields: [BeneficiaryOTP.accountId],
       references: [BeneficiaryAccount.id],
     }),
   }),

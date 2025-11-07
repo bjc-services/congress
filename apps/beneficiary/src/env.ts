@@ -2,11 +2,9 @@ import { createEnv } from "@t3-oss/env-core";
 import { vercel } from "@t3-oss/env-core/presets-zod";
 import { z } from "zod/v4";
 
-import { authEnv } from "@acme/auth/env";
-
 export const env = createEnv({
   clientPrefix: "VITE_",
-  extends: [authEnv(), vercel()],
+  extends: [vercel()],
   shared: {
     NODE_ENV: z
       .enum(["development", "production", "test"])
@@ -23,7 +21,7 @@ export const env = createEnv({
    * For them to be exposed to the client, prefix them with `VITE_`.
    */
   client: {
-    VITE_API_URL: z.url(),
+    VITE_API_URL: z.url().default("http://localhost:3000"),
   },
   /**
    * Destructure all variables from `process.env` to make sure they aren't tree-shaken away.

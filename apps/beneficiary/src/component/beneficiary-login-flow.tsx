@@ -1,0 +1,531 @@
+import React, { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
+
+import { Button } from "@acme/ui/button";
+import { Field, FieldContent, FieldGroup, FieldLabel } from "@acme/ui/field";
+import { Input } from "@acme/ui/input";
+import { toast } from "@acme/ui/toast";
+
+import { setAuthToken } from "~/lib/beneficiary-auth";
+import { useTRPC } from "~/lib/trpc";
+
+type LoginStep = "nationalId" | "password" | "otp" | "setPassword" | "signup";
+
+export function BeneficiaryLoginFlow() {
+  const { t } = useTranslation();
+  const trpc = useTRPC();
+  const navigate = useNavigate();
+  const [step, setStep] = useState<LoginStep>("nationalId");
+  const [nationalId, setNationalId] = useState("");
+  const [password, setPassword] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [phoneNumberMasked, setPhoneNumberMasked] = useState<string | null>(
+    null,
+  );
+  const [isLoading, setIsLoading] = useState(false);
+  const [shouldCheckAccount, setShouldCheckAccount] = useState(false);
+
+  // Check account status when national ID is entered
+  const { data: accountStatus, isFetching: isCheckingAccount } = useQuery(
+    trpc.beneficiaryAuth.checkNationalId.queryOptions(
+      { nationalId },
+      { enabled: shouldCheckAccount && !!nationalId.trim() },
+    ),
+  );
+
+  const sendOTPMutation = useMutation(
+    trpc.beneficiaryAuth.sendOTP.mutationOptions({
+      onSuccess: (data) => {
+        setPhoneNumberMasked(data.phoneNumberMasked ?? null);
+        setStep("otp");
+        toast.success(data.message);
+        if (data.devCode) {
+          console.log(`[DEV] OTP Code: ${data.devCode}`);
+        }
+      },
+      onError: (error: { message?: string }) => {
+        toast.error(error.message || t("failed_to_send_otp"));
+      },
+    }),
+  );
+
+  const verifyOTPMutation = useMutation(
+    trpc.beneficiaryAuth.verifyOTPAndSetPassword.mutationOptions({
+      onSuccess: async (data) => {
+        if (data.token) {
+          setAuthToken(data.token);
+          toast.success(data.message);
+          await navigate({ href: "/", replace: true });
+        }
+      },
+      onError: (error: { message?: string }) => {
+        toast.error(error.message || t("invalid_verification_code"));
+      },
+    }),
+  );
+
+  const loginMutation = useMutation(
+    trpc.beneficiaryAuth.login.mutationOptions({
+      onSuccess: async (data) => {
+        if (data.token) {
+          setAuthToken(data.token);
+          toast.success(t("logged_in_successfully"));
+          await navigate({ href: "/", replace: true });
+        }
+      },
+      onError: (error: { message?: string }) => {
+        toast.error(error.message || t("invalid_credentials"));
+      },
+    }),
+  );
+
+  const signupMutation = useMutation(
+    trpc.beneficiaryAuth.signup.mutationOptions({
+      onSuccess: async (data) => {
+        if (data.token) {
+          setAuthToken(data.token);
+          toast.success(data.message);
+          await navigate({ href: "/", replace: true });
+        }
+      },
+      onError: (error: { message?: string }) => {
+        toast.error(error.message || t("failed_to_create_account"));
+      },
+    }),
+  );
+
+  const handleNationalIdSubmit = () => {
+    if (!nationalId.trim()) {
+      toast.error(t("please_enter_national_id"));
+      return;
+    }
+    setShouldCheckAccount(true);
+  };
+
+  // Handle account status check result using useEffect
+  React.useEffect(() => {
+    if (shouldCheckAccount && accountStatus) {
+      setShouldCheckAccount(false);
+      if (!accountStatus.exists) {
+        // No account exists, show signup form
+        setStep("signup");
+      } else if (accountStatus.hasPassword) {
+        // Account exists with password, show password input
+        setStep("password");
+      } else {
+        // Account exists but no password, send OTP
+        void sendOTPMutation.mutate({ nationalId });
+      }
+    }
+  }, [shouldCheckAccount, accountStatus, nationalId, sendOTPMutation]);
+
+  const handlePasswordSubmit = async () => {
+    if (!password.trim()) {
+      toast.error(t("please_enter_password"));
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await loginMutation.mutateAsync({
+        nationalId,
+        password,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    setIsLoading(true);
+    try {
+      await sendOTPMutation.mutateAsync({ nationalId });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleOTPSubmit = () => {
+    if (!otpCode.trim() || otpCode.length !== 6) {
+      toast.error(t("please_enter_otp"));
+      return;
+    }
+
+    setStep("setPassword");
+  };
+
+  const handleSetPassword = async () => {
+    if (!newPassword.trim() || newPassword.length < 8) {
+      toast.error(t("password_min_length"));
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error(t("passwords_do_not_match"));
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await verifyOTPMutation.mutateAsync({
+        nationalId,
+        code: otpCode,
+        newPassword,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignup = async (signupData: {
+    phoneNumber: string;
+    firstName?: string;
+    lastName?: string;
+  }) => {
+    setIsLoading(true);
+    try {
+      await signupMutation.mutateAsync({
+        nationalId,
+        phoneNumber: signupData.phoneNumber,
+        firstName: signupData.firstName,
+        lastName: signupData.lastName,
+        documents: [], // TODO: Implement document upload
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Step 1: National ID Input
+  if (step === "nationalId") {
+    return (
+      <div className="flex w-full max-w-md flex-col gap-4">
+        <h2 className="text-2xl font-bold">{t("login")}</h2>
+        <FieldGroup>
+          <Field>
+            <FieldContent>
+              <FieldLabel htmlFor="nationalId">{t("national_id")}</FieldLabel>
+            </FieldContent>
+            <Input
+              id="nationalId"
+              type="text"
+              value={nationalId}
+              onChange={(e) => setNationalId(e.target.value)}
+              placeholder={t("enter_national_id")}
+              disabled={isLoading || isCheckingAccount}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  void handleNationalIdSubmit();
+                }
+              }}
+            />
+          </Field>
+        </FieldGroup>
+        <Button
+          size="lg"
+          disabled={isLoading || isCheckingAccount}
+          onClick={handleNationalIdSubmit}
+        >
+          {isLoading || isCheckingAccount ? t("checking") : t("continue")}
+        </Button>
+      </div>
+    );
+  }
+
+  // Step 2: Password Input (if account has password)
+  if (step === "password") {
+    return (
+      <div className="flex w-full max-w-md flex-col gap-4">
+        <h2 className="text-2xl font-bold">{t("enter_password")}</h2>
+        <FieldGroup>
+          <Field>
+            <FieldContent>
+              <FieldLabel htmlFor="password">{t("password")}</FieldLabel>
+            </FieldContent>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={t("enter_your_password")}
+              disabled={isLoading}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  void handlePasswordSubmit();
+                }
+              }}
+            />
+          </Field>
+        </FieldGroup>
+        <div className="flex flex-col gap-2">
+          <Button size="lg" disabled={isLoading} onClick={handlePasswordSubmit}>
+            {isLoading ? t("logging_in") : t("login")}
+          </Button>
+          <Button
+            variant="ghost"
+            disabled={isLoading}
+            onClick={handleForgotPassword}
+          >
+            {t("forgot_password")}
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              setStep("nationalId");
+              setPassword("");
+            }}
+          >
+            {t("back")}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Step 3: OTP Input
+  if (step === "otp") {
+    return (
+      <div className="flex w-full max-w-md flex-col gap-4">
+        <h2 className="text-2xl font-bold">{t("verification_code")}</h2>
+        <p className="text-muted-foreground text-sm">
+          {phoneNumberMasked
+            ? t("otp_sent_message", { phoneNumber: phoneNumberMasked })
+            : t("otp_sent_message_no_phone")}
+        </p>
+        <FieldGroup>
+          <Field>
+            <FieldContent>
+              <FieldLabel htmlFor="otp">
+                {t("verification_code_label")}
+              </FieldLabel>
+            </FieldContent>
+            <Input
+              id="otp"
+              type="text"
+              value={otpCode}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+                setOtpCode(value);
+              }}
+              placeholder="000000"
+              disabled={isLoading}
+              maxLength={6}
+              className="text-center text-2xl tracking-widest"
+            />
+          </Field>
+        </FieldGroup>
+        <div className="flex flex-col gap-2">
+          <Button
+            size="lg"
+            disabled={isLoading || otpCode.length !== 6}
+            onClick={handleOTPSubmit}
+          >
+            {isLoading ? t("verifying") : t("verify_code")}
+          </Button>
+          <Button
+            variant="ghost"
+            disabled={isLoading}
+            onClick={() => {
+              void sendOTPMutation.mutateAsync({ nationalId });
+            }}
+          >
+            {t("resend_code")}
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              setStep("nationalId");
+              setOtpCode("");
+            }}
+          >
+            {t("back")}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Step 4: Set Password (after OTP verification)
+  if (step === "setPassword") {
+    return (
+      <div className="flex w-full max-w-md flex-col gap-4">
+        <h2 className="text-2xl font-bold">{t("set_your_password")}</h2>
+        <FieldGroup>
+          <Field>
+            <FieldContent>
+              <FieldLabel htmlFor="newPassword">{t("new_password")}</FieldLabel>
+            </FieldContent>
+            <Input
+              id="newPassword"
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder={t("enter_new_password")}
+              disabled={isLoading}
+            />
+          </Field>
+          <Field>
+            <FieldContent>
+              <FieldLabel htmlFor="confirmPassword">
+                {t("confirm_password")}
+              </FieldLabel>
+            </FieldContent>
+            <Input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder={t("confirm_new_password")}
+              disabled={isLoading}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  void handleSetPassword();
+                }
+              }}
+            />
+          </Field>
+        </FieldGroup>
+        <div className="flex flex-col gap-2">
+          <Button
+            size="lg"
+            disabled={
+              isLoading ||
+              !newPassword ||
+              newPassword.length < 8 ||
+              newPassword !== confirmPassword
+            }
+            onClick={handleSetPassword}
+          >
+            {isLoading ? t("setting_password") : t("set_password")}
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              setStep("otp");
+              setNewPassword("");
+              setConfirmPassword("");
+            }}
+          >
+            {t("back")}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Step 5: Signup Form
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  if (step === "signup") {
+    return (
+      <SignupForm
+        nationalId={nationalId}
+        onSignup={handleSignup}
+        onBack={() => setStep("nationalId")}
+        isLoading={isLoading}
+      />
+    );
+  }
+
+  return null;
+}
+
+function SignupForm({
+  nationalId,
+  onSignup,
+  onBack,
+  isLoading,
+}: {
+  nationalId: string;
+  onSignup: (data: {
+    phoneNumber: string;
+    firstName?: string;
+    lastName?: string;
+  }) => Promise<void>;
+  onBack: () => void;
+  isLoading: boolean;
+}) {
+  const { t } = useTranslation();
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+
+  const handleSubmit = async () => {
+    if (!phoneNumber.trim()) {
+      toast.error(t("please_enter_phone_number"));
+      return;
+    }
+
+    await onSignup({
+      phoneNumber,
+      firstName: firstName.trim() || undefined,
+      lastName: lastName.trim() || undefined,
+    });
+  };
+
+  return (
+    <div className="flex w-full max-w-md flex-col gap-4">
+      <h2 className="text-2xl font-bold">{t("create_account")}</h2>
+      <p className="text-muted-foreground text-sm">
+        {t("no_account_found", { nationalId })}
+      </p>
+      <FieldGroup>
+        <Field>
+          <FieldContent>
+            <FieldLabel htmlFor="phoneNumber">{t("phone_number")}</FieldLabel>
+          </FieldContent>
+          <Input
+            id="phoneNumber"
+            type="tel"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            placeholder={t("phone_number_placeholder")}
+            disabled={isLoading}
+            required
+          />
+        </Field>
+        <Field>
+          <FieldContent>
+            <FieldLabel htmlFor="firstName">
+              {t("first_name_optional")}
+            </FieldLabel>
+          </FieldContent>
+          <Input
+            id="firstName"
+            type="text"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            placeholder={t("first_name_placeholder")}
+            disabled={isLoading}
+          />
+        </Field>
+        <Field>
+          <FieldContent>
+            <FieldLabel htmlFor="lastName">
+              {t("last_name_optional")}
+            </FieldLabel>
+          </FieldContent>
+          <Input
+            id="lastName"
+            type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            placeholder={t("last_name_placeholder")}
+            disabled={isLoading}
+          />
+        </Field>
+      </FieldGroup>
+      <div className="flex flex-col gap-2">
+        <Button size="lg" disabled={isLoading} onClick={handleSubmit}>
+          {isLoading ? t("creating_account") : t("create_account")}
+        </Button>
+        <Button variant="ghost" onClick={onBack}>
+          {t("back")}
+        </Button>
+      </div>
+    </div>
+  );
+}

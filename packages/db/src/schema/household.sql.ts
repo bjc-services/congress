@@ -71,7 +71,9 @@ export const HouseholdMember = createTable(
     // Only one primary member per household at a time
     uniqueIndex("household_member_household_id_is_primary_unique")
       .on(table.householdId)
-      .where(sql`${eq(table.isPrimary, true)} AND ${isNull(table.endDate)}`),
+      .where(
+        sql`${eq(table.isPrimary, true).inlineParams()} AND ${isNull(table.endDate)}`,
+      ),
   ],
 );
 

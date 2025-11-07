@@ -14,6 +14,9 @@ export const reactConfig = defineConfig(
         React: "writable",
       },
     },
+    rules: {
+      "@typescript-eslint/prefer-nullish-coalescing": "off",
+    },
   },
   reactHooks.configs.flat["recommended-latest"]!,
 );
