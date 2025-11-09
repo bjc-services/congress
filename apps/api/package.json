@@ -3,25 +3,29 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./src/index.ts"
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "default": "./src/types.ts"
     }
   },
   "scripts": {
+    "dev": "TZ=UTC pnpm with-env bun run --hot src/index.ts",
     "build": "tsc",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "dev": "tsc",
     "format": "prettier --check . --ignore-path ../../.gitignore",
     "lint": "eslint --flag unstable_native_nodejs_ts_config",
-    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false",
+    "with-env": "dotenv -e ../../.env --"
   },
   "dependencies": {
     "@congress/auth": "workspace:*",
     "@congress/db": "workspace:*",
-    "@congress/transactional": "workspace:^",
+    "@congress/transactional": "workspace:*",
     "@congress/validators": "workspace:*",
+    "@hono/trpc-server": "^0.4.0",
     "@trpc/server": "catalog:",
+    "better-auth": "catalog:",
+    "hono": "^4.10.4",
     "superjson": "2.2.3",
     "zod": "catalog:"
   },
@@ -29,6 +33,7 @@
     "@congress/eslint-config": "workspace:*",
     "@congress/prettier-config": "workspace:*",
     "@congress/tsconfig": "workspace:*",
+    "@types/node": "catalog:",
     "eslint": "catalog:",
     "prettier": "catalog:",
     "typescript": "catalog:"

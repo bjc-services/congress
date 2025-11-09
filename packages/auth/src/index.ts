@@ -1,13 +1,20 @@
 import type { BetterAuthOptions, BetterAuthPlugin } from "better-auth";
-import { createID } from "@congress/db";
-import { db } from "@congress/db/client";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { admin } from "better-auth/plugins";
 
+import { createID } from "@congress/db";
+import { db } from "@congress/db/client";
+
 const database = drizzleAdapter(db, {
   provider: "pg",
 });
+
+const devOrigins = ["http://localhost:3001", "http://localhost:3002"];
+const prodOrigins = ["https://app.bucharim.com", "https://my.bucharim.com"];
+
+// eslint-disable-next-line no-restricted-properties
+const isProd = process.env.NODE_ENV === "production";
 
 export function initAuth<
   TExtraPlugins extends BetterAuthPlugin[] = [],
@@ -48,6 +55,7 @@ export function initAuth<
         },
       },
     },
+    trustedOrigins: isProd ? prodOrigins : devOrigins,
   } satisfies BetterAuthOptions;
 
   return betterAuth(config);

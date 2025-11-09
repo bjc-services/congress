@@ -1,5 +1,14 @@
-import type { RouterOutputs } from "@congress/api";
 import { Suspense } from "react";
+import { useForm } from "@tanstack/react-form";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
+
+import type { RouterOutputs } from "@congress/api/types";
 import { CreatePostSchema } from "@congress/db/schema";
 import { cn } from "@congress/ui";
 import { Button } from "@congress/ui/button";
@@ -12,14 +21,6 @@ import {
 } from "@congress/ui/field";
 import { Input } from "@congress/ui/input";
 import { toast } from "@congress/ui/toast";
-import { useForm } from "@tanstack/react-form";
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { useTranslation } from "react-i18next";
 
 import { AuthShowcase } from "~/component/auth-showcase";
 import { useTRPC } from "~/lib/trpc";

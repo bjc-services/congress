@@ -1,4 +1,3 @@
-import type { AppRouter } from "@congress/api";
 import {
   createTRPCClient,
   httpBatchStreamLink,
@@ -7,8 +6,9 @@ import {
 import { createTRPCContext } from "@trpc/tanstack-react-query";
 import SuperJSON from "superjson";
 
+import type { AppRouter } from "@congress/api/types";
+
 import { env } from "~/env";
-import { getBaseUrl } from "~/lib/url";
 
 export const trpcClient = createTRPCClient<AppRouter>({
   links: [
@@ -19,10 +19,10 @@ export const trpcClient = createTRPCClient<AppRouter>({
     }),
     httpBatchStreamLink({
       transformer: SuperJSON,
-      url: getBaseUrl() + "/api/trpc",
+      url: env.VITE_API_URL + "/trpc",
       headers() {
         const headers = new Headers();
-        headers.set("x-trpc-source", "nextjs-react");
+        headers.set("x-trpc-source", "dashboard-app");
         return headers;
       },
     }),

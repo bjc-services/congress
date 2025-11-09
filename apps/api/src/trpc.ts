@@ -6,14 +6,15 @@
  * tl;dr - this is where all the tRPC server stuff is created and plugged in.
  * The pieces you will need to use are documented accordingly near the end
  */
+import { initTRPC, TRPCError } from "@trpc/server";
+import superjson from "superjson";
+import { z, ZodError } from "zod/v4";
+
 import type { DashboardAuth, DashboardSession } from "@congress/auth";
 import * as beneficiaryAuth from "@congress/auth/beneficiary";
 import { eq } from "@congress/db";
 import { db } from "@congress/db/client";
 import { BeneficiaryAccount } from "@congress/db/schema";
-import { initTRPC, TRPCError } from "@trpc/server";
-import superjson from "superjson";
-import { z, ZodError } from "zod/v4";
 
 const getSession = async (
   authApi: DashboardAuth,
@@ -45,7 +46,6 @@ export const createTRPCContext = async (opts: {
   const session = await getSession(opts.auth, opts.headers);
   return {
     session,
-    db,
     headers: opts.headers,
   };
 };

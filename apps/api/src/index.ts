@@ -1,23 +1,65 @@
-import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
+import { trpcServer } from "@hono/trpc-server"; // Deno 'npm:@hono/trpc-server'
 
-import type { AppRouter } from "./root";
+import { Hono } from "hono";
+import { cors } from "hono/cors";
 
-/**
- * Inference helpers for input types
- * @example
- * type PostByIdInput = RouterInputs['post']['byId']
- *      ^? { id: number }
- */
-type RouterInputs = inferRouterInputs<AppRouter>;
+import { dashboardAuth } from "./dashboard-auth";
+import { isProd } from "./is-prod";
+import { appRouter } from "./root";
+import { createTRPCContext } from "./trpc";
 
-/**
- * Inference helpers for output types
- * @example
- * type AllPostsOutput = RouterOutputs['post']['all']
- *      ^? Post[]
- */
-type RouterOutputs = inferRouterOutputs<AppRouter>;
+const prodOrigins = ["https://app.bucharim.com", "https://my.bucharim.com"];
+const devOrigins = ["http://localhost:3001", "http://localhost:3002"];
 
-export { type AppRouter, appRouter } from "./root";
-export { createTRPCContext } from "./trpc";
-export type { RouterInputs, RouterOutputs };
+const app = new Hono();
+
+app.use(
+  "/api/auth/*", // or replace with "*" to enable cors for all routes
+  cors({
+    origin: isProd ? prodOrigins : devOrigins,
+    allowHeaders: ["Content-Type", "Authorization"],
+    allowMethods: ["POST", "GET", "OPTIONS"],
+    exposeHeaders: ["Content-Length"],
+    maxAge: 600,
+    credentials: true,
+  }),
+);
+
+app.on(["POST", "GET"], "/auth/*", (c) => {
+  return dashboardAuth.handler(c.req.raw);
+});
+
+app.use(
+  "/trpc/*",
+  cors({
+    origin: isProd ? prodOrigins : devOrigins,
+    allowHeaders: [
+      "Content-Type",
+      "Authorization",
+      "trpc-accept",
+      "x-trpc-source",
+    ],
+    allowMethods: ["POST", "GET", "OPTIONS", "DELETE", "PUT", "PATCH", "HEAD"],
+    exposeHeaders: ["Content-Length"],
+    maxAge: 600,
+    credentials: true,
+  }),
+  trpcServer({
+    router: appRouter,
+    createContext(_, c) {
+      return createTRPCContext({
+        auth: dashboardAuth,
+        headers: c.req.raw.headers,
+      });
+    },
+    onError({ error, path }) {
+      console.error(`>>> tRPC Error on '${path}'`, error);
+    },
+  }),
+);
+
+app.get("/health", (c) => {
+  return c.json({ status: "ok" });
+});
+
+export default app;
