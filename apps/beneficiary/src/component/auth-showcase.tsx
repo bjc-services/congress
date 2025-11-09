@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
+
 import { Button } from "@congress/ui/button";
 import {
   Field,
@@ -8,8 +11,6 @@ import {
 } from "@congress/ui/field";
 import { Input } from "@congress/ui/input";
 import { toast } from "@congress/ui/toast";
-import { useNavigate } from "@tanstack/react-router";
-import { useTranslation } from "react-i18next";
 
 import { authClient } from "~/auth/client";
 

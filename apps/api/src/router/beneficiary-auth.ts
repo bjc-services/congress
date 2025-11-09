@@ -1,4 +1,7 @@
 import type { TRPCRouterRecord } from "@trpc/server";
+import { TRPCError } from "@trpc/server";
+import { z } from "zod/v4";
+
 import {
   createOTP,
   createPasswordResetToken,
@@ -19,8 +22,6 @@ import { createID, eq } from "@congress/db";
 import { db } from "@congress/db/client";
 import { BeneficiaryAccount, Person, PersonContact } from "@congress/db/schema";
 import { sendVoiceOTP } from "@congress/transactional/twilio";
-import { TRPCError } from "@trpc/server";
-import { z } from "zod/v4";
 
 import { publicProcedure } from "../trpc";
 

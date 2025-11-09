@@ -1,7 +1,3 @@
-import {
-  personContactTypes,
-  personRelationshipTypes,
-} from "@congress/validators/person";
 import { eq, isNull, lt, ne, sql } from "drizzle-orm";
 import {
   bigint,
@@ -16,6 +12,11 @@ import {
   uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core";
+
+import {
+  personContactTypes,
+  personRelationshipTypes,
+} from "@congress/validators/person";
 
 import { createTable } from "../create-table";
 import { timestamp, ulid } from "../types";

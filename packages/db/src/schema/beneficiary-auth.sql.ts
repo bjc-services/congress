@@ -163,12 +163,9 @@ export const beneficiaryPasswordResetRelations = relations(
   }),
 );
 
-export const beneficiaryOTPRelations = relations(
-  BeneficiaryOTP,
-  ({ one }) => ({
-    account: one(BeneficiaryAccount, {
-      fields: [BeneficiaryOTP.accountId],
-      references: [BeneficiaryAccount.id],
-    }),
+export const beneficiaryOTPRelations = relations(BeneficiaryOTP, ({ one }) => ({
+  account: one(BeneficiaryAccount, {
+    fields: [BeneficiaryOTP.accountId],
+    references: [BeneficiaryAccount.id],
   }),
-);
+}));

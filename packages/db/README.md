@@ -208,7 +208,7 @@ Temporal membership tracking:
 **Query Pattern**: Current household members
 
 ```sql
-SELECT * FROM household_member 
+SELECT * FROM household_member
 WHERE householdId = ? AND endDate IS NULL
 ```
 
@@ -363,9 +363,9 @@ Core application record:
 **Status Flow**:
 
 ```txt
-draft → submitted → under_review → [pending_documents | committee_review] 
+draft → submitted → under_review → [pending_documents | committee_review]
   → approved → payment_approved
-  
+
 OR → rejected
 ```
 
@@ -426,7 +426,7 @@ Defines calculation rules:
 
 ```json
 {
-  "baseAmount": 1000.00,
+  "baseAmount": 1000.0,
   "formulaFields": [
     {
       "field": "numberOfPersons",
@@ -647,9 +647,9 @@ Flat messaging system with typed messages:
 
 ```sql
 -- Unread messages for beneficiary
-SELECT * FROM message 
-WHERE recipientBeneficiaryAccountId = ? 
-  AND readAt IS NULL 
+SELECT * FROM message
+WHERE recipientBeneficiaryAccountId = ?
+  AND readAt IS NULL
   AND archivedAt IS NULL
 ORDER BY createdAt DESC
 
@@ -713,7 +713,7 @@ Committee recommendations:
 6. Staff Review
    └─> UPDATE application SET status='under_review', reviewedByUserId=?
    └─> Review documents: UPDATE application_document SET status='approved'/'rejected'
-   └─> If documents needed: 
+   └─> If documents needed:
        └─> UPDATE application SET status='pending_documents'
        └─> INSERT message (type='document_request', metadata={...})
 
@@ -784,7 +784,7 @@ When calculating payments based on household size:
        WHERE householdId = ? AND endDate IS NULL
 
 3. Get Demographics
-   └─> SELECT p.*, hm.role 
+   └─> SELECT p.*, hm.role
        FROM household_member hm
        JOIN person p ON hm.personId = p.id
        WHERE hm.householdId = ? AND hm.endDate IS NULL
@@ -897,7 +897,8 @@ type ApplicationStatus = typeof Application.$inferSelect.status;
 // => "draft" | "submitted" | "under_review" | ...
 
 // Usage in queries
-await db.update(Application)
+await db
+  .update(Application)
   .set({ status: "approved" }) // Type-checked!
   .where(eq(Application.id, id));
 ```
@@ -929,7 +930,7 @@ CREATE INDEX person_national_id_index ON person(national_id);
 CREATE INDEX application_status_index ON application(status);
 
 -- Fast beneficiary message retrieval
-CREATE INDEX message_recipient_beneficiary_account_id_index 
+CREATE INDEX message_recipient_beneficiary_account_id_index
   ON message(recipient_beneficiary_account_id);
 ```
 
@@ -959,7 +960,7 @@ CREATE INDEX application_program_version_id_index ON application(program_version
 
 ```sql
 -- Only one current address per person
-CREATE UNIQUE INDEX person_address_person_id_unique 
+CREATE UNIQUE INDEX person_address_person_id_unique
   ON person_address(person_id) WHERE end_date IS NULL;
 
 -- Only one primary contact per type
@@ -1035,7 +1036,8 @@ Use separate audit records instead of updates:
 
 ```typescript
 // DON'T: Update calculation
-await db.update(ApplicationCalculation)
+await db
+  .update(ApplicationCalculation)
   .set({ finalAmount: newAmount })
   .where(eq(ApplicationCalculation.id, calcId));
 
@@ -1087,21 +1089,45 @@ Create seed script for system-defined data:
 ```typescript
 // seed-system-data.ts
 await db.insert(DocumentType).values([
-  { name: 'national_id', isSystemDefined: true, description: 'National ID card or SSN' },
-  { name: 'proof_of_residence', isSystemDefined: true, description: 'Utility bill or lease agreement' },
-  { name: 'bank_statement', isSystemDefined: true, description: 'Recent bank statement' },
-  { name: 'income_verification', isSystemDefined: true, description: 'Pay stubs or income documentation' },
-  { name: 'marriage_certificate', isSystemDefined: true, description: 'Official marriage certificate' },
-  { name: 'birth_certificate', isSystemDefined: true, description: 'Birth certificate for children' },
+  {
+    name: "national_id",
+    isSystemDefined: true,
+    description: "National ID card or SSN",
+  },
+  {
+    name: "proof_of_residence",
+    isSystemDefined: true,
+    description: "Utility bill or lease agreement",
+  },
+  {
+    name: "bank_statement",
+    isSystemDefined: true,
+    description: "Recent bank statement",
+  },
+  {
+    name: "income_verification",
+    isSystemDefined: true,
+    description: "Pay stubs or income documentation",
+  },
+  {
+    name: "marriage_certificate",
+    isSystemDefined: true,
+    description: "Official marriage certificate",
+  },
+  {
+    name: "birth_certificate",
+    isSystemDefined: true,
+    description: "Birth certificate for children",
+  },
 ]);
 
 await db.insert(OrganizationType).values([
-  { name: 'synagogue', isSystemDefined: true },
-  { name: 'chabad_house', isSystemDefined: true },
-  { name: 'kollel', isSystemDefined: true },
-  { name: 'local_community', isSystemDefined: true },
-  { name: 'womens_club', isSystemDefined: true },
-  { name: 'other', isSystemDefined: true },
+  { name: "synagogue", isSystemDefined: true },
+  { name: "chabad_house", isSystemDefined: true },
+  { name: "kollel", isSystemDefined: true },
+  { name: "local_community", isSystemDefined: true },
+  { name: "womens_club", isSystemDefined: true },
+  { name: "other", isSystemDefined: true },
 ]);
 ```
 
@@ -1123,10 +1149,7 @@ Example migration with data:
 
 ```typescript
 // migration: add-household-income.ts
-await db.schema.Alter('household').addColumn(
-  'totalIncome',
-  'numeric(10,2)'
-);
+await db.schema.Alter("household").addColumn("totalIncome", "numeric(10,2)");
 
 // Backfill from existing data
 await db.execute(sql`
@@ -1148,8 +1171,8 @@ await db.execute(sql`
 // Cursor-based pagination for applications
 const applications = await db.query.Application.findMany({
   where: and(
-    eq(Application.status, 'submitted'),
-    cursorId ? lt(Application.id, cursorId) : undefined
+    eq(Application.status, "submitted"),
+    cursorId ? lt(Application.id, cursorId) : undefined,
   ),
   limit: 20,
   orderBy: [desc(Application.createdAt)],
@@ -1182,15 +1205,15 @@ const paymentSummary = await db
 // Applications needing review with specific criteria
 const needsReview = await db.query.Application.findMany({
   where: and(
-    inArray(Application.status, ['submitted', 'under_review']),
+    inArray(Application.status, ["submitted", "under_review"]),
     gte(Application.submittedAt, thirtyDaysAgo),
-    isNull(Application.reviewedByUserId)
+    isNull(Application.reviewedByUserId),
   ),
   with: {
     person: true,
     programVersion: true,
     documents: {
-      where: eq(ApplicationDocument.status, 'pending'),
+      where: eq(ApplicationDocument.status, "pending"),
     },
   },
   orderBy: [asc(Application.submittedAt)],
@@ -1206,16 +1229,18 @@ const activePrograms = await db
   .from(Program)
   .where(
     exists(
-      db.select().from(ProgramVersion)
+      db
+        .select()
+        .from(ProgramVersion)
         .where(
           and(
             eq(ProgramVersion.programId, Program.id),
             eq(ProgramVersion.isActive, true),
             lte(ProgramVersion.startDate, new Date()),
-            gte(ProgramVersion.endDate, new Date())
-          )
-        )
-    )
+            gte(ProgramVersion.endDate, new Date()),
+          ),
+        ),
+    ),
   );
 ```
 
@@ -1249,7 +1274,7 @@ const existing = await db.query.HouseholdMember.findFirst({
   where: and(
     eq(HouseholdMember.householdId, householdId),
     eq(HouseholdMember.personId, personId),
-    isNull(HouseholdMember.endDate)
+    isNull(HouseholdMember.endDate),
   ),
 });
 
@@ -1267,9 +1292,7 @@ type NewApplication = typeof Application.$inferInsert;
 
 // Use in functions
 async function createApplication(data: NewApplication): Promise<Application> {
-  const [application] = await db.insert(Application)
-    .values(data)
-    .returning();
+  const [application] = await db.insert(Application).values(data).returning();
   return application;
 }
 ```
@@ -1300,7 +1323,8 @@ const activePrograms = await db.query.Program.findMany({
 });
 
 // Soft delete instead of hard delete
-await db.update(Program)
+await db
+  .update(Program)
   .set({ archivedAt: new Date() })
   .where(eq(Program.id, programId));
 ```
@@ -1311,7 +1335,7 @@ await db.update(Program)
 // Check eligibility criteria before creating application
 async function validateEligibility(
   personId: number,
-  programVersionId: number
+  programVersionId: number,
 ): Promise<boolean> {
   const criteria = await db.query.EligibilityCriteria.findMany({
     where: eq(EligibilityCriteria.programVersionId, programVersionId),
@@ -1333,12 +1357,12 @@ async function validateEligibility(
 
 ```typescript
 const getApplicationById = db.query.Application.findFirst({
-  where: eq(Application.id, sql.placeholder('id')),
+  where: eq(Application.id, sql.placeholder("id")),
   with: {
     person: true,
     programVersion: { with: { program: true } },
   },
-}).prepare('get_application_by_id');
+}).prepare("get_application_by_id");
 
 // Reuse
 const app1 = await getApplicationById.execute({ id: 1 });
@@ -1351,9 +1375,9 @@ const app2 = await getApplicationById.execute({ id: 2 });
 /**
  * Creates a new household membership, automatically ending any previous
  * membership for the same person in a different household.
- * 
+ *
  * Business Rule: A person can only be in one household at a time.
- * 
+ *
  * @param personId - The person to add
  * @param householdId - The household to add them to
  * @param role - Their role in the household
@@ -1362,17 +1386,18 @@ const app2 = await getApplicationById.execute({ id: 2 });
 async function addToHousehold(
   personId: number,
   householdId: number,
-  role: HouseholdMemberRole
+  role: HouseholdMemberRole,
 ) {
   await db.transaction(async (tx) => {
     // End previous memberships
-    await tx.update(HouseholdMember)
-      .set({ endDate: new Date(), endReason: 'Moved to new household' })
+    await tx
+      .update(HouseholdMember)
+      .set({ endDate: new Date(), endReason: "Moved to new household" })
       .where(
         and(
           eq(HouseholdMember.personId, personId),
-          isNull(HouseholdMember.endDate)
-        )
+          isNull(HouseholdMember.endDate),
+        ),
       );
 
     // Create new membership
@@ -1471,13 +1496,13 @@ Error: invalid input value for enum application_status: "Approved"
 
 ```typescript
 // Enable query logging
-import { drizzle } from 'drizzle-orm/node-postgres';
+import { drizzle } from "drizzle-orm/node-postgres";
 
 const db = drizzle(pool, {
   logger: {
     logQuery: (query, params) => {
-      console.log('Query:', query);
-      console.log('Params:', params);
+      console.log("Query:", query);
+      console.log("Params:", params);
     },
   },
 });
