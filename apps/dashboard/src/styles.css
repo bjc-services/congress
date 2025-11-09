@@ -1,8 +1,7 @@
 @import "tailwindcss";
 @import "@congress/tailwind-config/theme";
 
-@import "@fontsource-variable/geist";
-@import "@fontsource-variable/geist-mono";
+@import "@fontsource-variable/rubik";
 
 @source "../../../packages/ui/src/*.{ts,tsx}";
 
@@ -23,8 +22,7 @@
 
 @layer base {
   :root {
-    --font-geist-sans: "Geist Variable";
-    --font-geist-mono: "Geist Mono Variable";
+    --font-rubik: "Rubik Variable";
   }
   * {
     @apply border-border;
