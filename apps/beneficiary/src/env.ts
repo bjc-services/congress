@@ -14,7 +14,9 @@ export const env = createEnv({
     VITE_API_URL: z.url(),
   },
   server: {},
-  runtimeEnv: process.env,
+  runtimeEnv: import.meta.env,
   skipValidation:
-    !!process.env.CI || process.env.npm_lifecycle_event === "lint",
+    !!(typeof process !== "undefined" && process.env.CI) ||
+    (typeof process !== "undefined" &&
+      process.env.npm_lifecycle_event === "lint"),
 });

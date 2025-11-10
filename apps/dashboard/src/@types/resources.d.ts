@@ -1,4 +1,7 @@
 interface Resources {
+  "common": {
+    "notFound": "Page not found"
+  },
   "translation": {
     "bug_content": "bug_content",
     "bug_title": "bug_title",

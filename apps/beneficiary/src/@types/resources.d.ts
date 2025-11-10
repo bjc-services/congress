@@ -1,4 +1,7 @@
 interface Resources {
+  "common": {
+    "notFound": "Page not found"
+  },
   "translation": {
     "account_pending_message": "Your account is pending verification. You can still apply for programs, but your submissions will not be processed until your account is verified.",
     "account_pending_verification": "Account Pending Verification",
