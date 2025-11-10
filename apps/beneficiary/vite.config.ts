@@ -8,7 +8,8 @@ import tsConfigPaths from "vite-tsconfig-paths";
 export default defineConfig({
   envDir: "../../",
   server: {
-    port: 3002,
+    port: 3001,
+    cors: true,
   },
   plugins: [
     tsConfigPaths({

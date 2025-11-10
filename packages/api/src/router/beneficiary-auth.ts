@@ -1,7 +1,10 @@
 import type { TRPCRouterRecord } from "@trpc/server";
-import type { Context as HonoContext } from "hono";
+import {
+  deleteCookie,
+  getCookie,
+  setCookie,
+} from "@tanstack/react-start/server";
 import { TRPCError } from "@trpc/server";
-import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { z } from "zod/v4";
 
 import {
@@ -31,18 +34,18 @@ import { publicProcedure } from "../trpc";
 const BENEFICIARY_AUTH_COOKIE_NAME = "congress_bat"; // congress beneficiary auth token
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days in seconds
 
-function setAuthCookie(ctx: { hono: HonoContext }, token: string) {
-  setCookie(ctx.hono, BENEFICIARY_AUTH_COOKIE_NAME, token, {
+function setAuthCookie(token: string) {
+  setCookie(BENEFICIARY_AUTH_COOKIE_NAME, token, {
     httpOnly: true,
     secure: env.NODE_ENV === "production",
-    sameSite: "Lax",
+    sameSite: "lax",
     maxAge: COOKIE_MAX_AGE,
     path: "/",
   });
 }
 
-function deleteAuthCookie(ctx: { hono: HonoContext }) {
-  deleteCookie(ctx.hono, BENEFICIARY_AUTH_COOKIE_NAME, {
+function deleteAuthCookie() {
+  deleteCookie(BENEFICIARY_AUTH_COOKIE_NAME, {
     path: "/",
   });
 }
@@ -178,7 +181,7 @@ export const beneficiaryAuthRouter = {
 
       // Generate and store OTP
       const code = await createOTP(account.id, {
-        ipAddress: ctx.hono.req.raw.headers.get("x-forwarded-for") ?? undefined,
+        ipAddress: ctx.headers.get("x-forwarded-for") ?? undefined,
       });
 
       // Send OTP via Twilio
@@ -238,12 +241,12 @@ export const beneficiaryAuthRouter = {
       // Create session and log in
       const token = await createSessionToken(account.id);
       await createSession(account.id, token, {
-        ipAddress: ctx.hono.req.raw.headers.get("x-forwarded-for") ?? undefined,
-        userAgent: ctx.hono.req.raw.headers.get("user-agent") ?? undefined,
+        ipAddress: ctx.headers.get("x-forwarded-for") ?? undefined,
+        userAgent: ctx.headers.get("user-agent") ?? undefined,
       });
 
       // Set auth cookie
-      setAuthCookie(ctx, token);
+      setAuthCookie(token);
 
       return {
         success: true,
@@ -339,12 +342,12 @@ export const beneficiaryAuthRouter = {
       // Log in immediately after signup
       const token = await createSessionToken(accountId);
       await createSession(accountId, token, {
-        ipAddress: ctx.hono.req.raw.headers.get("x-forwarded-for") ?? undefined,
-        userAgent: ctx.hono.req.raw.headers.get("user-agent") ?? undefined,
+        ipAddress: ctx.headers.get("x-forwarded-for") ?? undefined,
+        userAgent: ctx.headers.get("user-agent") ?? undefined,
       });
 
       // Set auth cookie
-      setAuthCookie(ctx, token);
+      setAuthCookie(token);
 
       return {
         success: true,
@@ -433,12 +436,12 @@ export const beneficiaryAuthRouter = {
       // Create session
       const token = await createSessionToken(account.id);
       await createSession(account.id, token, {
-        ipAddress: ctx.hono.req.raw.headers.get("x-forwarded-for") ?? undefined,
-        userAgent: ctx.hono.req.raw.headers.get("user-agent") ?? undefined,
+        ipAddress: ctx.headers.get("x-forwarded-for") ?? undefined,
+        userAgent: ctx.headers.get("user-agent") ?? undefined,
       });
 
       // Set auth cookie
-      setAuthCookie(ctx, token);
+      setAuthCookie(token);
 
       return {
         success: true,
@@ -453,8 +456,8 @@ export const beneficiaryAuthRouter = {
   /**
    * Get current session
    */
-  getSession: publicProcedure({ captcha: false }).query(async ({ ctx }) => {
-    const token = getCookie(ctx.hono, BENEFICIARY_AUTH_COOKIE_NAME);
+  getSession: publicProcedure({ captcha: false }).query(async () => {
+    const token = getCookie(BENEFICIARY_AUTH_COOKIE_NAME);
 
     if (!token) {
       return null;
@@ -487,14 +490,14 @@ export const beneficiaryAuthRouter = {
   /**
    * Logout - Delete session
    */
-  logout: publicProcedure({ captcha: false }).mutation(async ({ ctx }) => {
-    const token = getCookie(ctx.hono, BENEFICIARY_AUTH_COOKIE_NAME);
+  logout: publicProcedure({ captcha: false }).mutation(async () => {
+    const token = getCookie(BENEFICIARY_AUTH_COOKIE_NAME);
     if (token) {
       await deleteSession(token);
     }
 
     // Delete auth cookie
-    deleteAuthCookie(ctx);
+    deleteAuthCookie();
 
     return { success: true };
   }),
@@ -521,7 +524,7 @@ export const beneficiaryAuthRouter = {
 
       // Create reset token
       const resetToken = await createPasswordResetToken(account.id, {
-        ipAddress: ctx.hono.req.raw.headers.get("x-forwarded-for") ?? undefined,
+        ipAddress: ctx.headers.get("x-forwarded-for") ?? undefined,
       });
 
       // TODO: Integrate with voice call service (Twilio, Vonage, etc.)

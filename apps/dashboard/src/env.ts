@@ -2,9 +2,12 @@ import { createEnv } from "@t3-oss/env-core";
 import { vercel } from "@t3-oss/env-core/presets-zod";
 import { z } from "zod/v4";
 
+import { apiEnv } from "@congress/api/env";
+import { transactionalEnv } from "@congress/transactional/env";
+
 export const env = createEnv({
   clientPrefix: "VITE_",
-  extends: [vercel()],
+  extends: [vercel(), apiEnv(), transactionalEnv()],
   shared: {
     NODE_ENV: z
       .enum(["development", "production", "test"])
@@ -13,8 +16,13 @@ export const env = createEnv({
   client: {
     VITE_API_URL: z.url(),
   },
-  server: {},
-  runtimeEnv: import.meta.env,
+  server: {
+    BENEFICIARY_APP_URL: z.url(),
+  },
+  runtimeEnv: {
+    ...import.meta.env,
+    ...process.env,
+  },
   skipValidation:
     !!(typeof process !== "undefined" && process.env.CI) ||
     (typeof process !== "undefined" &&

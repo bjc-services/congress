@@ -12,7 +12,7 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { Direction } from "radix-ui";
 import { useTranslation } from "react-i18next";
 
-import type { AppRouter } from "@congress/api/types";
+import type { AppRouter } from "@congress/api";
 import { Toaster } from "@congress/ui/toast";
 
 import { BeneficiaryAuthProvider } from "~/lib/beneficiary-auth-provider";
@@ -74,7 +74,7 @@ function NotFoundComponent() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center">
       <h1 className="text-4xl font-bold">404</h1>
-      <p className="mt-4 text-lg text-muted-foreground">
+      <p className="text-muted-foreground mt-4 text-lg">
         {t("common:notFound", "Page not found")}
       </p>
     </div>

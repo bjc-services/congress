@@ -12,7 +12,7 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { Direction } from "radix-ui";
 import { useTranslation } from "react-i18next";
 
-import type { AppRouter } from "@congress/api/types";
+import type { AppRouter } from "@congress/api";
 import { Toaster } from "@congress/ui/toast";
 
 import { setSSRLanguage } from "~/lib/i18n";

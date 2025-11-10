@@ -6,9 +6,10 @@ import {
 import { createTRPCContext } from "@trpc/tanstack-react-query";
 import SuperJSON from "superjson";
 
-import type { AppRouter } from "@congress/api/types";
+import type { AppRouter } from "@congress/api";
 
 import { env } from "~/env";
+import { getBaseUrl } from "./url";
 
 export const trpcClient = createTRPCClient<AppRouter>({
   links: [
@@ -19,7 +20,7 @@ export const trpcClient = createTRPCClient<AppRouter>({
     }),
     httpBatchStreamLink({
       transformer: SuperJSON,
-      url: env.VITE_API_URL + "/trpc",
+      url: getBaseUrl() + "/api/trpc",
       headers() {
         const headers = new Headers();
         headers.set("x-trpc-source", "dashboard-app");

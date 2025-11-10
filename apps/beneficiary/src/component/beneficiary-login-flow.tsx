@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
-import type { RouterOutputs } from "@congress/api/types";
+import type { RouterOutputs } from "@congress/api";
 import { Button } from "@congress/ui/button";
 import {
   Field,

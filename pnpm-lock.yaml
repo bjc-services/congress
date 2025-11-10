@@ -113,72 +113,11 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  apps/api:
-    dependencies:
-      '@better-upload/server':
-        specifier: ^3.0.0
-        version: 3.0.0
-      '@congress/auth':
-        specifier: workspace:*
-        version: link:../../packages/auth
-      '@congress/db':
-        specifier: workspace:*
-        version: link:../../packages/db
-      '@congress/transactional':
-        specifier: workspace:*
-        version: link:../../packages/transactional
-      '@congress/validators':
-        specifier: workspace:*
-        version: link:../../packages/validators
-      '@hono/trpc-server':
-        specifier: ^0.4.0
-        version: 0.4.0(@trpc/server@11.7.0(typescript@5.9.3))(hono@4.10.4)
-      '@t3-oss/env-core':
-        specifier: ^0.13.8
-        version: 0.13.8(arktype@2.1.20)(typescript@5.9.3)(valibot@1.0.0-beta.15(typescript@5.9.3))(zod@4.1.12)
-      '@trpc/server':
-        specifier: 'catalog:'
-        version: 11.7.0(typescript@5.9.3)
-      better-auth:
-        specifier: 'catalog:'
-        version: 1.4.0-beta.18(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(solid-js@1.9.9)
-      hono:
-        specifier: ^4.10.4
-        version: 4.10.4
-      superjson:
-        specifier: 2.2.3
-        version: 2.2.3
-      zod:
-        specifier: 'catalog:'
-        version: 4.1.12
-    devDependencies:
-      '@congress/eslint-config':
-        specifier: workspace:*
-        version: link:../../tooling/eslint
-      '@congress/prettier-config':
-        specifier: workspace:*
-        version: link:../../tooling/prettier
-      '@congress/tsconfig':
-        specifier: workspace:*
-        version: link:../../tooling/typescript
-      '@types/node':
-        specifier: 'catalog:'
-        version: 22.18.12
-      eslint:
-        specifier: 'catalog:'
-        version: 9.38.0(jiti@2.6.1)
-      prettier:
-        specifier: 'catalog:'
-        version: 3.6.2
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-
   apps/beneficiary:
     dependencies:
       '@congress/api':
         specifier: workspace:*
-        version: link:../api
+        version: link:../../packages/api
       '@congress/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -235,7 +174,7 @@ importers:
         version: 8.2.0
       nitro:
         specifier: npm:nitro-nightly@latest
-        version: nitro-nightly@3.0.1-20251110-102933-36971ba8(@planetscale/database@1.19.0)(aws4fetch@1.0.20)(better-sqlite3@12.2.0)(chokidar@4.0.3)(drizzle-orm@0.44.7(@neondatabase/serverless@0.10.0)(@opentelemetry/api@1.9.0)(@planetscale/database@1.19.0)(@prisma/client@5.22.0(prisma@5.22.0))(@types/better-sqlite3@7.6.13)(@types/pg@8.11.10)(@vercel/postgres@0.10.0(utf-8-validate@6.0.4))(better-sqlite3@12.2.0)(bun-types@1.3.2(@types/react@19.1.12))(gel@2.0.0)(kysely@0.28.5)(mysql2@3.11.3)(postgres@3.4.7)(prisma@5.22.0))(lru-cache@11.2.2)(mysql2@3.11.3)(rollup@4.53.1)(vite@7.1.12(@types/node@22.18.12)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1))
+        version: nitro-nightly@3.0.1-20251110-110934-89e686f1(@planetscale/database@1.19.0)(aws4fetch@1.0.20)(better-sqlite3@12.2.0)(chokidar@4.0.3)(drizzle-orm@0.44.7(@neondatabase/serverless@0.10.0)(@opentelemetry/api@1.9.0)(@planetscale/database@1.19.0)(@prisma/client@5.22.0(prisma@5.22.0))(@types/better-sqlite3@7.6.13)(@types/pg@8.11.10)(@vercel/postgres@0.10.0(utf-8-validate@6.0.4))(better-sqlite3@12.2.0)(bun-types@1.3.2(@types/react@19.1.12))(gel@2.0.0)(kysely@0.28.5)(mysql2@3.11.3)(postgres@3.4.7)(prisma@5.22.0))(lru-cache@11.2.2)(mysql2@3.11.3)(rollup@4.53.1)(vite@7.1.12(@types/node@22.18.12)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1))
       radix-ui:
         specifier: 'catalog:'
         version: 1.4.3(@types/react-dom@19.1.9(@types/react@19.1.12))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -306,15 +245,21 @@ importers:
 
   apps/dashboard:
     dependencies:
+      '@better-upload/server':
+        specifier: ^3.0.0
+        version: 3.0.0
       '@congress/api':
         specifier: workspace:*
-        version: link:../api
+        version: link:../../packages/api
       '@congress/auth':
         specifier: workspace:*
         version: link:../../packages/auth
       '@congress/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@congress/transactional':
+        specifier: workspace:^
+        version: link:../../packages/transactional
       '@congress/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -362,7 +307,7 @@ importers:
         version: 8.2.0
       nitro:
         specifier: npm:nitro-nightly@latest
-        version: nitro-nightly@3.0.1-20251110-102933-36971ba8(@planetscale/database@1.19.0)(aws4fetch@1.0.20)(better-sqlite3@12.2.0)(chokidar@4.0.3)(drizzle-orm@0.44.7(@neondatabase/serverless@0.10.0)(@opentelemetry/api@1.9.0)(@planetscale/database@1.19.0)(@prisma/client@5.22.0(prisma@5.22.0))(@types/better-sqlite3@7.6.13)(@types/pg@8.11.10)(@vercel/postgres@0.10.0(utf-8-validate@6.0.4))(better-sqlite3@12.2.0)(bun-types@1.3.2(@types/react@19.1.12))(gel@2.0.0)(kysely@0.28.5)(mysql2@3.11.3)(postgres@3.4.7)(prisma@5.22.0))(lru-cache@11.2.2)(mysql2@3.11.3)(rollup@4.53.1)(vite@7.1.12(@types/node@22.18.12)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1))
+        version: nitro-nightly@3.0.1-20251110-110934-89e686f1(@planetscale/database@1.19.0)(aws4fetch@1.0.20)(better-sqlite3@12.2.0)(chokidar@4.0.3)(drizzle-orm@0.44.7(@neondatabase/serverless@0.10.0)(@opentelemetry/api@1.9.0)(@planetscale/database@1.19.0)(@prisma/client@5.22.0(prisma@5.22.0))(@types/better-sqlite3@7.6.13)(@types/pg@8.11.10)(@vercel/postgres@0.10.0(utf-8-validate@6.0.4))(better-sqlite3@12.2.0)(bun-types@1.3.2(@types/react@19.1.12))(gel@2.0.0)(kysely@0.28.5)(mysql2@3.11.3)(postgres@3.4.7)(prisma@5.22.0))(lru-cache@11.2.2)(mysql2@3.11.3)(rollup@4.53.1)(vite@7.1.12(@types/node@22.18.12)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1))
       radix-ui:
         specifier: 'catalog:'
         version: 1.4.3(@types/react-dom@19.1.9(@types/react@19.1.12))(@types/react@19.1.12)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -430,6 +375,61 @@ importers:
       vite-tsconfig-paths:
         specifier: ^5.1.4
         version: 5.1.4(typescript@5.9.3)(vite@7.1.12(@types/node@22.18.12)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1))
+
+  packages/api:
+    dependencies:
+      '@congress/auth':
+        specifier: workspace:*
+        version: link:../auth
+      '@congress/db':
+        specifier: workspace:*
+        version: link:../db
+      '@congress/transactional':
+        specifier: workspace:*
+        version: link:../transactional
+      '@congress/validators':
+        specifier: workspace:*
+        version: link:../validators
+      '@t3-oss/env-core':
+        specifier: ^0.13.8
+        version: 0.13.8(arktype@2.1.20)(typescript@5.9.3)(valibot@1.0.0-beta.15(typescript@5.9.3))(zod@4.1.12)
+      '@tanstack/react-start':
+        specifier: ^1.133.29
+        version: 1.133.29(crossws@0.4.1(srvx@0.9.5))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(vite@7.1.12(@types/node@22.18.12)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1))
+      '@trpc/server':
+        specifier: 'catalog:'
+        version: 11.7.0(typescript@5.9.3)
+      better-auth:
+        specifier: 'catalog:'
+        version: 1.4.0-beta.18(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(solid-js@1.9.9)
+      superjson:
+        specifier: 2.2.3
+        version: 2.2.3
+      zod:
+        specifier: 'catalog:'
+        version: 4.1.12
+    devDependencies:
+      '@congress/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
+      '@congress/prettier-config':
+        specifier: workspace:*
+        version: link:../../tooling/prettier
+      '@congress/tsconfig':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      '@types/node':
+        specifier: 'catalog:'
+        version: 22.18.12
+      eslint:
+        specifier: 'catalog:'
+        version: 9.38.0(jiti@2.6.1)
+      prettier:
+        specifier: 'catalog:'
+        version: 3.6.2
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
 
   packages/auth:
     dependencies:
@@ -1943,13 +1943,6 @@ packages:
 
   '@fontsource-variable/rubik@5.2.8':
     resolution: {integrity: sha512-vGDExLzB4a2Fj9mca5LqNoA2ZKcU9o+x5FEBLte/nxYkCB9hOQwZS6ZlItUv+Ssn7YMzKauGuI/Po+YueFuZbg==}
-
-  '@hono/trpc-server@0.4.0':
-    resolution: {integrity: sha512-LGlJfCmNIGMwcknZEIYdujVMs9OkNVazhpOhaz3kTWOXvNL660VOHpvvktosCiJrajyBY1RtIJKQ+IKaQvNuSg==}
-    engines: {node: '>=16.0.0'}
-    peerDependencies:
-      '@trpc/server': ^10.10.0 || >11.0.0-rc
-      hono: '>=4.*'
 
   '@hookform/resolvers@5.2.2':
     resolution: {integrity: sha512-A/IxlMLShx3KjV/HeTcTfaMxdwy690+L/ZADoeaTltLx+CVuzkeVIPuybK3jrRfw7YZnmdKsVVHAlEPIAEUNlA==}
@@ -5734,10 +5727,6 @@ packages:
   hermes-parser@0.25.1:
     resolution: {integrity: sha512-6pEjquH3rqaI6cYAXYPcz9MS4rY6R4ngRgrgfDshRptUZIc3lw0MCIJIGDj9++mfySOuPTHB4nrSW99BCvOPIA==}
 
-  hono@4.10.4:
-    resolution: {integrity: sha512-YG/fo7zlU3KwrBL5vDpWKisLYiM+nVstBQqfr7gCPbSYURnNEP9BDxEMz8KfsDR9JX0lJWDRNc6nXX31v7ZEyg==}
-    engines: {node: '>=16.9.0'}
-
   html-parse-stringify@3.0.1:
     resolution: {integrity: sha512-KknJ50kTInJ7qIScF3jeaFRpMpE8/lfiTdzf/twXyPBLAGrLRTmkz3AdTnKeh40X8k9L2fdYwEp/42WGXIRGcg==}
 
@@ -6436,8 +6425,8 @@ packages:
   nf3@0.1.10:
     resolution: {integrity: sha512-bT6FITvXLd8Z9Qbt0NsMz90diyLNK8H4Sp2vZ9IGLrKxsF5djM+F2vQmR6GyvtlP2y47XMZjjVFpPClgMB8USQ==}
 
-  nitro-nightly@3.0.1-20251110-102933-36971ba8:
-    resolution: {integrity: sha512-9fXOX6OtCMoxMRz2Uqp/piktnOZcug+/zcbOe42SSurdpF6metbb4468b65vKTpblMVh0IHrOqubDOi8xbDFCQ==}
+  nitro-nightly@3.0.1-20251110-110934-89e686f1:
+    resolution: {integrity: sha512-YGP8erDAE1idmKS3S3l/xsTo6z6bT/r7m1GXnC3pym7q3uGBmgdiAgzCvGp/9iFPO0y+PeXWgjDdzXL0z+Az2A==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -9193,11 +9182,6 @@ snapshots:
   '@floating-ui/utils@0.2.10': {}
 
   '@fontsource-variable/rubik@5.2.8': {}
-
-  '@hono/trpc-server@0.4.0(@trpc/server@11.7.0(typescript@5.9.3))(hono@4.10.4)':
-    dependencies:
-      '@trpc/server': 11.7.0(typescript@5.9.3)
-      hono: 4.10.4
 
   '@hookform/resolvers@5.2.2(react-hook-form@7.66.0(react@19.1.1))':
     dependencies:
@@ -13289,8 +13273,6 @@ snapshots:
     dependencies:
       hermes-estree: 0.25.1
 
-  hono@4.10.4: {}
-
   html-parse-stringify@3.0.1:
     dependencies:
       void-elements: 3.1.0
@@ -13953,7 +13935,7 @@ snapshots:
 
   nf3@0.1.10: {}
 
-  nitro-nightly@3.0.1-20251110-102933-36971ba8(@planetscale/database@1.19.0)(aws4fetch@1.0.20)(better-sqlite3@12.2.0)(chokidar@4.0.3)(drizzle-orm@0.44.7(@neondatabase/serverless@0.10.0)(@opentelemetry/api@1.9.0)(@planetscale/database@1.19.0)(@prisma/client@5.22.0(prisma@5.22.0))(@types/better-sqlite3@7.6.13)(@types/pg@8.11.10)(@vercel/postgres@0.10.0(utf-8-validate@6.0.4))(better-sqlite3@12.2.0)(bun-types@1.3.2(@types/react@19.1.12))(gel@2.0.0)(kysely@0.28.5)(mysql2@3.11.3)(postgres@3.4.7)(prisma@5.22.0))(lru-cache@11.2.2)(mysql2@3.11.3)(rollup@4.53.1)(vite@7.1.12(@types/node@22.18.12)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1)):
+  nitro-nightly@3.0.1-20251110-110934-89e686f1(@planetscale/database@1.19.0)(aws4fetch@1.0.20)(better-sqlite3@12.2.0)(chokidar@4.0.3)(drizzle-orm@0.44.7(@neondatabase/serverless@0.10.0)(@opentelemetry/api@1.9.0)(@planetscale/database@1.19.0)(@prisma/client@5.22.0(prisma@5.22.0))(@types/better-sqlite3@7.6.13)(@types/pg@8.11.10)(@vercel/postgres@0.10.0(utf-8-validate@6.0.4))(better-sqlite3@12.2.0)(bun-types@1.3.2(@types/react@19.1.12))(gel@2.0.0)(kysely@0.28.5)(mysql2@3.11.3)(postgres@3.4.7)(prisma@5.22.0))(lru-cache@11.2.2)(mysql2@3.11.3)(rollup@4.53.1)(vite@7.1.12(@types/node@22.18.12)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.0)(tsx@4.20.6)(yaml@2.8.1)):
     dependencies:
       consola: 3.4.2
       crossws: 0.4.1(srvx@0.9.5)

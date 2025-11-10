@@ -6,9 +6,8 @@
  * tl;dr - this is where all the tRPC server stuff is created and plugged in.
  * The pieces you will need to use are documented accordingly near the end
  */
-import type { Context as HonoContext } from "hono";
+import { getCookie } from "@tanstack/react-start/server";
 import { initTRPC, TRPCError } from "@trpc/server";
-import { getCookie } from "hono/cookie";
 import superjson from "superjson";
 import { z, ZodError } from "zod/v4";
 
@@ -43,12 +42,12 @@ const getSession = async (
 
 export const createTRPCContext = async (opts: {
   auth: DashboardAuth;
-  hono: HonoContext;
+  headers: Headers;
 }) => {
-  const session = await getSession(opts.auth, opts.hono.req.raw.headers);
+  const session = await getSession(opts.auth, opts.headers);
   return {
     session,
-    hono: opts.hono,
+    headers: opts.headers,
   };
 };
 /**
@@ -121,7 +120,7 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
  */
 export const beneficiaryProtectedProcedure = t.procedure.use(
   async ({ ctx, next }) => {
-    const token = getCookie(ctx.hono, "congress_bat");
+    const token = getCookie("congress_bat");
 
     if (!token) {
       throw new TRPCError({

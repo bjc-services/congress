@@ -12,7 +12,7 @@ const database = drizzleAdapter(db, {
   provider: "pg",
 });
 
-const devOrigins = ["http://localhost:3001", "http://localhost:3002"];
+const devOrigins = ["http://localhost:3000", "http://localhost:3001"];
 const prodOrigins = ["https://app.bucharim.com", "https://my.bucharim.com"];
 
 const isProd = env.NODE_ENV === "production";

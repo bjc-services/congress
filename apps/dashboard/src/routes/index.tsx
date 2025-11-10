@@ -8,7 +8,7 @@ import {
 import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
-import type { RouterOutputs } from "@congress/api/types";
+import type { RouterOutputs } from "@congress/api";
 import { CreatePostSchema } from "@congress/db/schema";
 import { cn } from "@congress/ui";
 import { Button } from "@congress/ui/button";

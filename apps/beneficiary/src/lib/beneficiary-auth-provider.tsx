@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
-import type { RouterOutputs } from "@congress/api/types";
+import type { RouterOutputs } from "@congress/api";
 
 import { useTRPC } from "./trpc";
 

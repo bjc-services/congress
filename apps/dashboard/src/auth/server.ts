@@ -1,11 +1,12 @@
 import type { DashboardAuth } from "@congress/auth";
 import { initAuth } from "@congress/auth";
 
+import { getBaseUrl } from "~/lib/url";
 import { env } from "../env";
 
 export const dashboardAuth = initAuth({
-  baseUrl: env.VERCEL_URL ?? "http://localhost:3000",
-  productionUrl: env.VERCEL_URL ?? "http://localhost:3000",
+  baseUrl: getBaseUrl(),
+  productionUrl: `https://${env.VERCEL_PROJECT_PRODUCTION_URL}`,
   secret: env.AUTH_SECRET,
   extraPlugins: [],
 }) as DashboardAuth;
