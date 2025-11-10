@@ -1,1 +1,3 @@
 routeTree.gen.ts
+src/@types/i18next.d.ts
+src/@types/resources.d.ts
