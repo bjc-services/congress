@@ -14,3 +14,5 @@ export function transactionalEnv() {
       !!process.env.CI || process.env.npm_lifecycle_event === "lint",
   });
 }
+
+export const env = transactionalEnv();

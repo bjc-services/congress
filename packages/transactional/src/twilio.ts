@@ -7,7 +7,7 @@
  * - TWILIO_PHONE_NUMBER (your Twilio phone number in E.164 format, e.g., +1234567890)
  */
 
-import { transactionalEnv } from "../env";
+import { env } from "../env";
 
 interface SendVoiceOTPOptions {
   to: string; // Phone number in E.164 format (e.g., +972501234567)
@@ -23,7 +23,6 @@ export async function sendVoiceOTP({
   to,
   code,
 }: SendVoiceOTPOptions): Promise<void> {
-  const env = transactionalEnv();
   const accountSid = env.TWILIO_ACCOUNT_SID;
   const authToken = env.TWILIO_AUTH_TOKEN;
   const fromNumber = env.TWILIO_PHONE_NUMBER;
@@ -64,7 +63,7 @@ export async function sendVoiceOTP({
   } catch (error) {
     console.error("Failed to send OTP via Twilio:", error);
     // In development, still log the code even if Twilio fails
-    if (process.env.NODE_ENV === "development") {
+    if (env.NODE_ENV === "development") {
       console.log(`[DEV] OTP code for ${to}: ${code}`);
     } else {
       throw new Error("Failed to send OTP code. Please try again later.");

@@ -1,5 +1,5 @@
 {
   "extends": "@congress/tsconfig/compiled-package.json",
-  "include": ["src"],
+  "include": ["src", "env.ts"],
   "exclude": ["node_modules"]
 }

@@ -25,6 +25,7 @@ import { db } from "@congress/db/client";
 import { BeneficiaryAccount, Person, PersonContact } from "@congress/db/schema";
 import { sendVoiceOTP } from "@congress/transactional/twilio";
 
+import { env } from "../../env";
 import { publicProcedure } from "../trpc";
 
 const BENEFICIARY_AUTH_COOKIE_NAME = "congress_bat"; // congress beneficiary auth token
@@ -33,7 +34,7 @@ const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days in seconds
 function setAuthCookie(ctx: { hono: HonoContext }, token: string) {
   setCookie(ctx.hono, BENEFICIARY_AUTH_COOKIE_NAME, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: env.NODE_ENV === "production",
     sameSite: "Lax",
     maxAge: COOKIE_MAX_AGE,
     path: "/",
@@ -192,7 +193,7 @@ export const beneficiaryAuthRouter = {
           "A verification code has been sent to your phone via voice call.",
         phoneNumberMasked: maskPhoneNumber(account.phoneNumber),
         // In development, return the code for testing
-        devCode: process.env.NODE_ENV === "development" ? code : undefined,
+        devCode: env.NODE_ENV === "development" ? code : undefined,
       };
     }),
 
@@ -540,8 +541,7 @@ export const beneficiaryAuthRouter = {
         message:
           "A password reset code has been sent to your phone via voice call.",
         // Remove this in production
-        devToken:
-          process.env.NODE_ENV === "development" ? resetToken : undefined,
+        devToken: env.NODE_ENV === "development" ? resetToken : undefined,
       };
     }),
 
