@@ -2,6 +2,7 @@
   "extends": "@congress/tsconfig/compiled-package.json",
   "compilerOptions": {
     "types": ["bun"],
+    "lib": ["ES2022", "DOM"],
     "outDir": "./dist",
     "jsxImportSource": "hono/jsx"
   },
