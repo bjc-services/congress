@@ -1,6 +1,7 @@
 {
   "extends": ["@congress/tsconfig/compiled-package.json", "./tsconfig.json"],
   "compilerOptions": {
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "types": ["node"]
   }
 }
