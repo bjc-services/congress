@@ -58,7 +58,6 @@
   "globalEnv": [
     "POSTGRES_URL",
     "AUTH_SECRET",
-    "VITE_API_URL",
     "PORT",
     "LEGACY_DB_DATABASE",
     "LEGACY_DB_HOST",

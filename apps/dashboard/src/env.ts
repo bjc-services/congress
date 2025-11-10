@@ -13,9 +13,7 @@ export const env = createEnv({
       .enum(["development", "production", "test"])
       .default("development"),
   },
-  client: {
-    VITE_API_URL: z.url(),
-  },
+  client: {},
   server: {},
   runtimeEnv: {
     ...import.meta.env,
