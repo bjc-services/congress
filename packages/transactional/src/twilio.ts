@@ -38,7 +38,7 @@ export async function sendVoiceOTP({
   }
 
   try {
-    // Dynamically import Twilio SDK (install with: pnpm add twilio)
+    // Dynamically import Twilio SDK (install with: bun add twilio)
     const twilio = await import("twilio");
 
     const client = twilio.default(accountSid, authToken);

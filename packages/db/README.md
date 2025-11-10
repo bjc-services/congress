@@ -1073,13 +1073,13 @@ All tables include:
 
 ```bash
 # Generate migration
-pnpm drizzle-kit generate
+bun drizzle-kit generate
 
 # Review generated SQL
 cat drizzle/0000_initial.sql
 
 # Apply migration
-pnpm drizzle-kit push
+bun drizzle-kit push
 ```
 
 ### Seed Data
@@ -1417,7 +1417,7 @@ async function addToHousehold(
 
 ```bash
 # Install dependencies
-pnpm install
+bun install
 
 # Start PostgreSQL (Docker)
 docker run -d \
@@ -1428,13 +1428,13 @@ docker run -d \
   postgres:14
 
 # Generate types
-pnpm drizzle-kit generate
+bun drizzle-kit generate
 
 # Push schema
-pnpm drizzle-kit push
+bun drizzle-kit push
 
 # Run seed
-pnpm seed
+bun seed
 ```
 
 ### Schema Updates
@@ -1442,26 +1442,26 @@ pnpm seed
 ```bash
 # 1. Modify schema files
 # 2. Generate migration
-pnpm drizzle-kit generate
+bun drizzle-kit generate
 
 # 3. Review SQL
 cat drizzle/migrations/XXXX_migration_name.sql
 
 # 4. Apply
-pnpm drizzle-kit push
+bun drizzle-kit push
 
 # 5. Update seed if needed
-pnpm seed
+bun seed
 ```
 
 ### Type Checking
 
 ```bash
 # Check types
-pnpm typecheck
+bun typecheck
 
 # Build package
-pnpm build
+bun build
 ```
 
 ## Troubleshooting

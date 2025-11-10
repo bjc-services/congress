@@ -4,7 +4,7 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "dev": "pnpm with-env vite dev",
+    "dev": "bun with-env vite dev",
     "dev:i18n:extract": "i18next-cli extract --watch",
     "dev:i18n:types": "i18next-cli types --watch",
     "build": "vite build",
