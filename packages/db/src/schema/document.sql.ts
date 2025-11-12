@@ -31,6 +31,8 @@ export const DocumentType = createTable(
       onDelete: "set null",
     }),
     maxAllowedFiles: integer("max_allowed_files").notNull().default(1),
+    allowedFileTypes: text("allowed_file_types").array().notNull(),
+    maxFileSize: bigint({ mode: "number" }).notNull().default(5242880), // 10MB
   },
   (table) => [index("document_type_name_index").on(table.name)],
 );

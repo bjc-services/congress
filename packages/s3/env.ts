@@ -2,22 +2,20 @@ import { createEnv } from "@t3-oss/env-core";
 import { vercel } from "@t3-oss/env-core/presets-zod";
 import { z } from "zod/v4";
 
-import { s3Env } from "@congress/s3/env";
-
-export const apiEnv = () => {
+export function s3Env() {
   return createEnv({
-    extends: [vercel(), s3Env()],
-    clientPrefix: "__", // https://github.com/t3-oss/t3-env/issues/151
-    client: {},
+    extends: [vercel()],
     server: {
+      AWS_REGION: z.string(),
+      AWS_ACCESS_KEY_ID: z.string(),
+      AWS_SECRET_ACCESS_KEY: z.string(),
+      AWS_BUCKET_NAME: z.string(),
       NODE_ENV: z.enum(["development", "production"]).optional(),
-      POSTGRES_URL: z.url(),
-      AUTH_SECRET: z.string().min(1),
     },
     runtimeEnv: process.env,
     skipValidation:
       !!process.env.CI || process.env.npm_lifecycle_event === "lint",
   });
-};
+}
 
-export const env = apiEnv();
+export const env = s3Env();

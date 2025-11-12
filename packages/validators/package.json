@@ -26,6 +26,10 @@
     "./utils": {
       "types": "./dist/utils.d.ts",
       "default": "./src/utils.ts"
+    },
+    "./constants": {
+      "types": "./dist/constants.d.ts",
+      "default": "./src/constants.ts"
     }
   },
   "scripts": {

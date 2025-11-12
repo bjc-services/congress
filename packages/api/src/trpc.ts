@@ -27,6 +27,16 @@ const getSession = async (
   return session;
 };
 
+const getBeneficiarySession = async () => {
+  const token = getCookie("congress_bat");
+
+  if (!token) return null;
+
+  const session = await beneficiaryAuth.getSession(token);
+
+  return session;
+};
+
 /**
  * 1. CONTEXT
  *
@@ -45,8 +55,10 @@ export const createTRPCContext = async (opts: {
   headers: Headers;
 }) => {
   const session = await getSession(opts.auth, opts.headers);
+  const beneficiarySession = await getBeneficiarySession();
   return {
     session,
+    beneficiarySession,
     headers: opts.headers,
   };
 };
@@ -119,19 +131,8 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
  * Verifies JWT token from cookie and ensures account is approved
  */
 export const beneficiaryProtectedProcedure = t.procedure.use(
-  async ({ ctx, next }) => {
-    const token = getCookie("congress_bat");
-
-    if (!token) {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message: "No token provided",
-      });
-    }
-
-    const session = await beneficiaryAuth.getSession(token);
-
-    if (!session) {
+  async ({ ctx: { beneficiarySession, ...ctx }, next }) => {
+    if (!beneficiarySession) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message: "Invalid or expired token",
@@ -141,7 +142,7 @@ export const beneficiaryProtectedProcedure = t.procedure.use(
     const [account] = await db
       .select()
       .from(BeneficiaryAccount)
-      .where(eq(BeneficiaryAccount.id, session.accountId))
+      .where(eq(BeneficiaryAccount.id, beneficiarySession.accountId))
       .limit(1);
 
     if (!account?.status || account.status !== "approved") {
@@ -155,7 +156,7 @@ export const beneficiaryProtectedProcedure = t.procedure.use(
       ctx: {
         ...ctx,
         beneficiaryAccount: account,
-        beneficiarySession: session,
+        beneficiarySession,
       },
     });
   },

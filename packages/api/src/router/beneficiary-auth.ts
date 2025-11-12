@@ -23,7 +23,7 @@ import {
   verifyPassword,
   verifyPasswordResetToken,
 } from "@congress/auth/beneficiary";
-import { and, createID, eq, isNull, or } from "@congress/db";
+import { and, createID, eq, inArray, isNull, or } from "@congress/db";
 import { db } from "@congress/db/client";
 import {
   BeneficiaryAccount,
@@ -32,6 +32,7 @@ import {
   PersonContact,
   PersonDocument,
   PersonRelationship,
+  Upload,
 } from "@congress/db/schema";
 import { sendVoiceOTP } from "@congress/transactional/twilio";
 import {
@@ -298,6 +299,17 @@ async function storeDocuments(
     documentTypeId: string;
   }[],
 ) {
+  await tx
+    .update(Upload)
+    .set({
+      status: "uploaded",
+    })
+    .where(
+      inArray(
+        Upload.id,
+        documents.map((document) => document.uploadId),
+      ),
+    );
   await tx.insert(PersonDocument).values(
     documents.map((document) => ({
       personId,

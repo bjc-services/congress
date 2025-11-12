@@ -16,6 +16,7 @@ export const uploadStatusEnum = pgEnum("upload_status", [
   "uploaded", // The upload has been uploaded to the storage bucket and commited to the entity.
   "expired", // The upload link has expired with no successful upload, we should delete the s3 object if it exists.
   "deleted", // The upload has been deleted by the user or the system.
+  "cancelled", // The upload has been cancelled by the user or the system.
 ]);
 
 export const Upload = createTable(
@@ -28,7 +29,7 @@ export const Upload = createTable(
     originalFileName: text(),
     contentType: text(),
     fileSize: bigint({ mode: "number" }),
-    checksum: text().notNull(),
+    base64Md5Hash: text().notNull(),
     objectUrl: text().notNull(),
     uploadedByBeneficiaryAccountId: ulid("beneficiaryAccount").references(
       () => BeneficiaryAccount.id,

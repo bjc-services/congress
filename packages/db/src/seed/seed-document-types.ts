@@ -10,6 +10,7 @@ const systemDocumentTypes: (typeof DocumentType.$inferInsert)[] = [
     maxAllowedFiles: 1,
     createdByUserId: createID.SYSTEM_USER_ID,
     id: createID.SYSTEM_DOCUMENT_IDS.idCard,
+    allowedFileTypes: ["image/*", "application/pdf"],
   },
   {
     name: "ספח תעודת זהות",
@@ -18,6 +19,7 @@ const systemDocumentTypes: (typeof DocumentType.$inferInsert)[] = [
     maxAllowedFiles: 1,
     createdByUserId: createID.SYSTEM_USER_ID,
     id: createID.SYSTEM_DOCUMENT_IDS.idAppendix,
+    allowedFileTypes: ["image/*", "application/pdf"],
   },
 ];
 
