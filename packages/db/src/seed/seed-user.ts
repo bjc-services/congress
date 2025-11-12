@@ -1,10 +1,10 @@
 import { db } from "../client";
-import { SYSTEM_USER_ID } from "../id";
+import { createID } from "../id";
 import { User } from "../schema";
 
 async function seedSystemUser() {
   await db.insert(User).values({
-    id: SYSTEM_USER_ID,
+    id: createID.SYSTEM_USER_ID,
     name: "System",
     email: "sys.services@bucharim.com",
     emailVerified: true,

@@ -54,7 +54,7 @@ interface GeneratePresignedUploadUrlInput {
 }
 
 export const generatePresignedUploadUrl = async ({
-  bucket = env.AWS_BUCKET_NAME,
+  bucket = env.AWS_S3_BUCKET,
   key = randomUUID(),
   maxUploadSizeInBytes,
   metadata = {},
