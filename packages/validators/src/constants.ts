@@ -27,3 +27,32 @@ export const SYSTEM_DOCUMENT_IDS = {
   idAppendix: _createFixedId("documentType", "id_appendix"),
 } as const;
 export const SYSTEM_USER_ID = _createFixedId("user", "system");
+
+export const SYSTEM_DOCUMENT_TYPES: {
+  name: string;
+  description: string;
+  isSystemDefined: boolean;
+  maxAllowedFiles: number;
+  createdByUserId: string;
+  id: string;
+  allowedFileTypes: string[];
+}[] = [
+  {
+    name: "תעודת זהות",
+    description: "תצלום תעודת זהות בתוקף",
+    isSystemDefined: true,
+    maxAllowedFiles: 1,
+    createdByUserId: SYSTEM_USER_ID,
+    id: SYSTEM_DOCUMENT_IDS.idCard,
+    allowedFileTypes: ["image/*", "application/pdf"],
+  },
+  {
+    name: "ספח תעודת זהות",
+    description: "ספח לתעודת זהות, הכולל את כל הנספחים בתעודת הזהות",
+    isSystemDefined: true,
+    maxAllowedFiles: 1,
+    createdByUserId: SYSTEM_USER_ID,
+    id: SYSTEM_DOCUMENT_IDS.idAppendix,
+    allowedFileTypes: ["image/*", "application/pdf"],
+  },
+] as const;
