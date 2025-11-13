@@ -22,7 +22,7 @@
 
 @layer base {
   :root {
-    --font-rubik: "Rubik Variable";
+    --font-sans: "Rubik Variable", sans-serif;
   }
   * {
     @apply border-border;

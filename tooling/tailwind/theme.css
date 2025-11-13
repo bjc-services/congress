@@ -31,10 +31,10 @@
   --sidebar-accent-foreground: oklch(1 0 0);
   --sidebar-border: oklch(0.35 0.02 264);
   --sidebar-ring: oklch(0.9408 0.0961 108.11);
-  --font-sans: Rubik, sans-serif;
+  --font-sans: "Rubik Variable", sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: Menlo, monospace;
-  --radius: 1.3rem;
+  --radius: 1rem;
   --shadow-x: 0px;
   --shadow-y: 2px;
   --shadow-blur: 0px;

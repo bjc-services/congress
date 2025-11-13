@@ -21,6 +21,8 @@ import { BeneficiaryAuthProvider } from "~/lib/beneficiary-auth-provider";
 import { setSSRLanguage } from "~/lib/i18n";
 import appCss from "~/styles.css?url";
 
+import "@fontsource-variable/rubik";
+
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
   trpc: TRPCOptionsProxy<AppRouter>;
@@ -30,6 +32,8 @@ export const Route = createRootRouteWithContext<{
   },
   head: () => ({
     meta: [
+      { name: "font-family", content: "Rubik Variable" },
+      { charset: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
     ],
     links: [{ rel: "stylesheet", href: appCss }],

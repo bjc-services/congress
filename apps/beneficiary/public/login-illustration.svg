@@ -1,0 +1,282 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 320 480"
+  role="img"
+  aria-labelledby="title desc"
+>
+  <title id="title">Abstract Bukharian geometric motif</title>
+  <desc id="desc">
+    Abstract line art with arches, domes, floral patterns and a string
+    instrument, inspired by Bukharian Jewish and Central Asian motifs.
+  </desc>
+
+  <style>
+    .navy {
+      stroke: #0b315f;
+    }
+    .gold {
+      stroke: #c8a86a;
+    }
+    .teal {
+      stroke: #4da1c0;
+    }
+    .thin {
+      stroke-width: 2;
+    }
+    .med {
+      stroke-width: 3;
+    }
+    .thick {
+      stroke-width: 4;
+    }
+    .round {
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+  </style>
+
+  <!-- CENTRAL ARCH -->
+  <g class="round">
+    <!-- outer arch -->
+    <path
+      class="navy thick"
+      fill="none"
+      d="M80 260
+         V180
+         Q80 120 160 90
+         Q240 120 240 180
+         V260
+         H80 Z"
+    />
+
+    <!-- inner arches -->
+    <path
+      class="gold med"
+      fill="none"
+      d="M100 260
+         V190
+         Q100 135 160 110
+         Q220 135 220 190
+         V260"
+    />
+    <path
+      class="teal med"
+      fill="none"
+      d="M120 260
+         V200
+         Q120 155 160 130
+         Q200 155 200 200
+         V260"
+    />
+
+    <!-- small inner diamond -->
+    <path
+      class="navy thin"
+      fill="none"
+      d="M160 176
+         L170 188
+         L160 200
+         L150 188
+         Z"
+    />
+
+    <!-- crown / floral top inside arch -->
+    <path
+      class="teal thin"
+      fill="none"
+      d="M145 155
+         Q160 140 175 155
+         M152 155
+         Q160 147 168 155"
+    />
+    <circle class="gold thin" cx="160" cy="165" r="4" fill="none" />
+
+    <!-- side dots inside arch -->
+    <circle class="gold thin" cx="132" cy="190" r="4" fill="none" />
+    <circle class="gold thin" cx="188" cy="190" r="4" fill="none" />
+  </g>
+
+  <!-- LOWER PANEL WITH GEOMETRIC CARPET MOTIF -->
+  <g class="round">
+    <rect
+      x="70"
+      y="260"
+      width="180"
+      height="80"
+      class="navy thick"
+      fill="none"
+      rx="6"
+    />
+    <!-- central shape -->
+    <path
+      class="navy med"
+      fill="none"
+      d="M130 290
+         Q140 278 160 278
+         Q180 278 190 290
+         Q176 300 160 305
+         Q144 300 130 290 Z"
+    />
+    <circle class="gold thin" cx="160" cy="314" r="4" fill="none" />
+
+    <!-- diagonal gold lines -->
+    <path class="gold thin" fill="none" d="M70 260 L120 305" />
+    <path class="gold thin" fill="none" d="M250 260 L200 305" />
+
+    <!-- small circles -->
+    <circle class="teal thin" cx="115" cy="310" r="3" fill="none" />
+    <circle class="teal thin" cx="205" cy="310" r="3" fill="none" />
+    <circle class="teal thin" cx="140" cy="330" r="3" fill="none" />
+    <circle class="teal thin" cx="180" cy="330" r="3" fill="none" />
+  </g>
+
+  <!-- LOWER ARCH / DOORWAY -->
+  <g class="round">
+    <path
+      class="navy thick"
+      fill="none"
+      d="M100 430
+         V360
+         Q100 330 160 315
+         Q220 330 220 360
+         V430"
+    />
+    <path
+      class="gold med"
+      fill="none"
+      d="M120 430
+         V365
+         Q120 340 160 330
+         Q200 340 200 365
+         V430"
+    />
+    <path
+      class="teal med"
+      fill="none"
+      d="M140 430
+         V372
+         Q140 352 160 346
+         Q180 352 180 372
+         V430"
+    />
+
+    <path
+      class="navy thin"
+      fill="none"
+      d="M160 355
+         L168 365
+         L160 375
+         L152 365 Z"
+    />
+  </g>
+
+  <!-- LEFT FLORAL / POMEGRANATE COLUMN -->
+  <g class="round">
+    <!-- stem -->
+    <line class="navy med" x1="48" y1="260" x2="48" y2="205" />
+    <!-- geometric leaves -->
+    <path
+      class="teal med"
+      fill="none"
+      d="M35 240 Q48 230 61 240
+         M35 225 Q48 215 61 225"
+    />
+    <!-- diamond heart -->
+    <path class="navy med" fill="none" d="M42 213 L48 205 L54 213 L48 221 Z" />
+
+    <!-- dome above column -->
+    <path
+      class="navy thick"
+      fill="none"
+      d="M24 205
+         Q48 185 72 205
+         V220
+         H24 Z"
+    />
+    <line class="gold thin" x1="24" y1="215" x2="72" y2="215" />
+  </g>
+
+  <!-- RIGHT FLORAL COLUMN (MIRROR) -->
+  <g class="round">
+    <line class="navy med" x1="272" y1="260" x2="272" y2="205" />
+    <path
+      class="teal med"
+      fill="none"
+      d="M259 240 Q272 230 285 240
+         M259 225 Q272 215 285 225"
+    />
+    <path
+      class="navy med"
+      fill="none"
+      d="M266 213 L272 205 L278 213 L272 221 Z"
+    />
+    <path
+      class="navy thick"
+      fill="none"
+      d="M248 205
+         Q272 185 296 205
+         V220
+         H248 Z"
+    />
+    <line class="gold thin" x1="248" y1="215" x2="296" y2="215" />
+  </g>
+
+  <!-- STRING INSTRUMENT (RIGHT BOTTOM) -->
+  <g class="round">
+    <circle class="navy thick" cx="258" cy="340" r="28" fill="none" />
+    <circle class="gold thin" cx="258" cy="340" r="7" fill="none" />
+    <line class="navy med" x1="258" y1="312" x2="258" y2="270" />
+    <!-- tuning pegs -->
+    <line class="navy thin" x1="252" y1="276" x2="246" y2="272" />
+    <line class="navy thin" x1="264" y1="276" x2="270" y2="272" />
+
+    <!-- strings -->
+    <line class="gold thin" x1="252" y1="315" x2="252" y2="335" />
+    <line class="gold thin" x1="258" y1="315" x2="258" y2="335" />
+    <line class="gold thin" x1="264" y1="315" x2="264" y2="335" />
+  </g>
+
+  <!-- SMALL ORNAMENTS / STARS / DIAMONDS -->
+  <g class="round">
+    <!-- top diamonds and circles -->
+    <rect
+      class="gold thin"
+      x="150"
+      y="52"
+      width="10"
+      height="10"
+      transform="rotate(45 155 57)"
+      fill="none"
+    />
+    <circle class="teal thin" cx="130" cy="70" r="4" fill="none" />
+    <circle class="teal thin" cx="190" cy="70" r="4" fill="none" />
+
+    <!-- side diamonds -->
+    <rect
+      class="gold thin"
+      x="34"
+      y="280"
+      width="8"
+      height="8"
+      transform="rotate(45 38 284)"
+      fill="none"
+    />
+    <rect
+      class="gold thin"
+      x="278"
+      y="280"
+      width="8"
+      height="8"
+      transform="rotate(45 282 284)"
+      fill="none"
+    />
+
+    <!-- scattered dots -->
+    <circle class="navy thin" cx="40" cy="90" r="2" fill="none" />
+    <circle class="navy thin" cx="280" cy="110" r="2" fill="none" />
+    <circle class="navy thin" cx="60" cy="140" r="2" fill="none" />
+    <circle class="navy thin" cx="260" cy="150" r="2" fill="none" />
+    <circle class="navy thin" cx="90" cy="350" r="2" fill="none" />
+    <circle class="navy thin" cx="230" cy="390" r="2" fill="none" />
+  </g>
+</svg>

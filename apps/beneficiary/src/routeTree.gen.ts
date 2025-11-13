@@ -9,25 +9,30 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as AuthLayoutRouteImport } from './routes/_auth-layout'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthLayoutSignupRouteImport } from './routes/_auth-layout/signup'
 import { Route as ApiTrpcSplatRouteImport } from './routes/api/trpc.$'
 
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLayoutRoute = AuthLayoutRouteImport.update({
+  id: '/_auth-layout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLayoutSignupRoute = AuthLayoutSignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => AuthLayoutRoute,
 } as any)
 const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
   id: '/api/trpc/$',
@@ -38,20 +43,21 @@ const ApiTrpcSplatRoute = ApiTrpcSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/signup': typeof SignupRoute
+  '/signup': typeof AuthLayoutSignupRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/signup': typeof SignupRoute
+  '/signup': typeof AuthLayoutSignupRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_auth-layout': typeof AuthLayoutRouteWithChildren
   '/login': typeof LoginRoute
-  '/signup': typeof SignupRoute
+  '/_auth-layout/signup': typeof AuthLayoutSignupRoute
   '/api/trpc/$': typeof ApiTrpcSplatRoute
 }
 export interface FileRouteTypes {
@@ -59,30 +65,36 @@ export interface FileRouteTypes {
   fullPaths: '/' | '/login' | '/signup' | '/api/trpc/$'
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/login' | '/signup' | '/api/trpc/$'
-  id: '__root__' | '/' | '/login' | '/signup' | '/api/trpc/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/_auth-layout'
+    | '/login'
+    | '/_auth-layout/signup'
+    | '/api/trpc/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthLayoutRoute: typeof AuthLayoutRouteWithChildren
   LoginRoute: typeof LoginRoute
-  SignupRoute: typeof SignupRoute
   ApiTrpcSplatRoute: typeof ApiTrpcSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_auth-layout': {
+      id: '/_auth-layout'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -91,6 +103,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_auth-layout/signup': {
+      id: '/_auth-layout/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof AuthLayoutSignupRouteImport
+      parentRoute: typeof AuthLayoutRoute
     }
     '/api/trpc/$': {
       id: '/api/trpc/$'
@@ -102,10 +121,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthLayoutRouteChildren {
+  AuthLayoutSignupRoute: typeof AuthLayoutSignupRoute
+}
+
+const AuthLayoutRouteChildren: AuthLayoutRouteChildren = {
+  AuthLayoutSignupRoute: AuthLayoutSignupRoute,
+}
+
+const AuthLayoutRouteWithChildren = AuthLayoutRoute._addFileChildren(
+  AuthLayoutRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthLayoutRoute: AuthLayoutRouteWithChildren,
   LoginRoute: LoginRoute,
-  SignupRoute: SignupRoute,
   ApiTrpcSplatRoute: ApiTrpcSplatRoute,
 }
 export const routeTree = rootRouteImport
