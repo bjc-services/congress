@@ -14,15 +14,8 @@
       "cache": false,
       "persistent": false
     },
-    "dev:i18n:extract": {
-      "dependsOn": ["^dev"],
-      "cache": false,
-      "persistent": false
-    },
-    "dev:i18n:types": {
-      "dependsOn": ["^dev"],
-      "cache": false,
-      "persistent": false
+    "//#dev:i18n": {
+      "persistent": true
     },
     "format": {
       "outputs": [".cache/.prettiercache"],
@@ -65,7 +58,10 @@
     "LEGACY_DB_PASSWORD",
     "TWILIO_ACCOUNT_SID",
     "TWILIO_AUTH_TOKEN",
-    "TWILIO_PHONE_NUMBER"
+    "TWILIO_PHONE_NUMBER",
+    "VERCEL_PROJECT_PRODUCTION_URL",
+    "VERCEL_URL",
+    "VERCEL_ENV"
   ],
   "globalPassThroughEnv": [
     "NODE_ENV",

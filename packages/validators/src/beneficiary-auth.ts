@@ -25,7 +25,8 @@ export const phoneNumberSchema = z
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- value is not actually guaranteed, but we check it in the refine
   .refine((value) => value?.isValid() ?? false, {
     message: "invalid_phone_number",
-  });
+  })
+  .transform((value) => value.number) as unknown as z.ZodString;
 
 export const optionalPhoneNumberSchema = z
   .string()
@@ -35,7 +36,10 @@ export const optionalPhoneNumberSchema = z
   })
   .refine((value) => value?.isValid() ?? true, {
     message: "invalid_phone_number",
-  });
+  })
+  .transform(
+    (value) => value?.number ?? undefined,
+  ) as unknown as z.ZodOptional<z.ZodString>;
 
 const nameSchema = z
   .string()

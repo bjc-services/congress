@@ -55,7 +55,7 @@ export const baseConfig = defineConfig(
     rules: {
       ...turboPlugin.configs.recommended.rules,
       "@typescript-eslint/no-unused-vars": [
-        "error",
+        "warn",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
       "@typescript-eslint/consistent-type-imports": [

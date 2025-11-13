@@ -2,6 +2,8 @@
 import type { QueryClient } from "@tanstack/react-query";
 import type { TRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import type * as React from "react";
+import { TanStackDevtools } from "@tanstack/react-devtools";
+import { FormDevtoolsPlugin } from "@tanstack/react-form-devtools";
 import {
   createRootRouteWithContext,
   HeadContent,
@@ -60,6 +62,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           {children}
           <div className="absolute right-4 bottom-12"></div>
           <Toaster />
+          <TanStackDevtools plugins={[FormDevtoolsPlugin()]} />
           <TanStackRouterDevtools position="bottom-right" />
           <Scripts />
         </body>

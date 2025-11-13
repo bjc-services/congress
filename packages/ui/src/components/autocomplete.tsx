@@ -17,25 +17,35 @@ import { Skeleton } from "./skeleton";
 interface Props<T extends string> {
   selectedValue: T;
   onSelectedValueChange: (value: T) => void;
-  searchValue: string;
-  onSearchValueChange: (value: string) => void;
+
+  /**
+   * When you want to control the search value from outside, use this prop
+   */
+  searchValue?: string;
+  onSearchValueChange?: (value: string) => void;
   items: { value: T; label: string }[];
   isLoading: boolean;
   emptyMessage: string;
   placeholder: string;
+  disabled?: boolean;
 }
 
 export function AutoComplete<T extends string>({
   selectedValue,
   onSelectedValueChange,
-  searchValue,
-  onSearchValueChange,
+  searchValue: incomingSearchValue = "",
+  onSearchValueChange: onExternalSearchValueChange,
   items,
   isLoading,
   emptyMessage,
   placeholder,
+  disabled = false,
 }: Props<T>) {
   const [open, setOpen] = useState(false);
+  const [internalSearchValue, setInternalSearchValue] =
+    useState(incomingSearchValue);
+
+  const searchValue = incomingSearchValue || internalSearchValue;
 
   const labels = useMemo(
     () =>
@@ -51,7 +61,8 @@ export function AutoComplete<T extends string>({
 
   const reset = () => {
     onSelectedValueChange("" as T);
-    onSearchValueChange("");
+    onExternalSearchValueChange?.("");
+    setInternalSearchValue("");
   };
 
   const onInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -68,19 +79,27 @@ export function AutoComplete<T extends string>({
       reset();
     } else {
       onSelectedValueChange(inputValue as T);
-      onSearchValueChange(labels[inputValue] ?? "");
+      onExternalSearchValueChange?.(labels[inputValue] ?? "");
+      setInternalSearchValue(labels[inputValue] ?? "");
     }
     setOpen(false);
   };
 
+  const onSearchValueChange = (value: string) => {
+    onExternalSearchValueChange?.(value);
+    setInternalSearchValue(value);
+  };
+
   return (
     <div className="flex items-center">
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={disabled === true ? false : open} onOpenChange={setOpen}>
         <Command shouldFilter={false}>
           <PopoverAnchor asChild>
             <CommandPrimitive.Input
               asChild
               value={searchValue}
+              disabled={disabled}
+              autoComplete="rutjfkde"
               onValueChange={onSearchValueChange}
               onKeyDown={(e) => setOpen(e.key !== "Escape")}
               onMouseDown={() => setOpen((open) => !!searchValue || !open)}
@@ -102,7 +121,8 @@ export function AutoComplete<T extends string>({
                 e.preventDefault();
               }
             }}
-            className="w-[--radix-popover-trigger-width] p-0"
+            align="start"
+            className="min-w-[--radix-popper-anchor-width] p-0"
           >
             <CommandList>
               {isLoading && (

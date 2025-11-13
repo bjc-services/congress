@@ -1,10 +1,6 @@
 import { ulid } from "ulidx";
 
-import {
-  dbIdPrefixes,
-  SYSTEM_DOCUMENT_IDS,
-  SYSTEM_USER_ID,
-} from "@congress/validators/constants";
+import { dbIdPrefixes, SYSTEM_USER_ID } from "@congress/validators/constants";
 
 export const prefixes = dbIdPrefixes;
 
@@ -15,7 +11,6 @@ function createID(prefix: keyof typeof prefixes): string {
 }
 
 createID.prefixes = prefixes;
-createID.SYSTEM_DOCUMENT_IDS = SYSTEM_DOCUMENT_IDS;
 createID.SYSTEM_USER_ID = SYSTEM_USER_ID;
 
 type Duplicate<T extends Record<string, string>> = {

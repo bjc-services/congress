@@ -1,0 +1,36 @@
+---
+alwaysApply: true
+---
+
+# Package Manager
+
+In this project we use Bun as the package manager.
+
+## Installing packages
+
+This project is a monorepo, so when you need to install a package for a specific app or package, you should use the `bun add --filter @congress/<app-or-package> <package>` command.
+
+If the package you are installing is only needed for development you should use the `-D` flag.
+
+If you are installing a package that is already installed in another app or package, you should convert both places to use the catalog feature of Bun, by adding it as a catalog entry in the root `package.json` file, and then using the `catalog:` prefix in the `package.json` file of the app or package.
+
+## Fixing sorted keys issues
+
+If you added a library and are faced with a sorted keys issues, use the `bun lint:ws -f` command to fix it.
+
+## Running commands
+
+Same behaviour like above appliesfor other commands like `bun remove`, `bun upgrade`, `bun run`, etc.
+
+For running commands for a specific app or package, you should use the `bun --filter @congress/<app-or-package> <command>` command.
+
+the filter can also be a glob pattern, or regular expression, for example `bun --filter @congress/* <command>` will run the command for all apps and packages.
+
+## Important commands
+
+from the root of the project, you can run the following commands, and turborepo will run the commands for the relevant apps and packages:
+
+- `bun lint` - lint the project
+- `bun typecheck` - type check the project
+
+You should never run `bun dev`, `bun build`, `bun start`, those are for the developer use only.

@@ -27,7 +27,7 @@ export const uploadRouter = {
       const mime = await import("mime-types");
       const typeis = await import("type-is");
 
-      await db.transaction(async (tx) => {
+      return await db.transaction(async (tx) => {
         const uploadId = createID("upload");
 
         const documentType = await tx.query.DocumentType.findFirst({

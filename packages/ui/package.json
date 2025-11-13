@@ -28,6 +28,7 @@
     "./dropdown-menu": "./src/components/dropdown-menu.tsx",
     "./empty": "./src/components/empty.tsx",
     "./field": "./src/components/field.tsx",
+    "./fields": "./src/components/fields/index.ts",
     "./hooks/use-mobile": "./src/hooks/use-mobile.ts",
     "./hover-card": "./src/components/hover-card.tsx",
     "./input": "./src/components/input.tsx",
@@ -39,6 +40,7 @@
     "./menubar": "./src/components/menubar.tsx",
     "./navigation-menu": "./src/components/navigation-menu.tsx",
     "./pagination": "./src/components/pagination.tsx",
+    "./phone-input": "./src/components/phone-input.tsx",
     "./popover": "./src/components/popover.tsx",
     "./progress": "./src/components/progress.tsx",
     "./radio-group": "./src/components/radio-group.tsx",
@@ -60,7 +62,11 @@
     "./toast": "./src/components/toast.tsx",
     "./toggle": "./src/components/toggle.tsx",
     "./toggle-group": "./src/components/toggle-group.tsx",
-    "./tooltip": "./src/components/tooltip.tsx"
+    "./tooltip": "./src/components/tooltip.tsx",
+    "./upload": "./src/components/upload.tsx",
+    "./date-picker": "./src/components/date-picker.tsx",
+    "./trpc": "./src/lib/trpc.ts",
+    "./url": "./src/lib/url.ts"
   },
   "scripts": {
     "clean": "git clean -xdf .cache .turbo dist node_modules",
@@ -91,19 +97,23 @@
     "react-resizable-panels": "^3.0.6",
     "recharts": "2.15.4",
     "sonner": "^2.0.7",
+    "spark-md5": "^3.0.2",
+    "superjson": "catalog:",
     "tailwind-merge": "^3.3.1",
+    "usehooks-ts": "^3.1.1",
     "vaul": "^1.1.2"
   },
   "devDependencies": {
+    "@congress/api": "workspace:*",
     "@congress/eslint-config": "workspace:*",
     "@congress/prettier-config": "workspace:*",
     "@congress/tsconfig": "workspace:*",
     "@types/react": "catalog:react19",
+    "@types/spark-md5": "^3.0.5",
     "eslint": "catalog:",
     "prettier": "catalog:",
     "react": "catalog:react19",
-    "typescript": "catalog:",
-    "zod": "catalog:"
+    "typescript": "catalog:"
   },
   "peerDependencies": {
     "react": "catalog:react19",

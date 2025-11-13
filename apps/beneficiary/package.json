@@ -5,8 +5,6 @@
   "type": "module",
   "scripts": {
     "dev": "bun with-env vite dev",
-    "dev:i18n:extract": "i18next-cli extract --watch",
-    "dev:i18n:types": "i18next-cli types --watch",
     "build": "vite build",
     "start": "vite start",
     "format": "prettier --check . --ignore-path ../../.gitignore --ignore-path .prettierignore",
@@ -23,7 +21,9 @@
     "@congress/ui": "workspace:*",
     "@fontsource-variable/rubik": "^5.2.8",
     "@t3-oss/env-core": "^0.13.8",
+    "@tanstack/react-devtools": "^0.8.1",
     "@tanstack/react-form": "catalog:",
+    "@tanstack/react-form-devtools": "^0.1.8",
     "@tanstack/react-query": "catalog:",
     "@tanstack/react-router": "^1.133.28",
     "@tanstack/react-router-devtools": "^1.133.28",
@@ -40,7 +40,7 @@
     "react": "catalog:react19",
     "react-dom": "catalog:react19",
     "react-i18next": "catalog:",
-    "superjson": "2.2.3",
+    "superjson": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
@@ -54,7 +54,6 @@
     "@types/react-dom": "catalog:react19",
     "@vitejs/plugin-react": "catalog:",
     "eslint": "catalog:",
-    "i18next-cli": "catalog:",
     "prettier": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",

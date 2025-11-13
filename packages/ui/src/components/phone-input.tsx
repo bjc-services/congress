@@ -55,8 +55,8 @@ const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
           ref={ref}
           className={cn("flex", className)}
           flagComponent={FlagComponent}
+          inputComponent={Input}
           countrySelectComponent={countrySelectComponentToUse}
-          inputComponent={InputComponent}
           smartCaret={false}
           value={value || undefined}
           defaultCountry={resolvedDefaultCountry}
@@ -77,18 +77,6 @@ const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
     },
   );
 PhoneInput.displayName = "PhoneInput";
-
-const InputComponent = React.forwardRef<
-  HTMLInputElement,
-  React.ComponentProps<"input">
->(({ className, ...props }, ref) => (
-  <Input
-    className={cn("rounded-s-none rounded-e-lg", className)}
-    {...props}
-    ref={ref}
-  />
-));
-InputComponent.displayName = "InputComponent";
 
 interface CountryEntry {
   label: string;
@@ -227,6 +215,8 @@ const FlagComponent = ({ country, countryName }: RPNInput.FlagProps) => {
 const FixedCountrySelect = ({ value, options }: CountrySelectProps) => {
   const countryOption = options.find((option) => option.value === value);
   const countryLabel = countryOption?.label ?? value;
+
+  return null;
 
   return (
     <div className="bg-muted pointer-events-none flex items-center gap-2 rounded-s-lg rounded-e-none border border-r-0 px-3 text-sm">

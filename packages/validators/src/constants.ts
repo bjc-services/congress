@@ -22,13 +22,9 @@ function _createFixedId<
   ) as `${(typeof dbIdPrefixes)[TPrefix]}_${TID}`;
 }
 
-export const SYSTEM_DOCUMENT_IDS = {
-  idCard: _createFixedId("documentType", "id_card"),
-  idAppendix: _createFixedId("documentType", "id_appendix"),
-} as const;
 export const SYSTEM_USER_ID = _createFixedId("user", "system");
 
-export const SYSTEM_DOCUMENT_TYPES: {
+interface SystemDocumentType {
   name: string;
   description: string;
   isSystemDefined: boolean;
@@ -37,25 +33,26 @@ export const SYSTEM_DOCUMENT_TYPES: {
   id: string;
   allowedFileTypes: string[];
   maxFileSize: number;
-}[] = [
-  {
-    name: "תעודת זהות",
-    description: "תצלום תעודת זהות בתוקף",
-    isSystemDefined: true,
-    maxAllowedFiles: 1,
-    createdByUserId: SYSTEM_USER_ID,
-    id: SYSTEM_DOCUMENT_IDS.idCard,
-    allowedFileTypes: ["image/*", "application/pdf"],
-    maxFileSize: 10485760, // 10MB
-  },
-  {
-    name: "ספח תעודת זהות",
-    description: "ספח לתעודת זהות, הכולל את כל הנספחים בתעודת הזהות",
-    isSystemDefined: true,
-    maxAllowedFiles: 1,
-    createdByUserId: SYSTEM_USER_ID,
-    id: SYSTEM_DOCUMENT_IDS.idAppendix,
-    allowedFileTypes: ["image/*", "application/pdf"],
-    maxFileSize: 10485760, // 10MB
-  },
-] as const;
+}
+
+export const identityCardDocumentType: SystemDocumentType = {
+  name: "תעודת זהות",
+  description: "תצלום תעודת זהות בתוקף",
+  isSystemDefined: true,
+  maxAllowedFiles: 1,
+  createdByUserId: SYSTEM_USER_ID,
+  id: _createFixedId("documentType", "id_card"),
+  allowedFileTypes: ["image/*", "application/pdf"],
+  maxFileSize: 10485760, // 10MB
+};
+
+export const identityAppendixDocumentType: SystemDocumentType = {
+  name: "ספח תעודת זהות",
+  description: "ספח לתעודת זהות, הכולל את כל הנספחים בתעודת הזהות",
+  isSystemDefined: true,
+  maxAllowedFiles: 1,
+  createdByUserId: SYSTEM_USER_ID,
+  id: _createFixedId("documentType", "id_appendix"),
+  allowedFileTypes: ["image/*", "application/pdf"],
+  maxFileSize: 10485760, // 10MB
+};

@@ -45,6 +45,10 @@ import {
   beneficiaryResetPasswordSchema,
   beneficiarySignupSchema,
 } from "@congress/validators";
+import {
+  identityAppendixDocumentType,
+  identityCardDocumentType,
+} from "@congress/validators/constants";
 
 import { env } from "../../env";
 import { publicProcedure } from "../trpc";
@@ -521,8 +525,8 @@ export const beneficiaryAuthRouter = {
         await upsertPhoneContacts(
           tx,
           applicant.id,
-          input.personalPhoneNumber.number,
-          input.homePhoneNumber?.number,
+          input.personalPhoneNumber,
+          input.homePhoneNumber,
         );
         await upsertAddress(tx, applicant.id, input.address);
 
@@ -555,7 +559,7 @@ export const beneficiaryAuthRouter = {
             await upsertPhoneContacts(
               tx,
               spousePerson.id,
-              input.spouse.phoneNumber.number,
+              input.spouse.phoneNumber,
             );
           }
 
@@ -594,13 +598,13 @@ export const beneficiaryAuthRouter = {
         if (input.identityCardUploadId) {
           documents.push({
             uploadId: input.identityCardUploadId,
-            documentTypeId: createID.SYSTEM_DOCUMENT_IDS.idCard,
+            documentTypeId: identityCardDocumentType.id,
           });
         }
         if (input.identityAppendixUploadId) {
           documents.push({
             uploadId: input.identityAppendixUploadId,
-            documentTypeId: createID.SYSTEM_DOCUMENT_IDS.idAppendix,
+            documentTypeId: identityAppendixDocumentType.id,
           });
         }
         await storeDocuments(tx, applicant.id, documents);

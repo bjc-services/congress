@@ -45,7 +45,7 @@ export function BeneficiaryLoginFlow() {
         if (!data.exists) {
           // No account exists, show signup form
           setStep("signup");
-        } else if (data.hasPassword) {
+        } else if (data.nextStep === "password") {
           // Account exists with password, show password input
           setStep("password");
         } else {
@@ -62,7 +62,7 @@ export function BeneficiaryLoginFlow() {
   const sendOTPMutation = useMutation(
     trpc.beneficiaryAuth.sendOTP.mutationOptions({
       onSuccess: (data) => {
-        setPhoneNumberMasked(data.phoneNumberMasked ?? null);
+        setPhoneNumberMasked(data.phoneNumberMasked);
         setStep("otp");
         toast.success(data.message);
         if (data.devCode) {
@@ -97,19 +97,6 @@ export function BeneficiaryLoginFlow() {
       },
       onError: (error: { message?: string }) => {
         toast.error(error.message || t("invalid_credentials"));
-      },
-    }),
-  );
-
-  const signupMutation = useMutation(
-    trpc.beneficiaryAuth.signup.mutationOptions({
-      onSuccess: async (data) => {
-        toast.success(data.message);
-        await refetchSession();
-        await navigate({ href: "/", replace: true });
-      },
-      onError: (error: { message?: string }) => {
-        toast.error(error.message || t("failed_to_create_account"));
       },
     }),
   );
@@ -179,25 +166,6 @@ export function BeneficiaryLoginFlow() {
         nationalId,
         code: otpCode,
         newPassword,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSignup = async (signupData: {
-    phoneNumber: string;
-    firstName?: string;
-    lastName?: string;
-  }) => {
-    setIsLoading(true);
-    try {
-      await signupMutation.mutateAsync({
-        nationalId,
-        phoneNumber: signupData.phoneNumber,
-        firstName: signupData.firstName,
-        lastName: signupData.lastName,
-        documents: [], // TODO: Implement document upload
       });
     } finally {
       setIsLoading(false);
@@ -426,112 +394,8 @@ export function BeneficiaryLoginFlow() {
   // Step 5: Signup Form
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (step === "signup") {
-    return (
-      <SignupForm
-        nationalId={nationalId}
-        onSignup={handleSignup}
-        onBack={() => setStep("nationalId")}
-        isLoading={isLoading}
-      />
-    );
+    void navigate({ to: "/signup", search: { nationalId }, replace: false });
   }
 
   return null;
-}
-
-function SignupForm({
-  nationalId,
-  onSignup,
-  onBack,
-  isLoading,
-}: {
-  nationalId: string;
-  onSignup: (data: {
-    phoneNumber: string;
-    firstName?: string;
-    lastName?: string;
-  }) => Promise<void>;
-  onBack: () => void;
-  isLoading: boolean;
-}) {
-  const { t } = useTranslation();
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-
-  const handleSubmit = async () => {
-    if (!phoneNumber.trim()) {
-      toast.error(t("please_enter_phone_number"));
-      return;
-    }
-
-    await onSignup({
-      phoneNumber,
-      firstName: firstName.trim() || undefined,
-      lastName: lastName.trim() || undefined,
-    });
-  };
-
-  return (
-    <div className="flex w-full max-w-md flex-col gap-4">
-      <h2 className="text-2xl font-bold">{t("create_account")}</h2>
-      <p className="text-muted-foreground text-sm">
-        {t("no_account_found", { nationalId })}
-      </p>
-      <FieldGroup>
-        <Field>
-          <FieldContent>
-            <FieldLabel htmlFor="phoneNumber">{t("phone_number")}</FieldLabel>
-          </FieldContent>
-          <Input
-            id="phoneNumber"
-            type="tel"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            placeholder={t("phone_number_placeholder")}
-            disabled={isLoading}
-            required
-          />
-        </Field>
-        <Field>
-          <FieldContent>
-            <FieldLabel htmlFor="firstName">
-              {t("first_name_optional")}
-            </FieldLabel>
-          </FieldContent>
-          <Input
-            id="firstName"
-            type="text"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            placeholder={t("first_name_placeholder")}
-            disabled={isLoading}
-          />
-        </Field>
-        <Field>
-          <FieldContent>
-            <FieldLabel htmlFor="lastName">
-              {t("last_name_optional")}
-            </FieldLabel>
-          </FieldContent>
-          <Input
-            id="lastName"
-            type="text"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            placeholder={t("last_name_placeholder")}
-            disabled={isLoading}
-          />
-        </Field>
-      </FieldGroup>
-      <div className="flex flex-col gap-2">
-        <Button size="lg" disabled={isLoading} onClick={handleSubmit}>
-          {isLoading ? t("creating_account") : t("create_account")}
-        </Button>
-        <Button variant="ghost" onClick={onBack}>
-          {t("back")}
-        </Button>
-      </div>
-    </div>
-  );
 }

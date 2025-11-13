@@ -30,7 +30,7 @@
     "@trpc/server": "catalog:",
     "better-auth": "catalog:",
     "mime-types": "^3.0.1",
-    "superjson": "2.2.3",
+    "superjson": "catalog:",
     "type-is": "^2.0.1",
     "zod": "catalog:"
   },
