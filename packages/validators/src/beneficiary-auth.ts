@@ -177,6 +177,7 @@ export const beneficiarySignupSchema = z
       .trim()
       .length(4, { message: "otp_invalid" })
       .regex(/^\d{4}$/, { message: "otp_invalid" }),
+    password: passwordSchema,
   })
   .superRefine((value, ctx) => {
     const age = calculateAge(value.dateOfBirth);

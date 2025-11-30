@@ -20,7 +20,7 @@ interface OtpStepProps {
     nationalId: string;
     personalPhoneNumber: string;
   } | null;
-  setStep: (step: "form" | "otp") => void;
+  setStep: (step: "form" | "otp" | "password") => void;
 }
 
 export function OtpStep({ otpForm, formData, setStep }: OtpStepProps) {
@@ -121,7 +121,7 @@ export function OtpStep({ otpForm, formData, setStep }: OtpStepProps) {
             type="button"
             variant="link"
             onClick={() => {
-              setStep("form");
+              setStep("password");
               otpForm.reset();
             }}
           >

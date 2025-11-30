@@ -46,9 +46,16 @@ export async function verifyPassword(
 /**
  * JWT token utilities
  */
-export async function createSessionToken(accountId: string): Promise<string> {
+export async function createSessionToken(
+  accountId: string,
+  accountStatus: "pending" | "approved" | "rejected" | "suspended",
+): Promise<string> {
   const secret = new TextEncoder().encode(JWT_SECRET);
-  const token = await new SignJWT({ accountId, type: "beneficiary" })
+  const token = await new SignJWT({
+    accountId,
+    type: "beneficiary",
+    accountStatus,
+  })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(Math.floor(Date.now() / 1000) + JWT_EXPIRES_IN)
@@ -59,6 +66,7 @@ export async function createSessionToken(accountId: string): Promise<string> {
 
 export async function verifySessionToken(token: string): Promise<{
   accountId: string;
+  accountStatus: "pending" | "approved" | "rejected" | "suspended";
 } | null> {
   try {
     const secret = new TextEncoder().encode(JWT_SECRET);
@@ -66,12 +74,25 @@ export async function verifySessionToken(token: string): Promise<{
 
     if (
       payload.type !== "beneficiary" ||
-      typeof payload.accountId !== "string"
+      typeof payload.accountId !== "string" ||
+      typeof payload.accountStatus !== "string"
     ) {
       return null;
     }
 
-    return { accountId: payload.accountId };
+    const accountStatus = payload.accountStatus as
+      | "pending"
+      | "approved"
+      | "rejected"
+      | "suspended";
+
+    if (
+      !["pending", "approved", "rejected", "suspended"].includes(accountStatus)
+    ) {
+      return null;
+    }
+
+    return { accountId: payload.accountId, accountStatus };
   } catch {
     return null;
   }

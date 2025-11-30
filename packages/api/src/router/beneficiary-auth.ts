@@ -478,7 +478,7 @@ export const beneficiaryAuthRouter = {
 
       await resetFailedLoginAttempts(account.id);
 
-      const token = await createSessionToken(account.id);
+      const token = await createSessionToken(account.id, account.status);
       await createSession(account.id, token, {
         ipAddress: ctx.headers.get("x-forwarded-for") ?? undefined,
         userAgent: ctx.headers.get("user-agent") ?? undefined,
@@ -599,11 +599,13 @@ export const beneficiaryAuthRouter = {
         );
         await upsertAddress(tx, applicant.id, input.address);
 
+        const passwordHash = await hashPassword(input.password as string);
+
         const beneficiaryAccountId = createID("beneficiaryAccount");
         await tx.insert(BeneficiaryAccount).values({
           id: beneficiaryAccountId,
           nationalId: input.nationalId,
-          passwordHash: null,
+          passwordHash,
           status: "pending",
         });
 
@@ -681,7 +683,19 @@ export const beneficiaryAuthRouter = {
         return beneficiaryAccountId;
       });
 
-      const token = await createSessionToken(accountId);
+      // Get the account to get its status for the token
+      const account = await db.query.BeneficiaryAccount.findFirst({
+        where: eq(BeneficiaryAccount.id, accountId),
+      });
+
+      if (!account) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "failed_to_retrieve_account",
+        });
+      }
+
+      const token = await createSessionToken(accountId, account.status);
       await createSession(accountId, token, {
         ipAddress: ctx.headers.get("x-forwarded-for") ?? undefined,
         userAgent: ctx.headers.get("user-agent") ?? undefined,
@@ -763,7 +777,7 @@ export const beneficiaryAuthRouter = {
 
       await resetFailedLoginAttempts(account.id);
 
-      const token = await createSessionToken(account.id);
+      const token = await createSessionToken(account.id, account.status);
       await createSession(account.id, token, {
         ipAddress: ctx.headers.get("x-forwarded-for") ?? undefined,
         userAgent: ctx.headers.get("user-agent") ?? undefined,

@@ -18,13 +18,17 @@ import { ChildrenSection } from "./signup/components/children-section";
 import { FamilyStatusSection } from "./signup/components/family-status-section";
 import { IdentityDocumentsSection } from "./signup/components/identity-documents-section";
 import { OtpStep } from "./signup/components/otp-step";
+import {
+  PasswordStep,
+  passwordStepSchema,
+} from "./signup/components/password-step";
 import { SignupFormActions } from "./signup/components/signup-form-actions";
 import { SignupHeader } from "./signup/components/signup-header";
 import { SignupLayout } from "./signup/components/signup-layout";
 
 type MaritalStatus = z.infer<typeof maritalStatusSchema>;
 
-type SignupStep = "form" | "otp";
+type SignupStep = "form" | "otp" | "password";
 
 const otpSchema = z.object({
   otp: z
@@ -33,8 +37,11 @@ const otpSchema = z.object({
     .regex(/^\d{4}$/, "invalid_otp"),
 });
 
-// Schema for form validation (without otpCode)
-const signupFormSchema = beneficiarySignupSchema.omit({ otpCode: true });
+// Schema for form validation (without otpCode and password)
+const signupFormSchema = beneficiarySignupSchema.omit({
+  otpCode: true,
+  password: true,
+});
 
 export const Route = createFileRoute("/signup")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -54,14 +61,15 @@ function SignupRouteComponent() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const trpc = useTRPC();
-  const { session } = useBeneficiaryAuth();
+  const { session, refetchSession } = useBeneficiaryAuth();
   const search = Route.useSearch();
 
   const [step, setStep] = useState<SignupStep>("form");
   const [formData, setFormData] = useState<Omit<
     z.infer<typeof beneficiarySignupSchema>,
-    "otpCode"
+    "otpCode" | "password"
   > | null>(null);
+  const [password, setPassword] = useState<string>("");
 
   useEffect(() => {
     if (session) {
@@ -85,6 +93,7 @@ function SignupRouteComponent() {
     trpc.beneficiaryAuth.signup.mutationOptions({
       onSuccess: async (data) => {
         toast.success(data.message);
+        await refetchSession();
         await navigate({ to: "/", replace: true });
       },
       onError: (error) => {
@@ -129,10 +138,11 @@ function SignupRouteComponent() {
       identityAppendixUploadId: undefined as string | undefined,
     },
     validators: {
+      // @ts-expect-error - Type mismatch between optional and required undefined, but runtime validation works correctly
       onSubmit: signupFormSchema,
     },
-    onSubmit: async ({ value }) => {
-      // Validate form and send OTP
+    onSubmit: ({ value }) => {
+      // Validate form and move to password step
       const payload = {
         ...value,
         homePhoneNumber: value.homePhoneNumber,
@@ -143,11 +153,8 @@ function SignupRouteComponent() {
       // Store form data for later submission
       setFormData(payload);
 
-      // Send OTP to phone number
-      await sendSignupOtpMutation.mutateAsync({
-        nationalId: value.nationalId,
-        phoneNumber: value.personalPhoneNumber,
-      });
+      // Move to password step
+      setStep("password");
     },
   });
 
@@ -165,13 +172,46 @@ function SignupRouteComponent() {
         return;
       }
 
-      // Submit signup with OTP code
+      if (!password) {
+        toast.error(t("password_required"));
+        setStep("password");
+        return;
+      }
+
+      // Submit signup with OTP code and password
       const payload = {
         ...formData,
         otpCode: value.otp,
+        password,
       };
 
       await signupMutation.mutateAsync(payload);
+    },
+  });
+
+  const passwordForm = useAppForm({
+    defaultValues: {
+      password: "",
+      confirmPassword: "",
+    },
+    validators: {
+      onSubmit: passwordStepSchema,
+    },
+    onSubmit: async ({ value }) => {
+      if (!formData) {
+        toast.error(t("form_data_missing"));
+        setStep("form");
+        return;
+      }
+
+      // Store password and send OTP
+      setPassword(value.password);
+
+      // Send OTP to phone number
+      await sendSignupOtpMutation.mutateAsync({
+        nationalId: formData.nationalId,
+        phoneNumber: formData.personalPhoneNumber,
+      });
     },
   });
 
@@ -275,6 +315,16 @@ function SignupRouteComponent() {
           otpForm={otpForm as unknown as AppForm}
           formData={formData}
           setStep={setStep}
+        />
+      )}
+      {step === "password" && (
+        <PasswordStep
+          passwordForm={passwordForm as unknown as AppForm}
+          onBack={() => {
+            setStep("form");
+            passwordForm.reset();
+          }}
+          isBusy={sendSignupOtpMutation.isPending}
         />
       )}
     </SignupLayout>
