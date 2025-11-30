@@ -26,7 +26,7 @@ const otpSchema = z.object({
   otp: z
     .string()
     .trim()
-    .regex(/^\d{6}$/, "invalid_otp"),
+    .regex(/^\d{4}$/, "invalid_otp"),
 });
 
 const setPasswordSchema = z

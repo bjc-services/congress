@@ -1,19 +1,11 @@
-import type { UseFormReturn } from "@tanstack/react-form";
 import { useTranslation } from "react-i18next";
 
+import type { AppForm } from "@congress/ui/fields";
 import { FieldGroup } from "@congress/ui/field";
-import {
-  ChildrenFieldsGroup,
-  type useAppForm,
-} from "@congress/ui/fields";
-
-type Form = UseFormReturn<
-  ReturnType<typeof useAppForm>["defaultValues"],
-  unknown
->;
+import { ChildrenFieldsGroup } from "@congress/ui/fields";
 
 interface ChildrenSectionProps {
-  form: Form;
+  form: AppForm;
 }
 
 export function ChildrenSection({ form }: ChildrenSectionProps) {
@@ -27,10 +19,19 @@ export function ChildrenSection({ form }: ChildrenSectionProps) {
           name="childrenCount"
           listeners={{
             onChange: ({ value, fieldApi }) => {
-              const currentChildren =
-                fieldApi.form.getFieldValue("children");
-              const targetCount = value;
-              const lastName = fieldApi.form.getFieldValue("lastName");
+              const currentChildren = fieldApi.form.getFieldValue(
+                "children",
+              ) as {
+                firstName: string;
+                lastName: string;
+                nationalId: string;
+                dateOfBirth: string;
+              }[];
+
+              const targetCount = value as number;
+              const lastName = fieldApi.form.getFieldValue(
+                "lastName",
+              ) as string;
 
               if (currentChildren.length < targetCount) {
                 // Add new children
@@ -67,22 +68,38 @@ export function ChildrenSection({ form }: ChildrenSectionProps) {
       <form.AppField name="children" mode="array">
         {(field) => (
           <form.Subscribe
-            selector={(state) => state.values.childrenCount}
+            selector={(state) =>
+              (state.values as { childrenCount: number }).childrenCount
+            }
             children={(childrenCount) => {
               const count =
                 typeof childrenCount === "number" ? childrenCount : 0;
               return (
                 <div className="space-y-4">
-                  {field.state.value.map((_, index) => (
+                  {(
+                    field.state.value as {
+                      firstName: string;
+                      lastName: string;
+                      nationalId: string;
+                      dateOfBirth: string;
+                    }[]
+                  ).map((_, index) => (
                     <ChildrenFieldsGroup
                       key={index}
                       form={form}
-                      fields={`children[${index}]`}
+                      fields={`children[${index}]` as never}
                       childNumber={index + 1}
                     />
                   ))}
                   {count > 0 &&
-                    field.state.value.length !== count && (
+                    (
+                      field.state.value as {
+                        firstName: string;
+                        lastName: string;
+                        nationalId: string;
+                        dateOfBirth: string;
+                      }[]
+                    ).length !== count && (
                       <p className="text-destructive text-sm">
                         {t("children_mismatch_hint")}
                       </p>
@@ -96,4 +113,3 @@ export function ChildrenSection({ form }: ChildrenSectionProps) {
     </section>
   );
 }
-

@@ -23,3 +23,5 @@ export const { useAppForm, withForm, withFieldGroup } = createFormHook({
   },
   formComponents: {},
 });
+
+export type AppForm = ReturnType<typeof useAppForm>;

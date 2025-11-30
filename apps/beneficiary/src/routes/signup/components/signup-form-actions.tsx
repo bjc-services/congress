@@ -1,16 +1,10 @@
-import type { UseFormReturn } from "@tanstack/react-form";
 import { useTranslation } from "react-i18next";
 
+import type { AppForm } from "@congress/ui/fields";
 import { Button } from "@congress/ui/button";
-import type { useAppForm } from "@congress/ui/fields";
-
-type Form = UseFormReturn<
-  ReturnType<typeof useAppForm>["defaultValues"],
-  unknown
->;
 
 interface SignupFormActionsProps {
-  form: Form;
+  form: AppForm;
 }
 
 export function SignupFormActions({ form }: SignupFormActionsProps) {
@@ -27,9 +21,7 @@ export function SignupFormActions({ form }: SignupFormActionsProps) {
             className="w-full"
             disabled={!canSubmit || isSubmitting}
           >
-            {isSubmitting
-              ? t("sending_verification_code")
-              : t("continue")}
+            {isSubmitting ? t("sending_verification_code") : t("continue")}
           </Button>
         )}
       />
@@ -39,4 +31,3 @@ export function SignupFormActions({ form }: SignupFormActionsProps) {
     </section>
   );
 }
-

@@ -13,3 +13,4 @@ export { SelectField } from "./select-field";
 export { AddressFieldsGroup } from "./address-fields-group";
 export { ChildrenFieldsGroup } from "./children-fields-group";
 export { FloatingField } from "./floating-field";
+export type { AppForm } from "./form-context";

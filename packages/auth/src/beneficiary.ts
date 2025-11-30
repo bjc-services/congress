@@ -291,6 +291,7 @@ export async function createOTP(
 export async function verifyOTP(
   accountId: string,
   code: string,
+  markUsed = true,
 ): Promise<boolean> {
   const otp = await db.query.BeneficiaryOTP.findFirst({
     where: and(
@@ -305,11 +306,13 @@ export async function verifyOTP(
     return false;
   }
 
-  // Mark OTP as used
-  await db
-    .update(BeneficiaryOTP)
-    .set({ usedAt: new Date() })
-    .where(eq(BeneficiaryOTP.id, otp.id));
+  if (markUsed) {
+    // Mark OTP as used
+    await db
+      .update(BeneficiaryOTP)
+      .set({ usedAt: new Date() })
+      .where(eq(BeneficiaryOTP.id, otp.id));
+  }
 
   return true;
 }

@@ -431,7 +431,7 @@ export const beneficiaryAuthRouter = {
         });
       }
 
-      const isValidOTP = await verifyOTP(account.id, input.code);
+      const isValidOTP = await verifyOTP(account.id, input.code, false);
 
       if (!isValidOTP) {
         throw new TRPCError({
@@ -460,7 +460,7 @@ export const beneficiaryAuthRouter = {
         });
       }
 
-      const isValidOTP = await verifyOTP(account.id, input.code);
+      const isValidOTP = await verifyOTP(account.id, input.code, true);
 
       if (!isValidOTP) {
         throw new TRPCError({
@@ -524,7 +524,6 @@ export const beneficiaryAuthRouter = {
         success: true,
         message: "verification_code_sent_successfully",
         phoneNumberMasked: maskPhoneNumber(input.phoneNumber),
-        devCode: env.NODE_ENV === "development" ? code : undefined,
       };
     }),
 

@@ -1,19 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
-import { useForm } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { z } from "zod/v4";
 
+import type { AppForm } from "@congress/ui/fields";
 import type { UploadedFile } from "@congress/ui/upload";
 import type { maritalStatusSchema } from "@congress/validators";
-import { useAppForm } from "@congress/ui/fields";
+import { AddressFieldsGroup, useAppForm } from "@congress/ui/fields";
 import { toast } from "@congress/ui/toast";
 import { beneficiarySignupSchema } from "@congress/validators";
 
 import { useBeneficiaryAuth } from "~/lib/beneficiary-auth-provider";
 import { trpcClient, useTRPC } from "~/lib/trpc";
-import { AddressSection } from "./signup/components/address-section";
 import { ApplicantDetailsSection } from "./signup/components/applicant-details-section";
 import { ChildrenSection } from "./signup/components/children-section";
 import { FamilyStatusSection } from "./signup/components/family-status-section";
@@ -31,7 +30,7 @@ const otpSchema = z.object({
   otp: z
     .string()
     .trim()
-    .regex(/^\d{6}$/, "invalid_otp"),
+    .regex(/^\d{4}$/, "invalid_otp"),
 });
 
 // Schema for form validation (without otpCode)
@@ -59,9 +58,6 @@ function SignupRouteComponent() {
   const search = Route.useSearch();
 
   const [step, setStep] = useState<SignupStep>("form");
-  const [maskedPhoneNumber, setMaskedPhoneNumber] = useState<string | null>(
-    null,
-  );
   const [formData, setFormData] = useState<Omit<
     z.infer<typeof beneficiarySignupSchema>,
     "otpCode"
@@ -76,11 +72,7 @@ function SignupRouteComponent() {
   const sendSignupOtpMutation = useMutation(
     trpc.beneficiaryAuth.sendSignupOTP.mutationOptions({
       onSuccess: (data) => {
-        setMaskedPhoneNumber(data.phoneNumberMasked);
         toast.success(data.message);
-        if (data.devCode) {
-          console.info("[DEV] OTP Code:", data.devCode);
-        }
         setStep("otp");
       },
       onError: (error) => {
@@ -159,7 +151,7 @@ function SignupRouteComponent() {
     },
   });
 
-  const otpForm = useForm({
+  const otpForm = useAppForm({
     defaultValues: {
       otp: "",
     },
@@ -239,18 +231,31 @@ function SignupRouteComponent() {
             }}
           >
             <ApplicantDetailsSection
-              form={form}
+              form={form as AppForm}
               setIdCardFile={setIdCardFile}
               setIdAppendixFile={setIdAppendixFile}
             />
-            <AddressSection form={form} />
-            <FamilyStatusSection form={form} />
-            <ChildrenSection form={form} />
+
+            {/* Address Section */}
+            <AddressFieldsGroup
+              form={form}
+              fields={{
+                cityId: "address.cityId",
+                streetId: "address.streetId",
+                houseNumber: "address.houseNumber",
+                addressLine2: "address.addressLine2",
+                postalCode: "address.postalCode",
+              }}
+              title={t("address_information")}
+            />
+
+            <FamilyStatusSection form={form as AppForm} />
+            <ChildrenSection form={form as AppForm} />
             <form.Subscribe
               selector={(state) => [state.values.dateOfBirth]}
               children={([dateOfBirth]) => (
                 <IdentityDocumentsSection
-                  form={form}
+                  form={form as AppForm}
                   dateOfBirth={dateOfBirth ?? ""}
                   idCardFile={idCardFile}
                   idAppendixFile={idAppendixFile}
@@ -261,18 +266,15 @@ function SignupRouteComponent() {
                 />
               )}
             />
-            <SignupFormActions form={form} />
+            <SignupFormActions form={form as AppForm} />
           </form>
         </form.AppForm>
       )}
       {step === "otp" && (
         <OtpStep
-          otpForm={otpForm}
-          maskedPhoneNumber={maskedPhoneNumber}
+          otpForm={otpForm as unknown as AppForm}
           formData={formData}
           setStep={setStep}
-          sendSignupOtpMutation={sendSignupOtpMutation}
-          signupMutation={signupMutation}
         />
       )}
     </SignupLayout>

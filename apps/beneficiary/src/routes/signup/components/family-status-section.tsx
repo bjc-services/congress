@@ -1,20 +1,14 @@
-import type { UseFormReturn } from "@tanstack/react-form";
-import { useTranslation } from "react-i18next";
 import type { z } from "zod/v4";
+import { useTranslation } from "react-i18next";
 
-import { FieldGroup } from "@congress/ui/field";
-import type { useAppForm } from "@congress/ui/fields";
+import type { AppForm } from "@congress/ui/fields";
 import type { maritalStatusSchema } from "@congress/validators";
-
-type Form = UseFormReturn<
-  ReturnType<typeof useAppForm>["defaultValues"],
-  unknown
->;
+import { FieldGroup } from "@congress/ui/field";
 
 type MaritalStatus = z.infer<typeof maritalStatusSchema>;
 
 interface FamilyStatusSectionProps {
-  form: Form;
+  form: AppForm;
 }
 
 export function FamilyStatusSection({ form }: FamilyStatusSectionProps) {
@@ -70,8 +64,16 @@ export function FamilyStatusSection({ form }: FamilyStatusSectionProps) {
       </FieldGroup>
       <form.Subscribe
         selector={(state) => [
-          state.values.maritalStatus,
-          state.values.spouse,
+          (state.values as { maritalStatus: MaritalStatus }).maritalStatus,
+          (
+            state.values as {
+              spouse: {
+                nationalId: string;
+                firstName: string;
+                lastName: string;
+              };
+            }
+          ).spouse,
         ]}
         children={([maritalStatus, spouse]) =>
           maritalStatus !== "single" && spouse ? (
@@ -81,9 +83,7 @@ export function FamilyStatusSection({ form }: FamilyStatusSectionProps) {
               </h3>
               <FieldGroup>
                 <form.AppField name="spouse.firstName">
-                  {(field) => (
-                    <field.TextField label={t("first_name")} />
-                  )}
+                  {(field) => <field.TextField label={t("first_name")} />}
                 </form.AppField>
                 <form.AppField name="spouse.lastName">
                   {(field) => <field.TextField label={t("last_name")} />}
@@ -91,9 +91,7 @@ export function FamilyStatusSection({ form }: FamilyStatusSectionProps) {
               </FieldGroup>
               <FieldGroup>
                 <form.AppField name="spouse.nationalId">
-                  {(field) => (
-                    <field.TextField label={t("national_id")} />
-                  )}
+                  {(field) => <field.TextField label={t("national_id")} />}
                 </form.AppField>
                 <form.AppField name="spouse.phoneNumber">
                   {(field) => (
@@ -119,4 +117,3 @@ export function FamilyStatusSection({ form }: FamilyStatusSectionProps) {
     </section>
   );
 }
-

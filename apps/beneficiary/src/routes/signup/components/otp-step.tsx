@@ -1,7 +1,7 @@
-import type { UseFormReturn } from "@tanstack/react-form";
+import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import type { UseMutationResult } from "@tanstack/react-query";
 
+import type { AppForm } from "@congress/ui/fields";
 import { Button } from "@congress/ui/button";
 import {
   Field,
@@ -12,47 +12,39 @@ import {
 } from "@congress/ui/field";
 import { Input } from "@congress/ui/input";
 import { toast } from "@congress/ui/toast";
+import { useTRPC } from "@congress/ui/trpc";
 
 interface OtpStepProps {
-  otpForm: UseFormReturn<{ otp: string }, unknown>;
-  maskedPhoneNumber: string | null;
+  otpForm: AppForm;
   formData: {
     nationalId: string;
     personalPhoneNumber: string;
   } | null;
   setStep: (step: "form" | "otp") => void;
-  sendSignupOtpMutation: UseMutationResult<
-    unknown,
-    Error,
-    { nationalId: string; phoneNumber: string },
-    unknown
-  >;
-  signupMutation: UseMutationResult<unknown, Error, unknown, unknown>;
 }
 
-export function OtpStep({
-  otpForm,
-  maskedPhoneNumber,
-  formData,
-  setStep,
-  sendSignupOtpMutation,
-  signupMutation,
-}: OtpStepProps) {
+export function OtpStep({ otpForm, formData, setStep }: OtpStepProps) {
   const { t } = useTranslation();
+  const trpc = useTRPC();
+
+  const sendSignupOtpMutation = useMutation(
+    trpc.beneficiaryAuth.sendSignupOTP.mutationOptions({}),
+  );
 
   return (
     <form
       className="space-y-6"
-      onSubmit={(event) => {
+      onSubmit={async (event) => {
         event.preventDefault();
-        void otpForm.handleSubmit();
+        event.stopPropagation();
+        await otpForm.handleSubmit();
       }}
     >
       <div className="text-muted-foreground space-y-2 text-sm">
         <p>
-          {maskedPhoneNumber
+          {formData?.personalPhoneNumber
             ? t("otp_sent_message", {
-                phoneNumber: maskedPhoneNumber,
+                phoneNumber: formData.personalPhoneNumber.replace("+972", "0"),
               })
             : t("otp_sent_message_no_phone")}
         </p>
@@ -75,24 +67,19 @@ export function OtpStep({
                   type="text"
                   inputMode="numeric"
                   maxLength={6}
-                  value={field.state.value}
+                  value={field.state.value as string}
                   onBlur={field.handleBlur}
                   onChange={(event) =>
-                    field.handleChange(
-                      event.target.value.replace(/\D/g, ""),
-                    )
+                    field.handleChange(event.target.value.replace(/\D/g, ""))
                   }
-                  placeholder="000000"
+                  placeholder="0000"
                   className="text-center text-2xl tracking-[0.4em]"
                   disabled={
                     otpForm.state.isSubmitting ||
-                    signupMutation.isPending ||
                     sendSignupOtpMutation.isPending
                   }
                 />
-                {isInvalid && (
-                  <FieldError errors={field.state.meta.errors} />
-                )}
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
             );
           }}
@@ -104,12 +91,10 @@ export function OtpStep({
           className="w-full"
           size="lg"
           disabled={
-            otpForm.state.isSubmitting ||
-            signupMutation.isPending ||
-            sendSignupOtpMutation.isPending
+            otpForm.state.isSubmitting || sendSignupOtpMutation.isPending
           }
         >
-          {otpForm.state.isSubmitting || signupMutation.isPending
+          {otpForm.state.isSubmitting
             ? t("submitting")
             : t("submit_application")}
         </Button>
@@ -147,4 +132,3 @@ export function OtpStep({
     </form>
   );
 }
-

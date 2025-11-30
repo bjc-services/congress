@@ -1,7 +1,6 @@
-import type { UseFormReturn } from "@tanstack/react-form";
 import { useTranslation } from "react-i18next";
 
-import type { useAppForm } from "@congress/ui/fields";
+import type { AppForm } from "@congress/ui/fields";
 import type { UploadedFile } from "@congress/ui/upload";
 import { Field, FieldError, FieldGroup } from "@congress/ui/field";
 import { DocumentUpload } from "@congress/ui/upload";
@@ -12,15 +11,10 @@ import {
 
 import { calculateAge } from "../utils";
 
-type Form = UseFormReturn<
-  ReturnType<typeof useAppForm>["defaultValues"],
-  unknown
->;
-
 type DocumentsRequirement = "required" | "optional" | "hidden";
 
 interface IdentityDocumentsSectionProps {
-  form: Form;
+  form: AppForm;
   dateOfBirth: string;
   idCardFile: UploadedFile | undefined;
   idAppendixFile: UploadedFile | undefined;
@@ -32,7 +26,11 @@ interface IdentityDocumentsSectionProps {
     fileSize: number;
     base64Md5Hash: string;
     contentType: string;
-  }) => Promise<unknown>;
+  }) => Promise<{
+    url: string;
+    fields: Record<string, string>;
+    uploadId: string;
+  }>;
   handleCancelUpload: (uploadId: string) => Promise<void>;
 }
 
@@ -75,7 +73,7 @@ export function IdentityDocumentsSection({
           listeners={{
             onChange: ({ fieldApi }) => {
               const dateOfBirth = fieldApi.form.getFieldValue("dateOfBirth");
-              const age = calculateAge(dateOfBirth);
+              const age = calculateAge(dateOfBirth as string);
               if (Number.isNaN(age) || age < 16) {
                 // Avoid infinite loops: only update if current value differs
                 if (fieldApi.state.value !== undefined) {
@@ -166,7 +164,7 @@ export function IdentityDocumentsSection({
           listeners={{
             onChange: ({ fieldApi }) => {
               const dateOfBirth = fieldApi.form.getFieldValue("dateOfBirth");
-              const age = calculateAge(dateOfBirth);
+              const age = calculateAge(dateOfBirth as string);
               if (Number.isNaN(age) || age < 16) {
                 // Avoid infinite loops: only update if current value differs
                 if (fieldApi.state.value !== undefined) {

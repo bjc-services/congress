@@ -1,18 +1,12 @@
-import type { UseFormReturn } from "@tanstack/react-form";
 import { useTranslation } from "react-i18next";
 
-import type { useAppForm } from "@congress/ui/fields";
+import type { AppForm } from "@congress/ui/fields";
 import { FieldGroup } from "@congress/ui/field";
 
 import { calculateAge } from "../utils";
 
-type Form = UseFormReturn<
-  ReturnType<typeof useAppForm>["defaultValues"],
-  unknown
->;
-
 interface ApplicantDetailsSectionProps {
-  form: Form;
+  form: AppForm;
   setIdCardFile: (file: undefined) => void;
   setIdAppendixFile: (file: undefined) => void;
 }
@@ -44,7 +38,12 @@ export function ApplicantDetailsSection({
                 });
               }
               // Update all children's lastName
-              const children = fieldApi.form.getFieldValue("children");
+              const children = fieldApi.form.getFieldValue("children") as {
+                firstName: string;
+                lastName: string;
+                nationalId: string;
+                dateOfBirth: string;
+              }[];
               if (children.length > 0) {
                 fieldApi.form.setFieldValue(
                   "children",
@@ -75,7 +74,7 @@ export function ApplicantDetailsSection({
           name="dateOfBirth"
           listeners={{
             onChange: ({ value, fieldApi }) => {
-              const age = calculateAge(value);
+              const age = calculateAge(value as string);
               if (Number.isNaN(age) || age < 16) {
                 fieldApi.form.setFieldValue("identityCardUploadId", undefined);
                 fieldApi.form.setFieldValue(

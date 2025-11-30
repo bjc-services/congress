@@ -141,7 +141,7 @@ export function BeneficiaryLoginFlow() {
   };
 
   const handleOTPSubmit = () => {
-    if (!otpCode.trim() || otpCode.length !== 6) {
+    if (!otpCode.trim() || otpCode.length !== 4) {
       toast.error(t("please_enter_otp"));
       return;
     }

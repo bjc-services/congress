@@ -116,8 +116,8 @@ export const beneficiaryOtpVerifySchema = z.object({
   code: z
     .string()
     .trim()
-    .length(6, { message: "otp_invalid" })
-    .regex(/^\d{6}$/, { message: "otp_invalid" }),
+    .length(4, { message: "otp_invalid" })
+    .regex(/^\d{4}$/, { message: "otp_invalid" }),
 });
 
 export const beneficiarySignupOtpRequestSchema = z.object({
@@ -131,8 +131,8 @@ export const beneficiarySignupOtpVerifySchema = z.object({
   code: z
     .string()
     .trim()
-    .length(6, { message: "otp_invalid" })
-    .regex(/^\d{6}$/, { message: "otp_invalid" }),
+    .length(4, { message: "otp_invalid" })
+    .regex(/^\d{4}$/, { message: "otp_invalid" }),
 });
 
 export const beneficiaryOtpChangePasswordSchema = z.object({
@@ -140,8 +140,8 @@ export const beneficiaryOtpChangePasswordSchema = z.object({
   code: z
     .string()
     .trim()
-    .length(6, { message: "otp_invalid" })
-    .regex(/^\d{6}$/, { message: "otp_invalid" }),
+    .length(4, { message: "otp_invalid" })
+    .regex(/^\d{4}$/, { message: "otp_invalid" }),
   newPassword: passwordSchema,
 });
 
@@ -175,8 +175,8 @@ export const beneficiarySignupSchema = z
     otpCode: z
       .string()
       .trim()
-      .length(6, { message: "otp_invalid" })
-      .regex(/^\d{6}$/, { message: "otp_invalid" }),
+      .length(4, { message: "otp_invalid" })
+      .regex(/^\d{4}$/, { message: "otp_invalid" }),
   })
   .superRefine((value, ctx) => {
     const age = calculateAge(value.dateOfBirth);
