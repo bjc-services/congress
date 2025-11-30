@@ -18,20 +18,6 @@ const BeneficiaryAuthContext = createContext<
   BeneficiaryAuthContextValue | undefined
 >(undefined);
 
-const BENEFICIARY_AUTH_COOKIE_NAME = "congress_bat"; // congress beneficiary auth token
-
-/**
- * Check if the auth cookie exists client-side
- */
-function hasAuthCookie(): boolean {
-  if (typeof document === "undefined") return false;
-  return document.cookie
-    .split(";")
-    .some((cookie) =>
-      cookie.trim().startsWith(`${BENEFICIARY_AUTH_COOKIE_NAME}=`),
-    );
-}
-
 export function BeneficiaryAuthProvider({
   children,
 }: {
@@ -41,15 +27,14 @@ export function BeneficiaryAuthProvider({
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  // Only fetch session if cookie exists - skip API call if no cookie
-  const cookieExists = hasAuthCookie();
+  // Always fetch session - the server-side getSession endpoint can read httpOnly cookies
+  // and will return null if the cookie doesn't exist or is invalid
   const {
     data: session,
     isLoading,
     refetch: refetchSession,
   } = useQuery({
     ...orpc.beneficiaryAuth.getSession.queryOptions(),
-    enabled: cookieExists, // Only run query if cookie exists
     retry: false, // Don't retry if there's no session
     retryOnMount: false, // Don't retry on mount if there's no session
     staleTime: 0, // Always check for fresh session
