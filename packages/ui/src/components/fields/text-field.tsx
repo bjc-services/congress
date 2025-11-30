@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import type { InputProps } from "../input";
 import { Field, FieldError } from "../field";
 import { Input } from "../input";
@@ -9,8 +11,9 @@ interface TextFieldProps extends InputProps {
 
   /**
    * The label is the placeholder, and is floated when the input is not empty, or when the input is focused.
+   * The placeholder prop will only be shown when the label is floating.
    */
-  placeholder?: never;
+  placeholder?: string;
 
   /**
    * display error message below the field
@@ -25,10 +28,19 @@ export function TextField({
   variant,
   align,
   displayError = true,
+  placeholder: placeholderProp,
   ...props
 }: TextFieldProps) {
   const field = useFieldContext<string>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+  const [isFocused, setIsFocused] = useState(false);
+
+  const hasValue = Boolean(field.state.value);
+  const isLabelFloating = isFocused || hasValue;
+
+  // When label is not floating, use space for CSS :placeholder-shown detection
+  // When label is floating, show the provided placeholder (or space if none provided)
+  const placeholder = isLabelFloating ? (placeholderProp ?? " ") : " ";
 
   return (
     <Field data-invalid={isInvalid}>
@@ -37,8 +49,16 @@ export function TextField({
           id={field.name}
           type={type}
           value={field.state.value}
-          onBlur={field.handleBlur}
-          placeholder={" "}
+          onFocus={(event) => {
+            setIsFocused(true);
+            props.onFocus?.(event);
+          }}
+          onBlur={(event) => {
+            setIsFocused(false);
+            field.handleBlur();
+            props.onBlur?.(event);
+          }}
+          placeholder={placeholder}
           variant={variant}
           align={align}
           onChange={(event) => field.handleChange(event.target.value)}
