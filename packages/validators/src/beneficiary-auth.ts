@@ -9,6 +9,7 @@ const MARITAL_STATUSES = ["single", "married", "divorced"] as const;
 const isoDateSchema = z
   .string({ message: "date_of_birth_required" })
   .trim()
+  .min(1,{message: "date_of_birth_required"})
   .refine(
     (value) => {
       const date = new Date(value);

@@ -34,7 +34,7 @@ interface IdentityDocumentsSectionProps {
   handleCancelUpload: (uploadId: string) => Promise<void>;
 }
 
-export function IdentityDocumentsSection({
+export function  IdentityDocumentsSection({
   form,
   dateOfBirth,
   idCardFile,

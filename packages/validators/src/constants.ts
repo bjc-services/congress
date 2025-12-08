@@ -56,3 +56,14 @@ export const identityAppendixDocumentType: SystemDocumentType = {
   allowedFileTypes: ["image/*", "application/pdf"],
   maxFileSize: 10485760, // 10MB
 };
+
+export const kollelCertificateDocumentType: SystemDocumentType = {
+  name: "אישור תים ללימוד בכולל",
+  description: "אישור תים ללימוד בכולל",
+  isSystemDefined: true,
+  maxAllowedFiles: 1,
+  createdByUserId: SYSTEM_USER_ID,
+  id: _createFixedId("documentType", "tim_confirmation"),
+  allowedFileTypes: ["image/*", "application/pdf"],
+  maxFileSize: 10485760,
+};

@@ -22,6 +22,7 @@ import { ApplicantDetailsSection } from "./signup/components/applicant-details-s
 import { ChildrenSection } from "./signup/components/children-section";
 import { FamilyStatusSection } from "./signup/components/family-status-section";
 import { IdentityDocumentsSection } from "./signup/components/identity-documents-section";
+import { KollelDetails } from "./signup/components/kollel-details";
 import { OtpStep } from "./signup/components/otp-step";
 import {
   PasswordStep,
@@ -132,6 +133,11 @@ function SignupRouteComponent() {
         addressLine2: "",
         postalCode: "",
       },
+      kollelType: "kollel" as "kollel" | "yeshiva",
+      kollelName: "",
+      headOfTheKollelName: "",
+      headOfTheKollelPhone: "",
+      kollelWorkType: "all_day" as "all_day" | "half_day",
       spouse: undefined as
         | {
             nationalId: string;
@@ -152,8 +158,8 @@ function SignupRouteComponent() {
       identityAppendixUploadId: undefined as string | undefined,
     },
     validators: {
-       // @ts-expect-error - Type mismatch between optional and required undefined, but runtime validation works correctly
-       onSubmit: signupFormSchema,
+      // @ts-expect-error - Type mismatch between optional and required undefined, but runtime validation works correctly
+      onSubmit: signupFormSchema,
     },
     onSubmit: ({ value }) => {
       // Validate form and move to password step
@@ -234,6 +240,7 @@ function SignupRouteComponent() {
   const [idAppendixFile, setIdAppendixFile] = useState<
     UploadedFile | undefined
   >();
+  const [kollelCertificateFile, setKollelCertificateFile] = useState<UploadedFile | undefined>();
 
   // Upload mutations - use direct orpc calls to avoid SSR issues with mutationOptions
   const handleGetPresignedUrl = useCallback(
@@ -304,10 +311,16 @@ function SignupRouteComponent() {
                 addressLine2: "address.addressLine2",
                 postalCode: "address.postalCode",
               }}
-              title={t("address_information")}
             />
 
             <FamilyStatusSection form={form as AppForm} />
+            <KollelDetails
+              form={form as AppForm}
+              kollelCertificateFile={kollelCertificateFile}
+              setKollelCertificateFile={setKollelCertificateFile}
+              handleGetPresignedUrl={handleGetPresignedUrl}
+              handleCancelUpload={handleCancelUpload}
+            />
             <ChildrenSection form={form as AppForm} />
             <form.Subscribe
               selector={(state) => [state.values.dateOfBirth]}

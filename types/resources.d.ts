@@ -29,7 +29,6 @@ interface Resources {
     "verifying": "Verifying..."
   },
   "signup": {
-    "address_information": "Address Information",
     "delete_failed": "Delete failed",
     "form_data_missing": "Form data is missing",
     "password_required": "Password is required",
@@ -38,8 +37,10 @@ interface Resources {
   "translation": {
     "account_pending_message": "Your account is pending verification. You will be able to access all features once your account has been verified.",
     "account_pending_verification": "Account Pending Verification",
+    "address_information": "address_information",
     "address_line_two": "Address Line 2",
     "address_line_two_placeholder": "Apartment, suite, unit, building, floor, etc.",
+    "all_day": "all_day",
     "applicant_details": "Applicant Details",
     "back": "Back",
     "beneficiary_logo_alt": "Beneficiary Portal Logo",
@@ -83,6 +84,9 @@ interface Resources {
     "forgot_password": "Forgot Password?",
     "form_data_missing": "Form data is missing. Please fill in all required fields.",
     "gov_appendix_link_text": "How to get your identity card appendix",
+    "half_day": "half_day",
+    "head_of_the_kollel_name": "head_of_the_kollel_name",
+    "head_of_the_kollel_phone": "head_of_the_kollel_phone",
     "home_phone_number": "Home Phone Number",
     "house_number": "House Number",
     "how_to_find_appendix": "How to find your identity card appendix",
@@ -90,6 +94,11 @@ interface Resources {
     "invalid_credentials": "Invalid credentials. Please check your ID number and password.",
     "invalid_file_type": "Invalid file type. Please upload a supported file format.",
     "invalid_verification_code": "Invalid verification code. Please enter the last 4 digits of the caller ID.",
+    "kollel": "kollel",
+    "kollel_details": "kollel_details",
+    "kollel_name": "kollel_name",
+    "kollel_type": "kollel_type",
+    "kollel_work_type": "kollel_work_type",
     "last_name": "Last Name",
     "loading": "Loading...",
     "logged_in_as": "Logged in as",
@@ -140,10 +149,12 @@ interface Resources {
     "street": "Street",
     "submit_application": "Submit Application",
     "submitting": "Submitting...",
+    "tim_confirmation": "tim_confirmation",
     "verification_code": "Verification Code",
     "verification_code_label": "Last 4 Digits of Caller ID",
     "verify_code": "Verify Code",
     "verifying": "Verifying...",
+    "yeshiva": "yeshiva",
     "you_must_be_logged_in_to_delete_a_post": "You must be logged in to delete a post",
     "you_must_be_logged_in_to_post": "You must be logged in to create a post"
   }

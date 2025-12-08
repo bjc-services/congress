@@ -9,6 +9,8 @@ export default defineConfig({
       "./packages/api/**/*.{js,jsx,ts,tsx}",
     ],
     output: "locals/{{language}}/{{namespace}}.json",
+    // Keep keys that are not found in the code (e.g., validation error keys from Zod schemas)
+    keepOrphans: true,
   },
   types: {
     output: "./types/18next.d.ts",

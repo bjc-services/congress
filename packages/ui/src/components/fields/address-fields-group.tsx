@@ -29,10 +29,10 @@ const defaultValues: AddressFields = {
 
 export const AddressFieldsGroup = withFieldGroup({
   defaultValues: defaultValues,
-  props: {
-    title: "Address Information",
-  },
-  render: function Render({ group, title }) {
+  // props: {
+  //   title: "Address Information",
+  // },
+  render: function Render({ group }) {
     const { t } = useTranslation();
 
     const [citySearch, setCitySearch] = useDebounceValue("", 300);
@@ -60,6 +60,8 @@ export const AddressFieldsGroup = withFieldGroup({
       }),
     );
 
+    console.log(citiesQuery.data);
+
     const selectedCity = useMemo(() => {
       return citiesQuery.data?.find(
         (city) => Number(city.value) === Number(cityId),
@@ -84,7 +86,7 @@ export const AddressFieldsGroup = withFieldGroup({
 
     return (
       <div className="space-y-4">
-        {title && <h2 className="text-lg font-medium">{title}</h2>}
+        <h2 className="text-lg font-medium">{t("address_information")}</h2>
         <FieldGroup>
           <group.AppField name="cityId">
             {(field) => {

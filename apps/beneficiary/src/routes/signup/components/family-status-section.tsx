@@ -77,19 +77,16 @@ export function FamilyStatusSection({ form }: FamilyStatusSectionProps) {
         ]}
         children={([maritalStatus, spouse]) =>
           maritalStatus !== "single" && spouse ? (
-            <div className="border-border rounded-xl border p-4">
+            <div className="border-border rounded-xl border p-4 space-y-4">
               <h3 className="mb-4 text-base font-medium">
                 {t("spouse_details")}
               </h3>
-              <FieldGroup>
                 <form.AppField name="spouse.firstName">
                   {(field) => <field.TextField label={t("first_name")} />}
                 </form.AppField>
                 <form.AppField name="spouse.lastName">
                   {(field) => <field.TextField label={t("last_name")} />}
                 </form.AppField>
-              </FieldGroup>
-              <FieldGroup>
                 <form.AppField name="spouse.nationalId">
                   {(field) => <field.TextField label={t("national_id")} />}
                 </form.AppField>
@@ -102,14 +99,11 @@ export function FamilyStatusSection({ form }: FamilyStatusSectionProps) {
                     />
                   )}
                 </form.AppField>
-              </FieldGroup>
-              <FieldGroup>
                 <form.AppField name="spouse.dateOfBirth">
                   {(field) => (
                     <field.DatePickerField label={t("date_of_birth")} />
                   )}
                 </form.AppField>
-              </FieldGroup>
             </div>
           ) : null
         }

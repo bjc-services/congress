@@ -1,8 +1,6 @@
 import { useTranslation } from "react-i18next";
-
 import type { AppForm } from "@congress/ui/fields";
 import { FieldGroup } from "@congress/ui/field";
-
 import { calculateAge } from "../utils";
 
 interface ApplicantDetailsSectionProps {

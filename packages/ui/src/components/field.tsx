@@ -1,14 +1,13 @@
 "use client";
 
-
 import type { VariantProps } from "class-variance-authority";
 import { useMemo } from "react";
 import { cva } from "class-variance-authority";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "../lib/utils";
 import { Label } from "./label";
 import { Separator } from "./separator";
-import { useTranslation } from "react-i18next";
 
 export function FieldSet({
   className,
@@ -234,11 +233,15 @@ export function FieldError({
       return null;
     }
 
-    if (errors.length === 1 && errors[0]?.message) {
+    if (errors[0]?.message) {
       return t(errors[0].message as never);
     }
 
-    return errors.map((error) => t(error.message as never)).join(", ");
+    // if (errors.length === 1 && errors[0]?.message) {
+    //   return t(errors[0].message as never);
+    // }
+
+    // return errors.map((error) => t(error.message as never)).join(", ");
   }, [children, maybeErrors, t]);
 
   if (!content) {
