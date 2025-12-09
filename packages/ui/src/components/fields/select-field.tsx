@@ -34,24 +34,24 @@ export function SelectField<T extends string>({
 
   return (
     <Field data-invalid={isInvalid}>
-			<FloatingField label={label} filled={!!field.state.value}>
-				<Select
-					value={field.state.value}
-					disabled={isSubmitting}
-					onValueChange={(value: T) => field.handleChange(value)}
-				>
-					<SelectTrigger className="w-full">
-						<SelectValue placeholder={placeholder} />
-					</SelectTrigger>
-					<SelectContent>
-						{options.map((option) => (
-							<SelectItem key={option.value} value={option.value}>
-								{option.label}
-							</SelectItem>
-						))}
-					</SelectContent>
-				</Select>
-			</FloatingField>
+      <FloatingField label={label} filled={!!field.state.value}>
+        <Select
+          value={field.state.value}
+          disabled={isSubmitting}
+          onValueChange={(value: T) => field.handleChange(value)}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder={placeholder} />
+          </SelectTrigger>
+          <SelectContent>
+            {options.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </FloatingField>
       {isInvalid && <FieldError errors={field.state.meta.errors} />}
     </Field>
   );

@@ -1,8 +1,9 @@
 import { useTranslation } from "react-i18next";
 
 import { Field, FieldError, FieldGroup } from "@congress/ui/field";
-import { AppForm } from "@congress/ui/fields";
-import { DocumentUpload, UploadedFile } from "@congress/ui/upload";
+import type { AppForm } from "@congress/ui/fields";
+import type { UploadedFile } from "@congress/ui/upload";
+import { DocumentUpload } from "@congress/ui/upload";
 import { yeshivaCertificateDocumentType } from "@congress/validators/constants";
 
 interface YeshivaDetailsProps {
@@ -35,18 +36,21 @@ export function YeshivaDetails({
     <section className="space-y-4">
       <h2 className="text-lg font-medium">{t("yeshiva_details")}</h2>
       <FieldGroup>
-        <form.AppField name="yeshivaDetails.yeshivaType" listeners={{
-          onChange: ({ value, fieldApi }) => {
-            fieldApi.form.setFieldValue("yeshivaDetails", {
-              yeshivaName: "",
-              headOfTheYeshivaName: "",
-              headOfTheYeshivaPhone: "",
-              yeshivaWorkType: "all_day",
-              yeshivaCertificateUploadId: undefined,
-              yeshivaType: value,
-            });
-          },
-        }}>
+        <form.AppField
+          name="yeshivaDetails.yeshivaType"
+          listeners={{
+            onChange: ({ value, fieldApi }) => {
+              fieldApi.form.setFieldValue("yeshivaDetails", {
+                yeshivaName: "",
+                headOfTheYeshivaName: "",
+                headOfTheYeshivaPhone: "",
+                yeshivaWorkType: "all_day",
+                yeshivaCertificateUploadId: undefined,
+                yeshivaType: value,
+              });
+            },
+          }}
+        >
           {(field) => (
             <field.SelectField
               label={t("yeshiva_type")}
@@ -59,7 +63,11 @@ export function YeshivaDetails({
         </form.AppField>
         <form.Subscribe
           selector={(state) => [
-            (state.values as { yeshivaDetails: { yeshivaType: "kollel" | "yeshiva" } }).yeshivaDetails.yeshivaType,
+            (
+              state.values as {
+                yeshivaDetails: { yeshivaType: "kollel" | "yeshiva" };
+              }
+            ).yeshivaDetails.yeshivaType,
           ]}
           children={([yeshivaType]) => {
             if (yeshivaType !== "kollel") {
@@ -77,7 +85,10 @@ export function YeshivaDetails({
                 </form.AppField>
                 <form.AppField name="yeshivaDetails.headOfTheYeshivaPhone">
                   {(field) => (
-                    <field.PhoneField label={t("head_of_the_kollel_phone")} t={t} />
+                    <field.PhoneField
+                      label={t("head_of_the_kollel_phone")}
+                      t={t}
+                    />
                   )}
                 </form.AppField>
                 <form.AppField name="yeshivaDetails.yeshivaWorkType">

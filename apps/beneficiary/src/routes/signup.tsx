@@ -52,8 +52,6 @@ const otpSchema = z.object({
     .regex(/^\d{4}$/, "invalid_otp"),
 });
 
-
-
 export const Route = createFileRoute("/signup")({
   validateSearch: (search: Record<string, unknown>) => ({
     nationalId:
@@ -239,7 +237,9 @@ function SignupRouteComponent() {
   const [idAppendixFile, setIdAppendixFile] = useState<
     UploadedFile | undefined
   >();
-  const [kollelCertificateFile, setKollelCertificateFile] = useState<UploadedFile | undefined>();
+  const [kollelCertificateFile, setKollelCertificateFile] = useState<
+    UploadedFile | undefined
+  >();
 
   // Upload mutations - use direct orpc calls to avoid SSR issues with mutationOptions
   const handleGetPresignedUrl = useCallback(

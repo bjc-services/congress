@@ -1,9 +1,9 @@
+import { ORPCError } from "@orpc/server";
 import {
   deleteCookie,
   getCookie,
   setCookie,
 } from "@tanstack/react-start/server";
-import { ORPCError } from "@orpc/server";
 
 import type { BeneficiarySignupInput } from "@congress/validators";
 import {
@@ -152,7 +152,7 @@ async function upsertPerson(
     })
     .returning();
 
-    if (!created) {
+  if (!created) {
     throw new ORPCError("INTERNAL_SERVER_ERROR", {
       message: "failed_to_create_person",
     });
@@ -257,7 +257,6 @@ async function upsertAddress(
   });
 }
 
-
 async function upsertYeshivaDetails(
   tx: TransactionClient,
   beneficiaryNationalId: string,
@@ -268,14 +267,17 @@ async function upsertYeshivaDetails(
   });
 
   if (existing) {
-    await tx.update(YeshivaDetails).set({
-      yeshivaName: yeshivaDetails.yeshivaName,
-      headOfTheYeshivaName: yeshivaDetails.headOfTheYeshivaName,
-      headOfTheYeshivaPhone: yeshivaDetails.headOfTheYeshivaPhone,
-      yeshivaWorkType: yeshivaDetails.yeshivaWorkType,
-      yeshivaCertificateUploadId: yeshivaDetails.yeshivaCertificateUploadId,
-      yeshivaType: yeshivaDetails.yeshivaType,
-    }).where(eq(YeshivaDetails.id, existing.id));
+    await tx
+      .update(YeshivaDetails)
+      .set({
+        yeshivaName: yeshivaDetails.yeshivaName,
+        headOfTheYeshivaName: yeshivaDetails.headOfTheYeshivaName,
+        headOfTheYeshivaPhone: yeshivaDetails.headOfTheYeshivaPhone,
+        yeshivaWorkType: yeshivaDetails.yeshivaWorkType,
+        yeshivaCertificateUploadId: yeshivaDetails.yeshivaCertificateUploadId,
+        yeshivaType: yeshivaDetails.yeshivaType,
+      })
+      .where(eq(YeshivaDetails.id, existing.id));
   } else {
     await tx.insert(YeshivaDetails).values({
       beneficiaryNationalId,
@@ -338,11 +340,10 @@ async function storeDocuments(
     uploadId: string;
     documentTypeId: string;
   }[],
-) { 
+) {
   if (documents.length === 0) {
     return;
   }
-
 
   await tx
     .update(Upload)
@@ -628,7 +629,7 @@ export const beneficiaryAuthRouter = {
         await upsertAddress(tx, applicant.id, input.address);
         await upsertYeshivaDetails(tx, input.nationalId, input.yeshivaDetails);
 
-        const passwordHash = await hashPassword(input.password as string);
+        const passwordHash = await hashPassword(input.password);
 
         const beneficiaryAccountId = createID("beneficiaryAccount");
         await tx.insert(BeneficiaryAccount).values({

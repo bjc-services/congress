@@ -171,9 +171,9 @@ function CreatePostForm() {
 function PostList() {
   const { orpc } = useRouteContext({ from: "/" });
   const { t } = useTranslation();
-  const { data: posts } = useSuspenseQuery(
-    orpc.post.all.queryOptions(),
-  ) as { data: RouterOutputs["post"]["all"] };
+  const { data: posts } = useSuspenseQuery(orpc.post.all.queryOptions()) as {
+    data: RouterOutputs["post"]["all"];
+  };
 
   if (posts.length === 0) {
     return (

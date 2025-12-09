@@ -1,9 +1,9 @@
+import { publicProcedure } from "./orpc";
 import { authRouter } from "./router/auth";
 import { beneficiaryAuthRouter } from "./router/beneficiary-auth";
 import { locationRouter } from "./router/location";
 import { postRouter } from "./router/post";
 import { uploadRouter } from "./router/upload";
-import { publicProcedure } from "./orpc";
 
 export const appRouter = {
   auth: authRouter,

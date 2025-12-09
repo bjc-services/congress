@@ -238,7 +238,7 @@ function PasswordStep({
               <Input
                 id={field.name}
                 type="password"
-                value={field.state.value as string}
+                value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(event) => field.handleChange(event.target.value)}
                 disabled={isSubmitting || isBusy}

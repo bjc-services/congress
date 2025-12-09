@@ -27,26 +27,20 @@ const zodErrorMap: z.ZodErrorMap = (issue) => {
       if (issue.expected === "date") return { message: "zod_invalid_date" };
       return { message: "zod_invalid_type" };
     case "too_small":
-      if (issue.origin === "string")
-        return { message: "zod_string_too_short" };
-      if (issue.origin === "number")
-        return { message: "zod_number_too_small" };
-      if (issue.origin === "array")
-        return { message: "zod_array_too_short" };
+      if (issue.origin === "string") return { message: "zod_string_too_short" };
+      if (issue.origin === "number") return { message: "zod_number_too_small" };
+      if (issue.origin === "array") return { message: "zod_array_too_short" };
       return { message: "zod_too_small" };
     case "too_big":
-      if (issue.origin === "string")
-        return { message: "zod_string_too_long" };
-      if (issue.origin === "number")
-        return { message: "zod_number_too_big" };
-      if (issue.origin === "array")
-        return { message: "zod_array_too_long" };
+      if (issue.origin === "string") return { message: "zod_string_too_long" };
+      if (issue.origin === "number") return { message: "zod_number_too_big" };
+      if (issue.origin === "array") return { message: "zod_array_too_long" };
       return { message: "zod_too_big" };
-    case "invalid_string":
-      if (issue.validation === "email") return { message: "zod_invalid_email" };
-      if (issue.validation === "url") return { message: "zod_invalid_url" };
+    case "invalid_format":
+      if (issue.format === "email") return { message: "zod_invalid_email" };
+      if (issue.format === "url") return { message: "zod_invalid_url" };
       return { message: "zod_invalid_string_format" };
-    case "invalid_enum_value":
+    case "invalid_value":
       return { message: "zod_invalid_option" };
     case "custom":
       return { message: "zod_validation_error" };

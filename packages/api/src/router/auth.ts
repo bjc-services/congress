@@ -1,4 +1,4 @@
-import { publicProcedure, protectedProcedure } from "../orpc";
+import { protectedProcedure, publicProcedure } from "../orpc";
 
 export const authRouter = {
   getSession: publicProcedure({ captcha: false }).handler(({ context }) => {

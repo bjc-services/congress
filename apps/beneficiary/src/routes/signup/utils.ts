@@ -13,4 +13,3 @@ export function calculateAge(isoDate: string): number {
   }
   return age;
 }
-

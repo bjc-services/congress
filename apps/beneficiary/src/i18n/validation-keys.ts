@@ -5,10 +5,8 @@
  * DO NOT import this file - it exists only for i18next-cli to extract the keys.
  */
 
-import type { TFunction } from "i18next";
-
 // This function is never called, it just helps i18next-cli extract keys
-export function declareValidationKeys(t: TFunction) {
+export function declareValidationKeys(t: (key: string) => void) {
   // Date validation
   t("date_of_birth_required");
   t("invalid_date");
@@ -59,4 +57,3 @@ export function declareValidationKeys(t: TFunction) {
   t("yeshiva_name_required");
   t("head_of_the_yeshiva_name_required");
 }
-

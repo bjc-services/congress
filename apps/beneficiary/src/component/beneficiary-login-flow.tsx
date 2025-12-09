@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useRouteContext } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import type { RouterOutputs } from "@congress/api";
@@ -15,7 +15,6 @@ import { Input } from "@congress/ui/input";
 import { toast } from "@congress/ui/toast";
 
 import { useBeneficiaryAuth } from "~/lib/beneficiary-auth-provider";
-import { useRouteContext } from "@tanstack/react-router";
 
 type LoginStep = "nationalId" | "password" | "otp" | "setPassword" | "signup";
 

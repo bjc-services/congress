@@ -22,15 +22,11 @@ export const postRouter = {
       });
     }),
 
-  create: protectedProcedure
-    .input(CreatePostSchema)
-    .handler(({ input }) => {
-      return db.insert(Post).values(input);
-    }),
+  create: protectedProcedure.input(CreatePostSchema).handler(({ input }) => {
+    return db.insert(Post).values(input);
+  }),
 
-  delete: protectedProcedure
-    .input(z.string())
-    .handler(({ input }) => {
-      return db.delete(Post).where(eq(Post.id, input));
-    }),
+  delete: protectedProcedure.input(z.string()).handler(({ input }) => {
+    return db.delete(Post).where(eq(Post.id, input));
+  }),
 };

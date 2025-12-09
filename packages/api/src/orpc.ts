@@ -6,8 +6,8 @@
  * tl;dr - this is where all the oRPC server stuff is created and plugged in.
  * The pieces you will need to use are documented accordingly near the end
  */
-import { getCookie } from "@tanstack/react-start/server";
 import { ORPCError, os } from "@orpc/server";
+import { getCookie } from "@tanstack/react-start/server";
 import { z, ZodError } from "zod/v4";
 
 import type { DashboardAuth, DashboardSession } from "@congress/auth";
@@ -67,9 +67,7 @@ export const createORPCContext = async (opts: {
  *
  * This is where the orpc api is initialized, connecting the context
  */
-const o = os.$context<
-  Awaited<ReturnType<typeof createORPCContext>>
->();
+const o = os.$context<Awaited<ReturnType<typeof createORPCContext>>>();
 
 /**
  * 3. ROUTER & PROCEDURE (THE IMPORTANT BIT)
@@ -143,4 +141,3 @@ export const beneficiaryProtectedProcedure = o.use(
     });
   },
 );
-
