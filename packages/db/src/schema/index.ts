@@ -14,3 +14,4 @@ export * from "./recommendation.sql";
 export * from "./drizzle-demo-ignore";
 export * from "./location.sql";
 export * from "./document.sql";
+export * from "./yeshiva-details.sql";

@@ -2,5 +2,15 @@
   "delete_failed": "Delete failed",
   "form_data_missing": "Form data is missing",
   "password_required": "Password is required",
-  "upload_failed": "Upload failed"
+  "upload_failed": "Upload failed",
+  "an_account_with_this_national_id_already_exists": "An account with this national ID already exists",
+  "verification_code_sent_successfully": "Verification code sent successfully",
+  "invalid_or_expired_verification_code": "Invalid or expired verification code",
+  "failed_to_retrieve_account": "Failed to retrieve account",
+  "account_created_successfully_pending_verification": "Account created successfully, pending verification",
+  "failed_to_create_person": "Failed to create person profile",
+  "unknown_document_type": "Unknown document type",
+  "file_size_too_large": "File size too large",
+  "invalid_file_type": "Invalid file type",
+  "phone_number_verified_successfully": "Phone number verified successfully"
 }

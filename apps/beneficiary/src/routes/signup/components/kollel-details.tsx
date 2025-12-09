@@ -3,9 +3,9 @@ import { useTranslation } from "react-i18next";
 import { Field, FieldError, FieldGroup } from "@congress/ui/field";
 import { AppForm } from "@congress/ui/fields";
 import { DocumentUpload, UploadedFile } from "@congress/ui/upload";
-import { kollelCertificateDocumentType } from "@congress/validators/constants";
+import { yeshivaCertificateDocumentType } from "@congress/validators/constants";
 
-interface KollelDetailsProps {
+interface YeshivaDetailsProps {
   form: AppForm;
   kollelCertificateFile: UploadedFile | undefined;
   setKollelCertificateFile: (file: UploadedFile | undefined) => void;
@@ -23,22 +23,33 @@ interface KollelDetailsProps {
   handleCancelUpload: (uploadId: string) => Promise<void>;
 }
 
-export function KollelDetails({
+export function YeshivaDetails({
   form,
   kollelCertificateFile,
   setKollelCertificateFile,
   handleGetPresignedUrl,
   handleCancelUpload,
-}: KollelDetailsProps) {
+}: YeshivaDetailsProps) {
   const { t } = useTranslation();
   return (
     <section className="space-y-4">
-      <h2 className="text-lg font-medium">{t("kollel_details")}</h2>
+      <h2 className="text-lg font-medium">{t("yeshiva_details")}</h2>
       <FieldGroup>
-        <form.AppField name="kollelType">
+        <form.AppField name="yeshivaDetails.yeshivaType" listeners={{
+          onChange: ({ value, fieldApi }) => {
+            fieldApi.form.setFieldValue("yeshivaDetails", {
+              yeshivaName: "",
+              headOfTheYeshivaName: "",
+              headOfTheYeshivaPhone: "",
+              yeshivaWorkType: "all_day",
+              yeshivaCertificateUploadId: undefined,
+              yeshivaType: value,
+            });
+          },
+        }}>
           {(field) => (
             <field.SelectField
-              label={t("kollel_type")}
+              label={t("yeshiva_type")}
               options={[
                 { label: t("kollel"), value: "kollel" },
                 { label: t("yeshiva"), value: "yeshiva" },
@@ -48,28 +59,28 @@ export function KollelDetails({
         </form.AppField>
         <form.Subscribe
           selector={(state) => [
-            (state.values as { kollelType: "kollel" | "yeshiva" }).kollelType,
+            (state.values as { yeshivaDetails: { yeshivaType: "kollel" | "yeshiva" } }).yeshivaDetails.yeshivaType,
           ]}
-          children={([kollelType]) => {
-            if (kollelType !== "kollel") {
+          children={([yeshivaType]) => {
+            if (yeshivaType !== "kollel") {
               return null;
             }
             return (
               <>
-                <form.AppField name="kollelName">
+                <form.AppField name="yeshivaDetails.yeshivaName">
                   {(field) => <field.TextField label={t("kollel_name")} />}
                 </form.AppField>
-                <form.AppField name="headOfTheKollelName">
+                <form.AppField name="yeshivaDetails.headOfTheYeshivaName">
                   {(field) => (
                     <field.TextField label={t("head_of_the_kollel_name")} />
                   )}
                 </form.AppField>
-                <form.AppField name="headOfTheKollelPhone">
+                <form.AppField name="yeshivaDetails.headOfTheYeshivaPhone">
                   {(field) => (
-                    <field.TextField label={t("head_of_the_kollel_phone")} />
+                    <field.PhoneField label={t("head_of_the_kollel_phone")} t={t} />
                   )}
                 </form.AppField>
-                <form.AppField name="kollelWorkType">
+                <form.AppField name="yeshivaDetails.yeshivaWorkType">
                   {(field) => (
                     <field.SelectField
                       label={t("kollel_work_type")}
@@ -80,7 +91,7 @@ export function KollelDetails({
                     />
                   )}
                 </form.AppField>
-                <form.AppField name="kollelCertificateUploadId">
+                <form.AppField name="yeshivaDetails.yeshivaCertificateUploadId">
                   {(field) => (
                     <form.Subscribe
                       selector={(state) => [state.isSubmitting]}
@@ -97,15 +108,15 @@ export function KollelDetails({
                             }
                           >
                             <DocumentUpload
-                              documentTypeId={kollelCertificateDocumentType.id}
+                              documentTypeId={yeshivaCertificateDocumentType.id}
                               maxFiles={
-                                kollelCertificateDocumentType.maxAllowedFiles
+                                yeshivaCertificateDocumentType.maxAllowedFiles
                               }
                               maxSize={
-                                kollelCertificateDocumentType.maxFileSize
+                                yeshivaCertificateDocumentType.maxFileSize
                               }
                               allowedFileTypes={
-                                kollelCertificateDocumentType.allowedFileTypes
+                                yeshivaCertificateDocumentType.allowedFileTypes
                               }
                               getPresignedUrl={handleGetPresignedUrl}
                               onFileDelete={handleCancelUpload}
@@ -126,19 +137,9 @@ export function KollelDetails({
                               }}
                               label={t("tim_confirmation")}
                               description={
-                                kollelCertificateDocumentType.description
+                                yeshivaCertificateDocumentType.description
                               }
                               disabled={submitting}
-                              error={
-                                field.state.meta.isTouched &&
-                                !field.state.meta.isValid
-                                  ? (
-                                      field.state.meta.errors[0] as
-                                        | { message?: string }
-                                        | undefined
-                                    )?.message
-                                  : undefined
-                              }
                               t={{
                                 fileSizeTooLarge: ({ maxSize }) =>
                                   t("file_size_too_large", {

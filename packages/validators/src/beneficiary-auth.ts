@@ -9,7 +9,7 @@ const MARITAL_STATUSES = ["single", "married", "divorced"] as const;
 const isoDateSchema = z
   .string({ message: "date_of_birth_required" })
   .trim()
-  .min(1,{message: "date_of_birth_required"})
+  .min(1, { message: "date_of_birth_required" })
   .refine(
     (value) => {
       const date = new Date(value);
@@ -61,8 +61,8 @@ const postalCodeSchema = z
   .max(7, { message: "postal_code_too_long" });
 
 const addressSchema = z.object({
-  cityId: z.number().int().positive(),
-  streetId: z.number().int().positive(),
+  cityId: z.number({ message: "city_required" }).int().positive({ message: "city_required" }),
+  streetId: z.number({ message: "street_required" }).int().positive({ message: "street_required" }),
   houseNumber: houseNumberSchema,
   addressLine2: z
     .string({ message: "address_line2_required" })
@@ -155,6 +155,18 @@ export const beneficiaryResetPasswordSchema = z.object({
   newPassword: passwordSchema,
 });
 
+export const yeshivaDetailsSchema = z.object({
+  yeshivaName: z.string().min(1, { message: "yeshiva_name_required" }).optional(),
+  headOfTheYeshivaName: z
+    .string()
+    .min(1, { message: "head_of_the_yeshiva_name_required" })
+    .optional(),
+  headOfTheYeshivaPhone: phoneNumberSchema.optional(),
+  yeshivaWorkType: z.enum(["all_day", "half_day"]).optional(),
+  yeshivaCertificateUploadId: z.string().optional(),
+  yeshivaType: z.enum(["kollel", "yeshiva"]),
+});
+
 export const beneficiarySignupSchema = z
   .object({
     nationalId: zodIsraeliId,
@@ -179,11 +191,14 @@ export const beneficiarySignupSchema = z
       .length(4, { message: "otp_invalid" })
       .regex(/^\d{4}$/, { message: "otp_invalid" }),
     password: passwordSchema,
+    yeshivaDetails: yeshivaDetailsSchema,
   })
   .superRefine((value, ctx) => {
     const age = calculateAge(value.dateOfBirth);
-    const documentsRequired = age >= 18;
+    const isKollel = value.yeshivaDetails.yeshivaType === "kollel";
+    const documentsRequired = age >= 18 || !age;
 
+    const hasYeshivaCertificate = value.yeshivaDetails.yeshivaCertificateUploadId !== undefined;
     const hasIdentityCard = value.identityCardUploadId !== undefined;
     const hasIdentityAppendix = value.identityAppendixUploadId !== undefined;
     const hasProvidedDocuments = hasIdentityCard && hasIdentityAppendix;
@@ -205,6 +220,15 @@ export const beneficiarySignupSchema = z
       }
     }
 
+    if (isKollel && !hasYeshivaCertificate) {
+      console.log("yeshiva_certificate_upload_id_required");
+      ctx.addIssue({
+        code: "custom",
+        path: ["yeshivaCertificateUploadId"],
+        message: "yeshiva_certificate_upload_id_required",
+      });
+    }
+
     if (value.maritalStatus !== "single") {
       if (!value.spouse) {
         ctx.addIssue({
@@ -223,6 +247,68 @@ export const beneficiarySignupSchema = z
       });
     }
   });
+
+  // Schema for form validation (without otpCode and password)
+export const signupFormSchema = beneficiarySignupSchema.omit({
+  otpCode: true,
+  password: true,
+}) .superRefine((value, ctx) => {
+  const age = calculateAge(value.dateOfBirth);
+  const isKollel = value.yeshivaDetails.yeshivaType === "kollel";
+  const documentsRequired = age >= 18 || !age;
+
+  const hasYeshivaCertificate = value.yeshivaDetails.yeshivaCertificateUploadId !== undefined;
+  const hasIdentityCard = value.identityCardUploadId !== undefined;
+  const hasIdentityAppendix = value.identityAppendixUploadId !== undefined;
+  const hasProvidedDocuments = hasIdentityCard && hasIdentityAppendix;
+
+
+  if (documentsRequired && !hasProvidedDocuments) {
+    if (!hasIdentityCard) {
+      console.log("identity_card_upload_id_required");
+      ctx.addIssue({
+        code: "custom",
+        path: ["identityCardUploadId"],
+        message: "identity_card_upload_id_required",
+      });
+    }
+    if (!hasIdentityAppendix) {
+      console.log("identity_appendix_upload_id_required");
+      ctx.addIssue({
+        code: "custom",
+        path: ["identityAppendixUploadId"],
+        message: "identity_appendix_upload_id_required",
+      });
+    }
+  }
+
+  if (isKollel && !hasYeshivaCertificate) {
+    console.log("yeshiva_certificate_upload_id_required");
+    ctx.addIssue({
+      code: "custom",
+      path: ["yeshivaDetails", "yeshivaCertificateUploadId"],
+      message: "yeshiva_certificate_upload_id_required",
+    });
+  }
+
+  if (value.maritalStatus !== "single") {
+    if (!value.spouse) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["spouse"],
+        message: "spouse_required",
+      });
+    }
+  }
+
+  if (value.children.length !== value.childrenCount) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["children"],
+      message: "children_mismatch",
+    });
+  }
+});
 
 export type BeneficiarySignupInput = z.infer<typeof beneficiarySignupSchema>;
 export type BeneficiarySpouseInput = z.infer<typeof spouseSchema>;

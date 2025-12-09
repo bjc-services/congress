@@ -119,15 +119,6 @@ export function  IdentityDocumentsSection({
                       label={t("document_identity_card")}
                       description={identityCardDocumentType.description}
                       disabled={submitting}
-                      error={
-                        field.state.meta.isTouched && !field.state.meta.isValid
-                          ? (
-                              field.state.meta.errors[0] as
-                                | { message?: string }
-                                | undefined
-                            )?.message
-                          : undefined
-                      }
                       t={{
                         fileSizeTooLarge: ({ maxSize }) =>
                           t("file_size_too_large", {
@@ -210,15 +201,6 @@ export function  IdentityDocumentsSection({
                       label={t("document_identity_appendix")}
                       description={identityAppendixDocumentType.description}
                       disabled={submitting}
-                      error={
-                        field.state.meta.isTouched && !field.state.meta.isValid
-                          ? (
-                              field.state.meta.errors[0] as
-                                | { message?: string }
-                                | undefined
-                            )?.message
-                          : undefined
-                      }
                       t={{
                         fileSizeTooLarge: ({ maxSize }) =>
                           t("file_size_too_large", {

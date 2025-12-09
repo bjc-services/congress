@@ -2,5 +2,15 @@
   "delete_failed": "המחיקה נכשלה",
   "form_data_missing": "נתוני הטופס חסרים",
   "password_required": "סיסמה היא שדה חובה",
-  "upload_failed": "ההעלאה נכשלה"
+  "upload_failed": "ההעלאה נכשלה",
+  "an_account_with_this_national_id_already_exists": "חשבון עם תעודת זהות זו כבר קיים במערכת",
+  "verification_code_sent_successfully": "קוד אימות נשלח בהצלחה",
+  "invalid_or_expired_verification_code": "קוד האימות אינו חוקי או שפג תוקפו",
+  "failed_to_retrieve_account": "נכשל באחזור פרטי החשבון",
+  "account_created_successfully_pending_verification": "החשבון נוצר בהצלחה וממתין לאימות",
+  "failed_to_create_person": "נכשל ביצירת פרופיל אישי",
+  "unknown_document_type": "סוג מסמך לא ידוע",
+  "file_size_too_large": "קובץ גדול מדי",
+  "invalid_file_type": "סוג קובץ לא תקין",
+  "phone_number_verified_successfully": "מספר הטלפון אומת בהצלחה"
 }

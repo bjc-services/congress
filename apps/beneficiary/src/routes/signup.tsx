@@ -14,7 +14,7 @@ import type { UploadedFile } from "@congress/ui/upload";
 import type { maritalStatusSchema } from "@congress/validators";
 import { AddressFieldsGroup, useAppForm } from "@congress/ui/fields";
 import { toast } from "@congress/ui/toast";
-import { beneficiarySignupSchema } from "@congress/validators";
+import { signupFormSchema } from "@congress/validators";
 
 import { useBeneficiaryAuth } from "~/lib/beneficiary-auth-provider";
 import { orpcClient } from "~/lib/orpc";
@@ -22,7 +22,7 @@ import { ApplicantDetailsSection } from "./signup/components/applicant-details-s
 import { ChildrenSection } from "./signup/components/children-section";
 import { FamilyStatusSection } from "./signup/components/family-status-section";
 import { IdentityDocumentsSection } from "./signup/components/identity-documents-section";
-import { KollelDetails } from "./signup/components/kollel-details";
+import { YeshivaDetails } from "./signup/components/kollel-details";
 import { OtpStep } from "./signup/components/otp-step";
 import {
   PasswordStep,
@@ -52,11 +52,7 @@ const otpSchema = z.object({
     .regex(/^\d{4}$/, "invalid_otp"),
 });
 
-// Schema for form validation (without otpCode and password)
-const signupFormSchema = beneficiarySignupSchema.omit({
-  otpCode: true,
-  password: true,
-});
+
 
 export const Route = createFileRoute("/signup")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -81,7 +77,7 @@ function SignupRouteComponent() {
 
   const [step, setStep] = useState<SignupStep>("form");
   const [formData, setFormData] = useState<Omit<
-    z.infer<typeof beneficiarySignupSchema>,
+    z.infer<typeof signupFormSchema>,
     "otpCode" | "password"
   > | null>(null);
   const [password, setPassword] = useState<string>("");
@@ -95,11 +91,11 @@ function SignupRouteComponent() {
   const sendSignupOtpMutation = useMutation(
     orpc.beneficiaryAuth.sendSignupOTP.mutationOptions({
       onSuccess: (data) => {
-        toast.success(data.message);
+        toast.success(t(data.message as any));
         setStep("otp");
       },
       onError: (error) => {
-        toast.error(error.message);
+        toast.error(t(error.message as any));
       },
     }),
   );
@@ -107,12 +103,12 @@ function SignupRouteComponent() {
   const signupMutation = useMutation(
     orpc.beneficiaryAuth.signup.mutationOptions({
       onSuccess: async (data) => {
-        toast.success(data.message);
+        toast.success(t(data.message as any));
         await refetchSession();
         await navigate({ to: "/", replace: true });
       },
       onError: (error) => {
-        toast.error(error.message);
+        toast.error(t(error.message as any));
       },
     }),
   );
@@ -133,11 +129,14 @@ function SignupRouteComponent() {
         addressLine2: "",
         postalCode: "",
       },
-      kollelType: "kollel" as "kollel" | "yeshiva",
-      kollelName: "",
-      headOfTheKollelName: "",
-      headOfTheKollelPhone: "",
-      kollelWorkType: "all_day" as "all_day" | "half_day",
+      yeshivaDetails: {
+        yeshivaName: undefined as string | undefined,
+        headOfTheYeshivaName: undefined as string | undefined,
+        headOfTheYeshivaPhone: undefined as string | undefined,
+        yeshivaWorkType: undefined as "all_day" | "half_day" | undefined,
+        yeshivaCertificateUploadId: undefined as string | undefined,
+        yeshivaType: "yeshiva" as "kollel" | "yeshiva",
+      },
       spouse: undefined as
         | {
             nationalId: string;
@@ -258,7 +257,7 @@ function SignupRouteComponent() {
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
-        toast.error(errorMessage || t("upload_failed"));
+        toast.error(t(errorMessage as any) || t("upload_failed"));
         throw error;
       }
     },
@@ -272,7 +271,7 @@ function SignupRouteComponent() {
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : String(error);
-        toast.error(errorMessage || t("delete_failed"));
+        toast.error(t(errorMessage as any) || t("delete_failed"));
         throw error;
       }
     },
@@ -314,7 +313,7 @@ function SignupRouteComponent() {
             />
 
             <FamilyStatusSection form={form as AppForm} />
-            <KollelDetails
+            <YeshivaDetails
               form={form as AppForm}
               kollelCertificateFile={kollelCertificateFile}
               setKollelCertificateFile={setKollelCertificateFile}

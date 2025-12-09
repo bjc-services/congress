@@ -8,6 +8,7 @@ export const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       theme={"light"} // TODO: Theme support
       className="toaster group"
+      richColors
       style={
         {
           "--normal-bg": "var(--popover)",

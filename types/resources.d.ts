@@ -95,9 +95,7 @@ interface Resources {
     "invalid_file_type": "Invalid file type. Please upload a supported file format.",
     "invalid_verification_code": "Invalid verification code. Please enter the last 4 digits of the caller ID.",
     "kollel": "kollel",
-    "kollel_details": "kollel_details",
     "kollel_name": "kollel_name",
-    "kollel_type": "kollel_type",
     "kollel_work_type": "kollel_work_type",
     "last_name": "Last Name",
     "loading": "Loading...",
@@ -155,6 +153,8 @@ interface Resources {
     "verify_code": "Verify Code",
     "verifying": "Verifying...",
     "yeshiva": "yeshiva",
+    "yeshiva_details": "yeshiva_details",
+    "yeshiva_type": "yeshiva_type",
     "you_must_be_logged_in_to_delete_a_post": "You must be logged in to delete a post",
     "you_must_be_logged_in_to_post": "You must be logged in to create a post"
   }

@@ -100,7 +100,7 @@ function IdentifyStep({
             fields: {
               nationalId:
                 error instanceof Error
-                  ? error.message || t("national_id_incorrect")
+                  ? t((error.message || "national_id_incorrect") as any)
                   : t("national_id_incorrect"),
             },
           };
@@ -156,7 +156,6 @@ function IdentifyStep({
         <FieldError
           className="absolute -bottom-6 left-0 w-full translate-y-full text-center text-base"
           errors={form.state.fieldMeta.nationalId.errors.map((error) => {
-            console.log(error);
             if (typeof error === "string") {
               try {
                 return { message: t(error as never) };
@@ -500,14 +499,16 @@ function LoginRouteComponent() {
     orpc.beneficiaryAuth.sendOTP.mutationOptions({
       onSuccess: (data) => {
         setMaskedPhoneNumber(data.phoneNumberMasked);
-        toast.success(data.message);
+        // @ts-expect-error - Backend returns keys
+        toast.success(t(data.message));
         if (data.devCode) {
           console.info("[DEV] OTP Code:", data.devCode);
         }
         setStep("otp");
       },
       onError: (error) => {
-        toast.error(error.message);
+        // @ts-expect-error - Backend returns keys
+        toast.error(t(error.message));
       },
     }),
   );
@@ -520,7 +521,8 @@ function LoginRouteComponent() {
         await navigate({ to: "/", replace: true });
       },
       onError: (error) => {
-        toast.error(error.message);
+        // @ts-expect-error - Backend returns keys
+        toast.error(t(error.message));
       },
     }),
   );
@@ -532,7 +534,8 @@ function LoginRouteComponent() {
         setStep("setPassword");
       },
       onError: (error) => {
-        toast.error(error.message);
+        // @ts-expect-error - Backend returns keys
+        toast.error(t(error.message));
       },
     }),
   );
@@ -540,12 +543,14 @@ function LoginRouteComponent() {
   const setPasswordMutation = useMutation(
     orpc.beneficiaryAuth.verifyOTPAndSetPassword.mutationOptions({
       onSuccess: async (data) => {
-        toast.success(data.message);
+        // @ts-expect-error - Backend returns keys
+        toast.success(t(data.message));
         await refetchSession();
         await navigate({ to: "/", replace: true });
       },
       onError: (error) => {
-        toast.error(error.message);
+        // @ts-expect-error - Backend returns keys
+        toast.error(t(error.message));
       },
     }),
   );

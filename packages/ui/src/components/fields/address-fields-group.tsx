@@ -60,8 +60,6 @@ export const AddressFieldsGroup = withFieldGroup({
       }),
     );
 
-    console.log(citiesQuery.data);
-
     const selectedCity = useMemo(() => {
       return citiesQuery.data?.find(
         (city) => Number(city.value) === Number(cityId),
