@@ -6,7 +6,7 @@ import {
   useNavigate,
   useRouteContext,
 } from "@tanstack/react-router";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { z } from "zod/v4";
 
 import { Button } from "@congress/ui/button";
@@ -61,7 +61,7 @@ function IdentifyStep({
   onPasswordStepReady,
   isBusy,
 }: IdentifyStepProps) {
-  const { t } = useTranslation("login");
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const form = useAppForm({
@@ -200,7 +200,7 @@ function PasswordStep({
   onBack,
   isBusy,
 }: PasswordStepProps) {
-  const { t } = useTranslation("login");
+  const { t } = useTranslation();
 
   const form = useAppForm({
     defaultValues: {
@@ -301,7 +301,7 @@ function OtpStep({
   isBusy,
   isResending,
 }: OtpStepProps) {
-  const { t } = useTranslation("login");
+  const { t } = useTranslation();
 
   const form = useAppForm({
     defaultValues: {
@@ -327,11 +327,17 @@ function OtpStep({
     >
       <div className="text-muted-foreground space-y-2 text-sm">
         <p>
-          {maskedPhoneNumber
-            ? t("otp_sent_message", {
-                phoneNumber: maskedPhoneNumber,
-              })
-            : t("otp_sent_message_no_phone")}
+          {maskedPhoneNumber ? (
+            <Trans
+              i18nKey="otp_sent_message"
+              values={{ phoneNumber: maskedPhoneNumber }}
+              components={{
+                phone: <span dir="ltr" className="inline-block" />,
+              }}
+            />
+          ) : (
+            t("otp_sent_message_no_phone")
+          )}
         </p>
       </div>
       <FieldGroup>
@@ -398,7 +404,7 @@ function SetPasswordStep({
   onBack,
   isBusy,
 }: SetPasswordStepProps) {
-  const { t } = useTranslation("login");
+  const { t } = useTranslation();
 
   const form = useAppForm({
     defaultValues: {
@@ -476,7 +482,7 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginRouteComponent() {
-  const { t } = useTranslation("login");
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const initialSearch = Route.useSearch();
   const { orpc } = useRouteContext({ from: "__root__" });

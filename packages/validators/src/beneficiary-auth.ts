@@ -58,7 +58,8 @@ const postalCodeSchema = z
   .string({ message: "postal_code_required" })
   .trim()
   .min(5, { message: "postal_code_too_short" })
-  .max(7, { message: "postal_code_too_long" });
+  .max(7, { message: "postal_code_too_long" })
+  .optional();
 
 const addressSchema = z.object({
   cityId: z
@@ -205,7 +206,8 @@ export const beneficiarySignupSchema = z
   .superRefine((value, ctx) => {
     const age = calculateAge(value.dateOfBirth);
     const isKollel = value.yeshivaDetails.yeshivaType === "kollel";
-    const documentsRequired = age >= 18 || !age;
+    // Documents required only if age is 18+ OR if we can't calculate age (invalid date)
+    const documentsRequired = Number.isNaN(age) || age >= 18;
 
     const hasYeshivaCertificate =
       value.yeshivaDetails.yeshivaCertificateUploadId !== undefined;
@@ -267,7 +269,8 @@ export const signupFormSchema = beneficiarySignupSchema
   .superRefine((value, ctx) => {
     const age = calculateAge(value.dateOfBirth);
     const isKollel = value.yeshivaDetails.yeshivaType === "kollel";
-    const documentsRequired = age >= 18 || !age;
+    // Documents required only if age is 18+ OR if we can't calculate age (invalid date)
+    const documentsRequired = Number.isNaN(age) || age >= 18;
 
     const hasYeshivaCertificate =
       value.yeshivaDetails.yeshivaCertificateUploadId !== undefined;
@@ -300,6 +303,21 @@ export const signupFormSchema = beneficiarySignupSchema
         code: "custom",
         path: ["yeshivaDetails", "yeshivaCertificateUploadId"],
         message: "yeshiva_certificate_upload_id_required",
+      });
+      ctx.addIssue({
+        code: "custom",
+        path: ["yeshivaDetails", "yeshivaName"],
+        message: "yeshiva_name_required",
+      });
+      ctx.addIssue({
+        code: "custom",
+        path: ["yeshivaDetails", "headOfTheYeshivaName"],
+        message: "head_of_the_yeshiva_name_required",
+      });
+      ctx.addIssue({
+        code: "custom",
+        path: ["yeshivaDetails", "headOfTheYeshivaPhone"],
+        message: "head_of_the_yeshiva_phone_required",
       });
     }
 

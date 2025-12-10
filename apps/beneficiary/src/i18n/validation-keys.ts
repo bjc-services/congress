@@ -21,6 +21,12 @@ export function declareValidationKeys(t: (key: string) => void) {
   t("name_too_long");
 
   // Address validation
+  t("city_required");
+  t("city_too_long");
+  t("city_too_short");
+  t("street_required");
+  t("street_too_long");
+  t("street_too_short");
   t("house_number_required");
   t("house_number_too_long");
   t("postal_code_required");

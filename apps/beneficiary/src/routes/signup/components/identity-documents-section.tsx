@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { AppForm } from "@congress/ui/fields";
 import type { UploadedFile } from "@congress/ui/upload";
 import { Field, FieldError, FieldGroup } from "@congress/ui/field";
+import { toast } from "@congress/ui/toast";
 import { DocumentUpload } from "@congress/ui/upload";
 import {
   identityAppendixDocumentType,
@@ -49,6 +50,7 @@ export function IdentityDocumentsSection({
   const documentsRequirement = ((): DocumentsRequirement => {
     if (!dateOfBirth) return "required";
     const age = calculateAge(dateOfBirth);
+    console.log("age", age);
     if (Number.isNaN(age)) return "required";
     if (age >= 18) return "required";
     if (age >= 16) return "optional";
@@ -77,6 +79,7 @@ export function IdentityDocumentsSection({
               if (Number.isNaN(age) || age < 16) {
                 // Avoid infinite loops: only update if current value differs
                 if (fieldApi.state.value !== undefined) {
+                  toast.info(t("age_is_less_than_16"));
                   fieldApi.setValue(undefined);
                   setIdCardFile(undefined);
                 }
@@ -159,6 +162,7 @@ export function IdentityDocumentsSection({
               if (Number.isNaN(age) || age < 16) {
                 // Avoid infinite loops: only update if current value differs
                 if (fieldApi.state.value !== undefined) {
+                  toast.info(t("age_is_less_than_16"));
                   fieldApi.setValue(undefined);
                   setIdAppendixFile(undefined);
                 }

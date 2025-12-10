@@ -35,7 +35,7 @@ interface OtpStepProps {
 }
 
 export function OtpStep({ formData, setStep, password }: OtpStepProps) {
-  const { t } = useTranslation("signup");
+  const { t } = useTranslation();
   const { orpc } = useRouteContext({ from: "__root__" });
   const { refetchSession } = useBeneficiaryAuth();
   const navigate = useNavigate();

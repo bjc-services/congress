@@ -16,7 +16,7 @@ interface AddressFields {
   streetId: number | undefined;
   houseNumber: string;
   addressLine2?: string;
-  postalCode: string;
+  postalCode?: string;
 }
 
 const defaultValues: AddressFields = {
@@ -24,7 +24,7 @@ const defaultValues: AddressFields = {
   streetId: undefined,
   houseNumber: "",
   addressLine2: "",
-  postalCode: "",
+  postalCode: undefined,
 };
 
 export const AddressFieldsGroup = withFieldGroup({
@@ -85,7 +85,7 @@ export const AddressFieldsGroup = withFieldGroup({
     return (
       <div className="space-y-4">
         <h2 className="text-lg font-medium">{t("address_information")}</h2>
-        <FieldGroup>
+        <FieldGroup className="gap-5">
           <group.AppField name="cityId">
             {(field) => {
               const isInvalid =
@@ -154,8 +154,6 @@ export const AddressFieldsGroup = withFieldGroup({
               );
             }}
           </group.AppField>
-        </FieldGroup>
-        <FieldGroup>
           <group.AppField name="houseNumber">
             {(field) => <field.TextField label={t("house_number")} />}
           </group.AppField>

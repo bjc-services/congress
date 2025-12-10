@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Command as CommandPrimitive } from "cmdk";
 import { Check } from "lucide-react";
 
@@ -58,6 +58,15 @@ export function AutoComplete<T extends string>({
       ),
     [items],
   );
+
+  // Initialize search value from selected item's label when items load
+  useEffect(() => {
+    if (selectedValue && labels[selectedValue] && !searchValue) {
+      const label = labels[selectedValue];
+      onExternalSearchValueChange?.(label);
+      setInternalSearchValue(label);
+    }
+  }, [selectedValue, labels, searchValue, onExternalSearchValueChange]);
 
   const reset = () => {
     onSelectedValueChange("" as T);

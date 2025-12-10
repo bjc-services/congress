@@ -24,7 +24,7 @@ export function ChildrenSection({ form }: ChildrenSectionProps) {
         return (
           <section className="space-y-4">
             <h2 className="text-lg font-medium">{t("children_information")}</h2>
-            <FieldGroup>
+            <FieldGroup className="gap-5">
               <form.AppField
                 name="childrenCount"
                 listeners={{
@@ -74,52 +74,52 @@ export function ChildrenSection({ form }: ChildrenSectionProps) {
                   />
                 )}
               </form.AppField>
-            </FieldGroup>
-            <form.AppField name="children" mode="array">
-              {(field) => (
-                <form.Subscribe
-                  selector={(state) =>
-                    (state.values as { childrenCount: number }).childrenCount
-                  }
-                  children={(childrenCount) => {
-                    const count =
-                      typeof childrenCount === "number" ? childrenCount : 0;
-                    return (
-                      <div className="space-y-4">
-                        {(
-                          field.state.value as {
-                            firstName: string;
-                            lastName: string;
-                            nationalId: string;
-                            dateOfBirth: string;
-                          }[]
-                        ).map((_, index) => (
-                          <ChildrenFieldsGroup
-                            key={index}
-                            form={form}
-                            fields={`children[${index}]` as never}
-                            childNumber={index + 1}
-                          />
-                        ))}
-                        {count > 0 &&
-                          (
+              <form.AppField name="children" mode="array">
+                {(field) => (
+                  <form.Subscribe
+                    selector={(state) =>
+                      (state.values as { childrenCount: number }).childrenCount
+                    }
+                    children={(childrenCount) => {
+                      const count =
+                        typeof childrenCount === "number" ? childrenCount : 0;
+                      return (
+                        <div className="space-y-4">
+                          {(
                             field.state.value as {
                               firstName: string;
                               lastName: string;
                               nationalId: string;
                               dateOfBirth: string;
                             }[]
-                          ).length !== count && (
-                            <p className="text-destructive text-sm">
-                              {t("children_mismatch_hint")}
-                            </p>
-                          )}
-                      </div>
-                    );
-                  }}
-                />
-              )}
-            </form.AppField>
+                          ).map((_, index) => (
+                            <ChildrenFieldsGroup
+                              key={index}
+                              form={form}
+                              fields={`children[${index}]` as never}
+                              childNumber={index + 1}
+                            />
+                          ))}
+                          {count > 0 &&
+                            (
+                              field.state.value as {
+                                firstName: string;
+                                lastName: string;
+                                nationalId: string;
+                                dateOfBirth: string;
+                              }[]
+                            ).length !== count && (
+                              <p className="text-destructive text-sm">
+                                {t("children_mismatch_hint")}
+                              </p>
+                            )}
+                        </div>
+                      );
+                    }}
+                  />
+                )}
+              </form.AppField>
+            </FieldGroup>
           </section>
         );
       }}

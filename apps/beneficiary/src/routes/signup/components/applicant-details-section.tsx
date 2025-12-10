@@ -21,7 +21,7 @@ export function ApplicantDetailsSection({
   return (
     <section className="space-y-4">
       <h2 className="text-lg font-medium">{t("applicant_details")}</h2>
-      <FieldGroup>
+      <FieldGroup className="gap-5">
         <form.AppField name="firstName">
           {(field) => <field.TextField label={t("first_name")} />}
         </form.AppField>
@@ -58,8 +58,6 @@ export function ApplicantDetailsSection({
         >
           {(field) => <field.TextField label={t("last_name")} />}
         </form.AppField>
-      </FieldGroup>
-      <FieldGroup>
         <form.AppField name="nationalId">
           {(field) => (
             <field.TextField
@@ -89,8 +87,6 @@ export function ApplicantDetailsSection({
         >
           {(field) => <field.DatePickerField label={t("date_of_birth")} />}
         </form.AppField>
-      </FieldGroup>
-      <FieldGroup>
         <form.AppField name="personalPhoneNumber">
           {(field) => (
             <field.PhoneField

@@ -329,6 +329,13 @@ export function DocumentUpload({
         contentType: mimeType,
       });
 
+      // Set status to uploading
+      setUploadingFiles((prev) =>
+        prev.map((f) =>
+          f.file === file ? { ...f, status: "uploading" as const } : f,
+        ),
+      );
+
       // Upload to S3
       await uploadToS3(file, url, presignedFields, (progress) => {
         setUploadingFiles((prev) =>

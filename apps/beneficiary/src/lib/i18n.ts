@@ -5,11 +5,7 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";
 import { z } from "zod/v4";
 
-import enLogin from "../../../../locals/en/login.json";
-import enSignup from "../../../../locals/en/signup.json";
 import enTranslation from "../../../../locals/en/translation.json";
-import heLogin from "../../../../locals/he/login.json";
-import heSignup from "../../../../locals/he/signup.json";
 import heTranslation from "../../../../locals/he/translation.json";
 
 // Zod error map to ensure all errors use translation keys
@@ -55,13 +51,9 @@ z.config({ customError: zodErrorMap });
 export const resources = {
   en: {
     translation: enTranslation,
-    login: enLogin,
-    signup: enSignup,
   },
   he: {
     translation: heTranslation,
-    login: heLogin,
-    signup: heSignup,
   },
 } as const;
 

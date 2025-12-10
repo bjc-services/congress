@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod/v4";
 
@@ -20,13 +22,7 @@ import { passwordSchema } from "@congress/validators";
 const passwordStepSchema = z
   .object({
     password: passwordSchema,
-    confirmPassword: passwordSchema,
   })
-  .refine((value) => value.password === value.confirmPassword, {
-    message: "passwords_do_not_match",
-    path: ["confirmPassword"],
-  });
-
 interface PasswordStepProps {
   setStep: (step: "form" | "otp" | "password") => void;
   setPassword: (password: string) => void;
@@ -41,11 +37,11 @@ export function PasswordStep({
   personalPhoneNumber,
 }: PasswordStepProps) {
   const { t } = useTranslation();
+  const [showPassword, setShowPassword] = useState(false);
 
   const passwordForm = useAppForm({
     defaultValues: {
       password: "",
-      confirmPassword: "",
     },
     validators: {
       onSubmit: passwordStepSchema,
@@ -116,45 +112,36 @@ export function PasswordStep({
                           {t("password")}
                         </FieldLabel>
                       </FieldContent>
-                      <Input
-                        id={field.name}
-                        type="password"
-                        value={field.state.value as string}
-                        onBlur={field.handleBlur}
-                        onChange={(event) =>
-                          field.handleChange(event.target.value)
-                        }
-                        disabled={isDisabled}
-                      />
-                      {isInvalid && (
-                        <FieldError errors={field.state.meta.errors} />
-                      )}
-                    </Field>
-                  );
-                }}
-              />
-              <passwordForm.Field
-                name="confirmPassword"
-                children={(field) => {
-                  const isInvalid =
-                    field.state.meta.isTouched && !field.state.meta.isValid;
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldContent>
-                        <FieldLabel htmlFor={field.name}>
-                          {t("confirm_password")}
-                        </FieldLabel>
-                      </FieldContent>
-                      <Input
-                        id={field.name}
-                        type="password"
-                        value={field.state.value as string}
-                        onBlur={field.handleBlur}
-                        onChange={(event) =>
-                          field.handleChange(event.target.value)
-                        }
-                        disabled={isDisabled}
-                      />
+                      <div className="relative">
+                        <Input
+                          id={field.name}
+                          type={showPassword ? "text" : "password"}
+                          value={field.state.value as string}
+                          onBlur={field.handleBlur}
+                          onChange={(event) =>
+                            field.handleChange(event.target.value)
+                          }
+                          disabled={isDisabled}
+                          className="pe-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="text-muted-foreground hover:text-foreground absolute end-3 top-1/2 -translate-y-1/2"
+                          tabIndex={-1}
+                          aria-label={
+                            showPassword
+                              ? t("hide_password")
+                              : t("show_password")
+                          }
+                        >
+                          {showPassword ? (
+                            <EyeOffIcon className="size-4" />
+                          ) : (
+                            <EyeIcon className="size-4" />
+                          )}
+                        </button>
+                      </div>
                       {isInvalid && (
                         <FieldError errors={field.state.meta.errors} />
                       )}
@@ -170,7 +157,7 @@ export function PasswordStep({
                 size="lg"
                 disabled={isDisabled}
               >
-                {isSubmitting ? t("submitting") : t("submit_application")}
+                {isSubmitting ? t("submitting") : t("continue")}
               </Button>
               <Button type="button" variant="link" onClick={onBack}>
                 {t("back")}

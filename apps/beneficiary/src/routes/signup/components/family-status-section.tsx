@@ -17,7 +17,7 @@ export function FamilyStatusSection({ form }: FamilyStatusSectionProps) {
   return (
     <section className="space-y-4">
       <h2 className="text-lg font-medium">{t("family_status")}</h2>
-      <FieldGroup>
+      <FieldGroup className="gap-5">
         <form.AppField
           name="maritalStatus"
           listeners={{
@@ -25,6 +25,25 @@ export function FamilyStatusSection({ form }: FamilyStatusSectionProps) {
               const lastName = fieldApi.form.getFieldValue("lastName");
               if (value === "single") {
                 fieldApi.form.setFieldValue("spouse", undefined);
+
+                // Clear validation errors for spouse fields
+                const spouseFields = [
+                  "spouse",
+                  "spouse.firstName",
+                  "spouse.lastName",
+                  "spouse.nationalId",
+                  "spouse.phoneNumber",
+                  "spouse.dateOfBirth",
+                ] as const;
+                for (const field of spouseFields) {
+                  fieldApi.form.setFieldMeta(field, (meta) => ({
+                    ...meta,
+                    errors: [],
+                    errorMap: {},
+                    isTouched: false,
+                    isValid: true,
+                  }));
+                }
               } else {
                 const currentSpouse = fieldApi.form.getFieldValue("spouse");
                 if (!currentSpouse) {

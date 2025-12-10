@@ -43,7 +43,7 @@ export function TextField({
   const placeholder = isLabelFloating ? (placeholderProp ?? " ") : " ";
 
   return (
-    <Field data-invalid={isInvalid}>
+    <Field data-invalid={isInvalid} className="gap-1">
       <FloatingField label={label} variant={variant} align={align}>
         <Input
           id={field.name}

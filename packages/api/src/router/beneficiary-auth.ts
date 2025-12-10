@@ -81,8 +81,10 @@ function maskPhoneNumber(phoneNumber: string): string {
   if (!phoneNumber) return "05*****00";
 
   const trimmed = phoneNumber.trim();
+  // Extract only digits, then add back the "+" if it was present
+  const digitsOnly = trimmed.replace(/[^\d]/g, "");
   const hasPlus = trimmed.startsWith("+");
-  const digits = (hasPlus ? "+" : "") + trimmed.replace(/[^\d+]/g, "");
+  const digits = hasPlus ? `+${digitsOnly}` : digitsOnly;
 
   let local: string | null = null;
 

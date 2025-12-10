@@ -23,7 +23,7 @@ export function PhoneField({ label, optional = false, t }: PhoneFieldProps) {
       <FloatingField
         label={
           optional
-            ? `${label} ${field.state.meta.isTouched ? "" : `(${t("optional")})`}`
+            ? `${label} ${`(${t("optional")})`}`
             : label
         }
         filled={Boolean(field.state.value)}

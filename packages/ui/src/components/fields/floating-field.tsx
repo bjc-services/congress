@@ -42,7 +42,7 @@ export function FloatingField({
         data-align={align}
         htmlFor={field.name}
         className={cn(
-          "origin-start absolute top-1/2 block -translate-y-1/2 cursor-text px-2 text-start transition-all data-[align=center]:w-full data-[align=center]:text-center data-[align=left]:text-left data-[align=right]:text-right",
+          "origin-start absolute top-1/2 z-10 block -translate-y-1/2 cursor-text px-2 text-start transition-all data-[align=center]:w-full data-[align=center]:text-center data-[align=left]:text-left data-[align=right]:text-right",
           // Default variant styling
           variant === "default" && "text-muted-foreground",
           // Inverted variant styling

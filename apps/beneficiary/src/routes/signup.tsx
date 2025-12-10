@@ -36,6 +36,12 @@ export const Route = createFileRoute("/signup")({
   component: SignupRouteComponent,
 });
 
+export interface DisclaimerState {
+  disclaimerStatement1: boolean;
+  disclaimerStatement2: boolean;
+  disclaimerStatement3: boolean;
+}
+
 function SignupRouteComponent() {
   const navigate = useNavigate();
   const { session } = useBeneficiaryAuth();
@@ -47,6 +53,11 @@ function SignupRouteComponent() {
   > | null>(null);
 
   const [password, setPassword] = useState<string>("");
+  const [disclaimers, setDisclaimers] = useState<DisclaimerState>({
+    disclaimerStatement1: false,
+    disclaimerStatement2: false,
+    disclaimerStatement3: false,
+  });
 
   useEffect(() => {
     if (session) {
@@ -66,6 +77,9 @@ function SignupRouteComponent() {
           nationalId={search.nationalId ?? ""}
           setFormData={setFormData}
           setStep={setStep}
+          initialData={formData}
+          disclaimers={disclaimers}
+          setDisclaimers={setDisclaimers}
         />
       )}
       {step === "otp" && (

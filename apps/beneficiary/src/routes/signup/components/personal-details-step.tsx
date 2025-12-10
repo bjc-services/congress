@@ -9,6 +9,7 @@ import { toast } from "@congress/ui/toast";
 import { UploadedFile } from "@congress/ui/upload";
 import { maritalStatusSchema, signupFormSchema } from "@congress/validators";
 
+import type { DisclaimerState } from "../../signup";
 import { ApplicantDetailsSection } from "./applicant-details-section";
 import { ChildrenSection } from "./children-section";
 import { FamilyStatusSection } from "./family-status-section";
@@ -20,6 +21,48 @@ interface PersonalDetailsStepProps {
   setFormData: (data: any) => void;
   setStep: (step: "form" | "otp" | "password") => void;
   nationalId: string | undefined;
+  initialData?: {
+    nationalId: string;
+    firstName: string;
+    lastName: string;
+    personalPhoneNumber: string;
+    homePhoneNumber?: string;
+    dateOfBirth: string;
+    maritalStatus: "single" | "married" | "divorced";
+    address: {
+      cityId: number;
+      streetId: number;
+      houseNumber: string;
+      addressLine2?: string;
+      postalCode?: string;
+    };
+    yeshivaDetails: {
+      yeshivaName?: string;
+      headOfTheYeshivaName?: string;
+      headOfTheYeshivaPhone?: string;
+      yeshivaWorkType?: "all_day" | "half_day";
+      yeshivaCertificateUploadId?: string;
+      yeshivaType: "kollel" | "yeshiva";
+    };
+    spouse?: {
+      nationalId: string;
+      firstName: string;
+      lastName: string;
+      phoneNumber?: string;
+      dateOfBirth: string;
+    };
+    childrenCount: number;
+    children: {
+      firstName: string;
+      lastName: string;
+      nationalId: string;
+      dateOfBirth: string;
+    }[];
+    identityCardUploadId?: string;
+    identityAppendixUploadId?: string;
+  } | null;
+  disclaimers: DisclaimerState;
+  setDisclaimers: (disclaimers: DisclaimerState) => void;
 }
 
 type MaritalStatus = z.infer<typeof maritalStatusSchema>;
@@ -28,8 +71,11 @@ export function PersonalDetailsStep({
   setFormData,
   setStep,
   nationalId,
+  initialData,
+  disclaimers,
+  setDisclaimers,
 }: PersonalDetailsStepProps) {
-  const { t } = useTranslation("signup");
+  const { t } = useTranslation();
 
   const [idCardFile, setIdCardFile] = useState<UploadedFile | undefined>();
   const [idAppendixFile, setIdAppendixFile] = useState<
@@ -63,7 +109,7 @@ export function PersonalDetailsStep({
   );
 
   const form = useAppForm({
-    defaultValues: {
+    defaultValues: initialData ?? {
       nationalId: nationalId ?? "",
       firstName: "",
       lastName: "",
@@ -76,15 +122,15 @@ export function PersonalDetailsStep({
         streetId: 0,
         houseNumber: "",
         addressLine2: "",
-        postalCode: "",
+        postalCode: undefined as string | undefined,
       },
       yeshivaDetails: {
         yeshivaName: undefined as string | undefined,
         headOfTheYeshivaName: undefined as string | undefined,
         headOfTheYeshivaPhone: undefined as string | undefined,
-        yeshivaWorkType: undefined as "all_day" | "half_day" | undefined,
+        yeshivaWorkType: "all_day" as "all_day" | "half_day" | undefined,
         yeshivaCertificateUploadId: undefined as string | undefined,
-        yeshivaType: "yeshiva" as "kollel" | "yeshiva",
+        yeshivaType: "kollel" as "kollel" | "yeshiva",
       },
       spouse: undefined as
         | {
@@ -154,8 +200,6 @@ export function PersonalDetailsStep({
           setIdCardFile={setIdCardFile}
           setIdAppendixFile={setIdAppendixFile}
         />
-
-        {/* Address Section */}
         <AddressFieldsGroup
           form={form}
           fields={{
@@ -166,8 +210,8 @@ export function PersonalDetailsStep({
             postalCode: "address.postalCode",
           }}
         />
-
         <FamilyStatusSection form={form as AppForm} />
+        <ChildrenSection form={form as AppForm} />
         <YeshivaDetails
           form={form as AppForm}
           kollelCertificateFile={kollelCertificateFile}
@@ -175,7 +219,6 @@ export function PersonalDetailsStep({
           handleGetPresignedUrl={handleGetPresignedUrl}
           handleCancelUpload={handleCancelUpload}
         />
-        <ChildrenSection form={form as AppForm} />
         <form.Subscribe
           selector={(state) => [state.values.dateOfBirth]}
           children={([dateOfBirth]) => (
@@ -191,7 +234,24 @@ export function PersonalDetailsStep({
             />
           )}
         />
-        <SignupFormActions form={form as AppForm} />
+        <SignupFormActions
+          form={form as AppForm}
+          disclaimers={disclaimers}
+          setDisclaimers={setDisclaimers}
+        />
+        {/* Debug: Show all field errors
+        <form.Subscribe
+          selector={(state) => [state.fieldMeta]}
+          children={([fieldMeta]) => {
+            const fieldsWithErrors = Object.entries(fieldMeta as Record<string, { errors: unknown[] }>)
+              .filter(([, meta]) => meta.errors && meta.errors.length > 0)
+              .map(([name, meta]) => ({ name, errors: meta.errors }));
+            if (fieldsWithErrors.length > 0) {
+              console.log("=== Fields with errors ===", fieldsWithErrors);
+            }
+            return null;
+          }}
+        /> */}
       </form>
     </form.AppForm>
   );

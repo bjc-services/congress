@@ -35,19 +35,40 @@ export function YeshivaDetails({
   return (
     <section className="space-y-4">
       <h2 className="text-lg font-medium">{t("yeshiva_details")}</h2>
-      <FieldGroup>
+      <FieldGroup className="gap-5">
         <form.AppField
           name="yeshivaDetails.yeshivaType"
           listeners={{
             onChange: ({ value, fieldApi }) => {
-              fieldApi.form.setFieldValue("yeshivaDetails", {
-                yeshivaName: "",
-                headOfTheYeshivaName: "",
-                headOfTheYeshivaPhone: "",
-                yeshivaWorkType: "all_day",
-                yeshivaCertificateUploadId: undefined,
-                yeshivaType: value,
-              });
+              // Only reset kollel fields when switching AWAY from kollel
+              if (value !== "kollel") {
+                setKollelCertificateFile(undefined);
+                fieldApi.form.setFieldValue("yeshivaDetails", {
+                  yeshivaName: undefined,
+                  headOfTheYeshivaName: undefined,
+                  headOfTheYeshivaPhone: undefined,
+                  yeshivaWorkType: "all_day",
+                  yeshivaCertificateUploadId: undefined,
+                  yeshivaType: value,
+                });
+                // Clear validation errors for all kollel-specific fields
+                const kollelFields = [
+                  "yeshivaDetails.yeshivaName",
+                  "yeshivaDetails.headOfTheYeshivaName",
+                  "yeshivaDetails.headOfTheYeshivaPhone",
+                  "yeshivaDetails.yeshivaWorkType",
+                  "yeshivaDetails.yeshivaCertificateUploadId",
+                ] as const;
+                for (const field of kollelFields) {
+                  fieldApi.form.setFieldMeta(field, (meta) => ({
+                    ...meta,
+                    errors: [],
+                    errorMap: {},
+                    isTouched: false,
+                    isValid: true,
+                  }));
+                }
+              }
             },
           }}
         >
