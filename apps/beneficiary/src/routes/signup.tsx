@@ -28,12 +28,10 @@ import {
   PasswordStep,
   passwordStepSchema,
 } from "./signup/components/password-step";
-import { SignupFormActions } from "./signup/components/signup-form-actions";
+import { PersonalDetailsStep } from "./signup/components/personal-details-step";
 import { SignupHeader } from "./signup/components/signup-header";
 import { SignupLayout } from "./signup/components/signup-layout";
 import { StepIndicator } from "./signup/components/step-indicator";
-
-type MaritalStatus = z.infer<typeof maritalStatusSchema>;
 
 type SignupStep = "form" | "otp" | "password";
 
@@ -44,13 +42,6 @@ const STEP_TO_NUMBER: Record<SignupStep, number> = {
   password: 2,
   otp: 3,
 };
-
-const otpSchema = z.object({
-  otp: z
-    .string()
-    .trim()
-    .regex(/^\d{4}$/, "invalid_otp"),
-});
 
 export const Route = createFileRoute("/signup")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -67,17 +58,15 @@ export const Route = createFileRoute("/signup")({
 });
 
 function SignupRouteComponent() {
-  const { t } = useTranslation("signup");
   const navigate = useNavigate();
-  const { orpc } = useRouteContext({ from: "__root__" });
-  const { session, refetchSession } = useBeneficiaryAuth();
+  const { session } = useBeneficiaryAuth();
   const search = Route.useSearch();
-
   const [step, setStep] = useState<SignupStep>("form");
   const [formData, setFormData] = useState<Omit<
     z.infer<typeof signupFormSchema>,
     "otpCode" | "password"
   > | null>(null);
+
   const [password, setPassword] = useState<string>("");
 
   useEffect(() => {
@@ -85,198 +74,6 @@ function SignupRouteComponent() {
       void navigate({ to: "/", replace: true });
     }
   }, [navigate, session]);
-
-  const sendSignupOtpMutation = useMutation(
-    orpc.beneficiaryAuth.sendSignupOTP.mutationOptions({
-      onSuccess: (data) => {
-        toast.success(t(data.message as any));
-        setStep("otp");
-      },
-      onError: (error) => {
-        toast.error(t(error.message as any));
-      },
-    }),
-  );
-
-  const signupMutation = useMutation(
-    orpc.beneficiaryAuth.signup.mutationOptions({
-      onSuccess: async (data) => {
-        toast.success(t(data.message as any));
-        await refetchSession();
-        await navigate({ to: "/", replace: true });
-      },
-      onError: (error) => {
-        toast.error(t(error.message as any));
-      },
-    }),
-  );
-
-  const form = useAppForm({
-    defaultValues: {
-      nationalId: search.nationalId ?? "",
-      firstName: "",
-      lastName: "",
-      personalPhoneNumber: "",
-      homePhoneNumber: "" as string | undefined,
-      dateOfBirth: "",
-      maritalStatus: "single" as MaritalStatus,
-      address: {
-        cityId: 0,
-        streetId: 0,
-        houseNumber: "",
-        addressLine2: "",
-        postalCode: "",
-      },
-      yeshivaDetails: {
-        yeshivaName: undefined as string | undefined,
-        headOfTheYeshivaName: undefined as string | undefined,
-        headOfTheYeshivaPhone: undefined as string | undefined,
-        yeshivaWorkType: undefined as "all_day" | "half_day" | undefined,
-        yeshivaCertificateUploadId: undefined as string | undefined,
-        yeshivaType: "yeshiva" as "kollel" | "yeshiva",
-      },
-      spouse: undefined as
-        | {
-            nationalId: string;
-            firstName: string;
-            lastName: string;
-            phoneNumber?: string;
-            dateOfBirth: string;
-          }
-        | undefined,
-      childrenCount: 0,
-      children: [] as {
-        firstName: string;
-        lastName: string;
-        nationalId: string;
-        dateOfBirth: string;
-      }[],
-      identityCardUploadId: undefined as string | undefined,
-      identityAppendixUploadId: undefined as string | undefined,
-    },
-    validators: {
-      // @ts-expect-error - Type mismatch between optional and required undefined, but runtime validation works correctly
-      onSubmit: signupFormSchema,
-    },
-    onSubmit: ({ value }) => {
-      // Validate form and move to password step
-      const payload = {
-        ...value,
-        homePhoneNumber: value.homePhoneNumber,
-        spouse: value.maritalStatus === "single" ? undefined : value.spouse,
-        children: value.children.slice(0, value.childrenCount),
-      };
-
-      // Store form data for later submission
-      setFormData(payload);
-
-      // Move to password step
-      setStep("password");
-    },
-  });
-
-  const otpForm = useAppForm({
-    defaultValues: {
-      otp: "",
-    },
-    validators: {
-      onSubmit: otpSchema,
-    },
-    onSubmit: async ({ value }) => {
-      if (!formData) {
-        toast.error(t("form_data_missing"));
-        setStep("form");
-        return;
-      }
-
-      if (!password) {
-        toast.error(t("password_required"));
-        setStep("password");
-        return;
-      }
-
-      // Submit signup with OTP code and password
-      const payload = {
-        ...formData,
-        otpCode: value.otp,
-        password,
-      };
-
-      await signupMutation.mutateAsync(payload);
-    },
-  });
-
-  const passwordForm = useAppForm({
-    defaultValues: {
-      password: "",
-      confirmPassword: "",
-    },
-    validators: {
-      onSubmit: passwordStepSchema,
-    },
-    onSubmit: async ({ value }) => {
-      if (!formData) {
-        toast.error(t("form_data_missing"));
-        setStep("form");
-        return;
-      }
-
-      // Store password and send OTP
-      setPassword(value.password);
-
-      // Send OTP to phone number
-      await sendSignupOtpMutation.mutateAsync({
-        nationalId: formData.nationalId,
-        phoneNumber: formData.personalPhoneNumber,
-      });
-    },
-  });
-
-  // State for uploaded files
-  const [idCardFile, setIdCardFile] = useState<UploadedFile | undefined>();
-  const [idAppendixFile, setIdAppendixFile] = useState<
-    UploadedFile | undefined
-  >();
-  const [kollelCertificateFile, setKollelCertificateFile] = useState<
-    UploadedFile | undefined
-  >();
-
-  // Upload mutations - use direct orpc calls to avoid SSR issues with mutationOptions
-  const handleGetPresignedUrl = useCallback(
-    async (params: {
-      documentTypeId: string;
-      fileName: string;
-      fileSize: number;
-      base64Md5Hash: string;
-      contentType: string;
-    }) => {
-      try {
-        // Use the orpc client directly for SSR compatibility
-        const result = await orpcClient.upload.requestUploadUrl(params);
-        return result;
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-        toast.error(t(errorMessage as any) || t("upload_failed"));
-        throw error;
-      }
-    },
-    [t],
-  );
-
-  const handleCancelUpload = useCallback(
-    async (uploadId: string) => {
-      try {
-        await orpcClient.upload.cancelUpload({ uploadId });
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error);
-        toast.error(t(errorMessage as any) || t("delete_failed"));
-        throw error;
-      }
-    },
-    [t],
-  );
 
   return (
     <SignupLayout>
@@ -286,75 +83,25 @@ function SignupRouteComponent() {
       />
       <SignupHeader />
       {step === "form" && (
-        <form.AppForm>
-          <form
-            className="space-y-6"
-            onSubmit={(event) => {
-              event.preventDefault();
-              void form.handleSubmit();
-            }}
-          >
-            <ApplicantDetailsSection
-              form={form as AppForm}
-              setIdCardFile={setIdCardFile}
-              setIdAppendixFile={setIdAppendixFile}
-            />
-
-            {/* Address Section */}
-            <AddressFieldsGroup
-              form={form}
-              fields={{
-                cityId: "address.cityId",
-                streetId: "address.streetId",
-                houseNumber: "address.houseNumber",
-                addressLine2: "address.addressLine2",
-                postalCode: "address.postalCode",
-              }}
-            />
-
-            <FamilyStatusSection form={form as AppForm} />
-            <YeshivaDetails
-              form={form as AppForm}
-              kollelCertificateFile={kollelCertificateFile}
-              setKollelCertificateFile={setKollelCertificateFile}
-              handleGetPresignedUrl={handleGetPresignedUrl}
-              handleCancelUpload={handleCancelUpload}
-            />
-            <ChildrenSection form={form as AppForm} />
-            <form.Subscribe
-              selector={(state) => [state.values.dateOfBirth]}
-              children={([dateOfBirth]) => (
-                <IdentityDocumentsSection
-                  form={form as AppForm}
-                  dateOfBirth={dateOfBirth ?? ""}
-                  idCardFile={idCardFile}
-                  idAppendixFile={idAppendixFile}
-                  setIdCardFile={setIdCardFile}
-                  setIdAppendixFile={setIdAppendixFile}
-                  handleGetPresignedUrl={handleGetPresignedUrl}
-                  handleCancelUpload={handleCancelUpload}
-                />
-              )}
-            />
-            <SignupFormActions form={form as AppForm} />
-          </form>
-        </form.AppForm>
+        <PersonalDetailsStep
+          nationalId={search.nationalId ?? ""}
+          setFormData={setFormData}
+          setStep={setStep}
+        />
       )}
       {step === "otp" && (
         <OtpStep
-          otpForm={otpForm as unknown as AppForm}
           formData={formData}
           setStep={setStep}
+          password={password}
         />
       )}
       {step === "password" && (
         <PasswordStep
-          passwordForm={passwordForm as unknown as AppForm}
-          onBack={() => {
-            setStep("form");
-            passwordForm.reset();
-          }}
-          isBusy={sendSignupOtpMutation.isPending}
+          setStep={setStep}
+          setPassword={setPassword}
+          nationalId={search.nationalId ?? ""}
+          personalPhoneNumber={formData?.personalPhoneNumber ?? ""}
         />
       )}
     </SignupLayout>

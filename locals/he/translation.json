@@ -1,4 +1,5 @@
 {
+  "account_created_successfully_pending_verification": "חשבון נוצר בהצלחה. ממתין לאימות.",
   "account_pending_message": "החשבון שלך ממתין לאימות. תוכל לגשת לכל התכונות לאחר שהחשבון יאומת.",
   "account_pending_verification": "חשבון ממתין לאימות",
   "address_information": "פרטי כתובת",
@@ -141,6 +142,7 @@
   "upload_id_required": "נדרשת העלאת מסמך",
   "verification_code": "קוד אימות",
   "verification_code_label": "4 הספרות האחרונות של מספר המתקשר",
+  "verification_code_sent_successfully": "קוד אימות נשלח בהצלחה",
   "verify_code": "אמת קוד",
   "verifying": "מאמת...",
   "yeshiva": "ישיבה",

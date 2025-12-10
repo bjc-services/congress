@@ -25,5 +25,6 @@
   "setting_password": "מגדיר סיסמה...",
   "verification_code_label": "4 הספרות האחרונות של מספר המתקשר",
   "verify_code": "אמת קוד",
-  "verifying": "מאמת..."
+  "verifying": "מאמת...",
+  "invalid_national_id_or_password": "מספר זהות או סיסמה לא תקין. אנא בדוק ונסה שוב."
 }

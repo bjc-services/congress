@@ -1,8 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
-import { useRouteContext } from "@tanstack/react-router";
+import { useNavigate, useRouteContext } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { z } from "zod/v4";
 
-import type { AppForm } from "@congress/ui/fields";
+import { useAppForm } from "@congress/ui/fields";
 import { Button } from "@congress/ui/button";
 import {
   Field,
@@ -13,19 +14,74 @@ import {
 } from "@congress/ui/field";
 import { Input } from "@congress/ui/input";
 import { toast } from "@congress/ui/toast";
+import { useBeneficiaryAuth } from "~/lib/beneficiary-auth-provider";
+import { signupFormSchema } from "@congress/validators";
+
+const otpSchema = z.object({
+  otp: z
+    .string()
+    .trim()
+    .regex(/^\d{4}$/, "invalid_otp"),
+});
+
 
 interface OtpStepProps {
-  otpForm: AppForm;
-  formData: {
-    nationalId: string;
-    personalPhoneNumber: string;
-  } | null;
+  formData: Omit<
+  z.infer<typeof signupFormSchema>,
+  "otpCode" | "password"
+> | null;
   setStep: (step: "form" | "otp" | "password") => void;
+  password: string
 }
 
-export function OtpStep({ otpForm, formData, setStep }: OtpStepProps) {
-  const { t } = useTranslation();
+export function OtpStep({ formData, setStep, password }: OtpStepProps) {
+  const { t } = useTranslation("signup");
   const { orpc } = useRouteContext({ from: "__root__" });
+  const { refetchSession } = useBeneficiaryAuth();
+  const navigate = useNavigate();
+
+
+  const otpForm = useAppForm({
+    defaultValues: {
+      otp: "",
+    },
+    validators: {
+      onSubmit: otpSchema,
+    },
+    onSubmit: async ({ value }) => {
+      if (!formData) {
+        toast.error(t("form_data_missing"));
+        setStep("form");
+        return;
+      }
+
+      if (!password) {
+        toast.error(t("password_required"));
+        setStep("password");
+        return;
+      }
+
+      // Submit signup with OTP code and password
+      await signupMutation.mutateAsync({
+        ...formData,
+        otpCode: value.otp,
+        password: password as string,
+      });
+    },
+  });
+
+  const signupMutation = useMutation(
+    orpc.beneficiaryAuth.signup.mutationOptions({
+      onSuccess: async (data) => {
+        toast.success(t(data.message as any));
+        await refetchSession();
+        await navigate({ to: "/", replace: true });
+      },
+      onError: (error) => {
+        toast.error(t(error.message as any));
+      },
+    }),
+  );
 
   const sendSignupOtpMutation = useMutation(
     orpc.beneficiaryAuth.sendSignupOTP.mutationOptions(),

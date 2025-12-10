@@ -10,7 +10,7 @@ export default defineConfig({
     ],
     output: "locals/{{language}}/{{namespace}}.json",
     // Keep keys that are not found in the code (e.g., validation error keys from Zod schemas)
-    keepOrphans: true,
+    removeUnusedKeys: false,
   },
   types: {
     output: "./types/18next.d.ts",

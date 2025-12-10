@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { z } from "zod/v4";
 
-import type { AppForm } from "@congress/ui/fields";
+import { useAppForm, type AppForm } from "@congress/ui/fields";
 import { Button } from "@congress/ui/button";
 import {
   Field,
@@ -12,6 +12,9 @@ import {
 } from "@congress/ui/field";
 import { Input } from "@congress/ui/input";
 import { passwordSchema } from "@congress/validators";
+import { toast } from "@congress/ui/toast";
+import { useMutation } from "@tanstack/react-query";
+import { orpc } from "@congress/ui/orpc";
 
 const passwordStepSchema = z
   .object({
@@ -24,23 +27,68 @@ const passwordStepSchema = z
   });
 
 interface PasswordStepProps {
-  passwordForm: AppForm;
-  onBack: () => void;
-  isBusy: boolean;
+  setStep: (step: "form" | "otp" | "password") => void;
+  setPassword: (password: string) => void;
+  nationalId: string;
+  personalPhoneNumber: string;
 }
 
 export function PasswordStep({
-  passwordForm,
-  onBack,
-  isBusy,
+  setStep,
+  setPassword,
+  nationalId,
+  personalPhoneNumber,
 }: PasswordStepProps) {
   const { t } = useTranslation();
+
+  const passwordForm = useAppForm({
+    defaultValues: {
+      password: "",
+      confirmPassword: "",
+    },
+    validators: {
+      onSubmit: passwordStepSchema,
+    },
+    onSubmit: async ({ value }) => {
+      // if (!formData) {
+      //   toast.error(t("form_data_missing"));
+      //   setStep("form");
+      //   return;
+      // }
+
+      // Store password and send OTP
+      setPassword(value.password);
+
+      // Send OTP to phone number
+      await sendSignupOtpMutation.mutateAsync({
+        nationalId,
+        phoneNumber: personalPhoneNumber,
+      });
+    },
+  });
+
+  const sendSignupOtpMutation = useMutation(
+    orpc.beneficiaryAuth.sendSignupOTP.mutationOptions({
+      onSuccess: (data) => {
+        toast.success(t(data.message as any));
+        setStep("otp");
+      },
+      onError: (error) => {
+        toast.error(t(error.message as any));
+      },
+    }),
+  );
+
+  const onBack = () => {
+    setStep("form");
+    passwordForm.reset();
+  };
 
   return (
     <passwordForm.Subscribe
       selector={(state) => state.isSubmitting}
       children={(isSubmitting) => {
-        const isDisabled = isSubmitting || isBusy;
+        const isDisabled = isSubmitting || sendSignupOtpMutation.isPending;
 
         return (
           <form

@@ -29,12 +29,22 @@ interface Resources {
     "verifying": "Verifying..."
   },
   "signup": {
+    "account_created_successfully_pending_verification": "account_created_successfully_pending_verification",
+    "back": "back",
     "delete_failed": "Delete failed",
     "form_data_missing": "Form data is missing",
+    "otp_sent_message": "otp_sent_message",
+    "otp_sent_message_no_phone": "otp_sent_message_no_phone",
     "password_required": "Password is required",
-    "upload_failed": "Upload failed"
+    "resend_code": "resend_code",
+    "submit_application": "submit_application",
+    "submitting": "submitting",
+    "upload_failed": "Upload failed",
+    "verification_code_label": "verification_code_label",
+    "verification_code_sent_successfully": "verification_code_sent_successfully"
   },
   "translation": {
+    "account_created_successfully_pending_verification": "account_created_successfully_pending_verification",
     "account_pending_message": "Your account is pending verification. You will be able to access all features once your account has been verified.",
     "account_pending_verification": "Account Pending Verification",
     "address_information": "address_information",
@@ -177,6 +187,7 @@ interface Resources {
     "upload_id_required": "Document upload is required",
     "verification_code": "Verification Code",
     "verification_code_label": "Last 4 Digits of Caller ID",
+    "verification_code_sent_successfully": "verification_code_sent_successfully",
     "verify_code": "Verify Code",
     "verifying": "Verifying...",
     "yeshiva": "yeshiva",
@@ -185,38 +196,6 @@ interface Resources {
     "yeshiva_type": "yeshiva_type",
     "you_must_be_logged_in_to_delete_a_post": "You must be logged in to delete a post",
     "you_must_be_logged_in_to_post": "You must be logged in to create a post"
-  }
-}
-
-export default Resources;
-_your_password": "הגדר את הסיסמה שלך",
-    "setting_password": "מגדיר סיסמה...",
-    "sign_in": "התחבר",
-    "sign_out": "התנתק",
-    "signing_in": "מתחבר...",
-    "signup_disclaimer": "בהמשך, אתה מסכים לתנאים וההגבלות שלנו.",
-    "signup_subtitle": "צור את החשבון שלך כדי להתחיל",
-    "signup_title": "הרשמה",
-    "spouse_details": "פרטי בן/בת הזוג",
-    "spouse_required": "פרטי בן/בת זוג נדרשים",
-    "status_divorced": "גרוש/ה",
-    "status_married": "נשוי/ה",
-    "status_single": "רווק/ה",
-    "street": "רחוב",
-    "submit_application": "שלח בקשה",
-    "submitting": "שולח...",
-    "tim_confirmation": "אישור תים ללימוד בכולל",
-    "upload_id_required": "נדרשת העלאת מסמך",
-    "verification_code": "קוד אימות",
-    "verification_code_label": "4 הספרות האחרונות של מספר המתקשר",
-    "verify_code": "אמת קוד",
-    "verifying": "מאמת...",
-    "yeshiva": "ישיבה",
-    "yeshiva_details": "פרטי ישיבה",
-    "yeshiva_name_required": "שם ישיבה/כולל נדרש",
-    "yeshiva_type": "סוג ישיבה",
-    "you_must_be_logged_in_to_delete_a_post": "עליך להתחבר כדי למחוק פוסט",
-    "you_must_be_logged_in_to_post": "עליך להתחבר כדי ליצור פוסט"
   }
 }
 
