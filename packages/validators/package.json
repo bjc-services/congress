@@ -1,6 +1,7 @@
 {
   "name": "@congress/validators",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "exports": {
     ".": {

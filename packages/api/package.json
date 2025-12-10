@@ -1,6 +1,7 @@
 {
   "name": "@congress/api",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "exports": {
     ".": {

@@ -1,6 +1,7 @@
 {
   "name": "@congress/db",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "exports": {
     ".": {

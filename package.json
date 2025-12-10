@@ -1,6 +1,7 @@
 {
   "name": "create-t3-turbo",
   "private": true,
+  "license": "UNLICENSED",
   "engines": {
     "node": "^22.21.0"
   },
@@ -23,7 +24,8 @@
     "lint:ws": "bun x sherif@latest",
     "postinstall": "bun lint:ws",
     "typecheck": "turbo run typecheck",
-    "ui-add": "turbo run ui-add"
+    "ui-add": "turbo run ui-add",
+    "update:license": "bun scripts/update-license-year.ts"
   },
   "devDependencies": {
     "@congress/prettier-config": "workspace:*",

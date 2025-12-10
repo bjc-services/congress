@@ -1,6 +1,7 @@
 {
   "name": "@congress/transactional",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "exports": {
     "./yemot": {

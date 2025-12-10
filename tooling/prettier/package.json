@@ -1,6 +1,7 @@
 {
   "name": "@congress/prettier-config",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "exports": {
     ".": "./index.js"

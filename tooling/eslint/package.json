@@ -1,6 +1,7 @@
 {
   "name": "@congress/eslint-config",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "exports": {
     "./base": "./base.ts",

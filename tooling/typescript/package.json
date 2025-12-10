@@ -1,6 +1,7 @@
 {
   "name": "@congress/tsconfig",
   "private": true,
+  "license": "UNLICENSED",
   "files": [
     "*.json"
   ]

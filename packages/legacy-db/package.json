@@ -1,6 +1,7 @@
 {
   "name": "@congress/legacy-db",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "exports": {
     "./client": {

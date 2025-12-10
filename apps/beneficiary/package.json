@@ -1,6 +1,7 @@
 {
   "name": "@congress/beneficiary",
   "private": true,
+  "license": "UNLICENSED",
   "sideEffects": false,
   "type": "module",
   "scripts": {

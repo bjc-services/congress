@@ -1,6 +1,7 @@
 {
   "name": "@congress/ui",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "exports": {
     ".": "./src/index.ts",

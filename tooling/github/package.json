@@ -1,3 +1,5 @@
 {
-  "name": "@congress/github"
+  "name": "@congress/github",
+  "private": true,
+  "license": "UNLICENSED"
 }

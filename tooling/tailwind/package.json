@@ -1,6 +1,7 @@
 {
   "name": "@congress/tailwind-config",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "exports": {
     "./theme": "./theme.css",

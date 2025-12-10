@@ -1,0 +1,45 @@
+name: Update License Year
+
+on:
+  schedule:
+    # Run on the first day of each month at midnight UTC
+    - cron: "0 0 1 * *"
+  workflow_dispatch: # Allow manual triggering
+
+permissions:
+  contents: write
+
+jobs:
+  update-license:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.2
+
+      - name: Update LICENSE year
+        run: bun scripts/update-license-year.ts
+
+      - name: Check for changes
+        id: verify-changed
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit changes
+        if: steps.verify-changed.outputs.changed == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add LICENSE
+          git commit -m "chore: update LICENSE copyright year to $(date +%Y)"
+          git push

@@ -1,6 +1,7 @@
 {
   "name": "@congress/s3",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "exports": {
     ".": {

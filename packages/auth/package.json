@@ -1,6 +1,7 @@
 {
   "name": "@congress/auth",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "exports": {
     ".": {
