@@ -77,7 +77,7 @@ export function YeshivaDetails({
               label={t("yeshiva_type")}
               options={[
                 { label: t("kollel"), value: "kollel" },
-                { label: t("yeshiva"), value: "yeshiva" },
+                // { label: t("yeshiva"), value: "yeshiva" },
               ]}
             />
           )}
