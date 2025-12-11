@@ -137,6 +137,7 @@
   "passwords_do_not_match": "Passwords do not match",
   "period": "Period",
   "personal_phone_number": "Personal Phone Number",
+  "phone_number_already_registered_to_another_account": "Phone number already registered to another account",
   "phone_number_optional": "Phone Number (Optional)",
   "phone_number_required": "Phone number is required",
   "please_enter_national_id": "Please enter your national ID",

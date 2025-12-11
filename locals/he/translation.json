@@ -139,6 +139,7 @@
   "passwords_do_not_match": "הסיסמאות אינן תואמות",
   "period": "תקופה",
   "personal_phone_number": "טלפון נייד",
+  "phone_number_already_registered_to_another_account": "מספר טלפון זה כבר רשום לחשבון אחר",
   "phone_number_optional": "מספר טלפון (אופציונלי)",
   "phone_number_required": "מספר טלפון נדרש",
   "please_enter_national_id": "אנא הזן את מספר הזהות שלך",

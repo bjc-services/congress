@@ -116,6 +116,51 @@ type TransactionClient = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type RelationshipType =
   (typeof PersonRelationship.$inferInsert)["relationshipType"];
 
+/**
+ * Check if a phone number belongs to another beneficiary account
+ * @param phoneNumber The phone number to check
+ * @param excludeNationalId The national ID to exclude from the check (the current user's national ID)
+ * @returns true if the phone number belongs to another beneficiary, false otherwise
+ */
+async function isPhoneNumberTakenByAnotherBeneficiary(
+  phoneNumber: string,
+  excludeNationalId: string,
+): Promise<boolean> {
+  // Find all PersonContact records with this phone number
+  const contacts = await db.query.PersonContact.findMany({
+    where: and(
+      eq(PersonContact.value, phoneNumber),
+      eq(PersonContact.contactType, "phone"),
+    ),
+    with: {
+      person: {
+        columns: {
+          nationalId: true,
+        },
+      },
+    },
+  });
+
+  if (contacts.length === 0) {
+    return false;
+  }
+
+  // Check if any of these persons have a BeneficiaryAccount with a different nationalId
+  const nationalIds = contacts
+    .map((contact) => contact.person.nationalId)
+    .filter((id) => id !== excludeNationalId);
+
+  if (nationalIds.length === 0) {
+    return false;
+  }
+
+  const existingAccounts = await db.query.BeneficiaryAccount.findMany({
+    where: inArray(BeneficiaryAccount.nationalId, nationalIds),
+  });
+
+  return existingAccounts.length > 0;
+}
+
 async function upsertPerson(
   tx: TransactionClient,
   person: {
@@ -555,6 +600,18 @@ export const beneficiaryAuthRouter = {
         });
       }
 
+      // Check if phone number belongs to another beneficiary
+      const isPhoneTaken = await isPhoneNumberTakenByAnotherBeneficiary(
+        input.phoneNumber,
+        input.nationalId,
+      );
+
+      if (isPhoneTaken) {
+        throw new ORPCError("CONFLICT", {
+          message: "phone_number_already_registered_to_another_account",
+        });
+      }
+
       const code = await sendVoicePhoneVerification({
         to: input.phoneNumber,
       });
@@ -604,6 +661,18 @@ export const beneficiaryAuthRouter = {
       if (!isValidOTP) {
         throw new ORPCError("BAD_REQUEST", {
           message: "invalid_or_expired_verification_code",
+        });
+      }
+
+      // Check if phone number belongs to another beneficiary
+      const isPhoneTaken = await isPhoneNumberTakenByAnotherBeneficiary(
+        input.personalPhoneNumber,
+        input.nationalId,
+      );
+
+      if (isPhoneTaken) {
+        throw new ORPCError("CONFLICT", {
+          message: "phone_number_already_registered_to_another_account",
         });
       }
 
