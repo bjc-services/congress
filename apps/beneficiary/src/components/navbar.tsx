@@ -19,12 +19,6 @@ export const Navbar = () => {
         </Link>
 
         <div className="flex items-center gap-4">
-          <nav className="hidden md:flex items-center gap-2">
-            <Button variant="ghost" asChild>
-              <Link to="/dashboard">{t("dashboard")}</Link>
-            </Button>
-          </nav>
-
           <div className="flex items-center gap-2">
             <LanguageSwitcher className="text-foreground hover:text-foreground" />
             <Button
