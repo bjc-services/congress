@@ -40,7 +40,6 @@ function RouteComponent() {
     );
   }
 
-
   if (isLoading) {
     return (
       <main className="container flex h-screen items-center justify-center py-16">
@@ -48,7 +47,7 @@ function RouteComponent() {
       </main>
     );
   }
-  
+
   return <Navigate to="/dashboard" />;
 
   // User is authenticated, show dashboard

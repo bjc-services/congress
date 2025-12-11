@@ -21,11 +21,7 @@ export function PhoneField({ label, optional = false, t }: PhoneFieldProps) {
   return (
     <Field data-invalid={isInvalid}>
       <FloatingField
-        label={
-          optional
-            ? `${label} ${`(${t("optional")})`}`
-            : label
-        }
+        label={optional ? `${label} ${`(${t("optional")})`}` : label}
         filled={Boolean(field.state.value)}
       >
         <PhoneInput

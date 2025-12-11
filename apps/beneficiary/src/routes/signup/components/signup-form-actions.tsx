@@ -22,7 +22,7 @@ export function SignupFormActions({
   const allDisclaimersChecked =
     disclaimers.disclaimerStatement1 &&
     disclaimers.disclaimerStatement2 &&
-    disclaimers.disclaimerStatement3;  
+    disclaimers.disclaimerStatement3;
 
   return (
     <section className="space-y-4">
@@ -78,10 +78,14 @@ export function SignupFormActions({
                 size="lg"
                 className="w-full"
                 disabled={
-                  !formState.canSubmit || !allDisclaimersChecked || formState.isSubmitting
+                  !formState.canSubmit ||
+                  !allDisclaimersChecked ||
+                  formState.isSubmitting
                 }
               >
-                {formState.isSubmitting ? t("sending_verification_code") : t("continue")}
+                {formState.isSubmitting
+                  ? t("sending_verification_code")
+                  : t("continue")}
               </Button>
               {!formState.canSubmit && (
                 <div className="text-destructive text-center text-xs">

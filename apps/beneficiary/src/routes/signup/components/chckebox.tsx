@@ -22,11 +22,11 @@ export const DisclaimerCheckbox = ({
         onCheckedChange={(checked) => setChecked(checked === true)}
         className="mt-0.5"
       />
-          <Label
-            htmlFor={name}
-            className="text-muted-foreground cursor-pointer text-sm leading-relaxed"
-          >
-            {label}
+      <Label
+        htmlFor={name}
+        className="text-muted-foreground cursor-pointer text-sm leading-relaxed"
+      >
+        {label}
       </Label>
     </div>
   );

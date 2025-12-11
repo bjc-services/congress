@@ -19,10 +19,9 @@ import { orpc } from "@congress/ui/orpc";
 import { toast } from "@congress/ui/toast";
 import { passwordSchema } from "@congress/validators";
 
-const passwordStepSchema = z
-  .object({
-    password: passwordSchema,
-  })
+const passwordStepSchema = z.object({
+  password: passwordSchema,
+});
 interface PasswordStepProps {
   setStep: (step: "form" | "otp" | "password") => void;
   setPassword: (password: string) => void;
