@@ -8,7 +8,6 @@
  */
 import { ORPCError, os } from "@orpc/server";
 import { getCookie } from "@tanstack/react-start/server";
-import { z, ZodError } from "zod/v4";
 
 import type { DashboardAuth, DashboardSession } from "@congress/auth";
 import * as beneficiaryAuth from "@congress/auth/beneficiary";
@@ -112,8 +111,10 @@ export const protectedProcedure = o.use(({ context, next }) => {
  *
  * Verifies JWT token from cookie and ensures account is approved
  */
-export const beneficiaryProtectedProcedure = o.use(
-  async ({ context, next }) => {
+export const beneficiaryProtectedProcedure = (
+  opts: { allowUnapproved?: boolean } = {},
+) =>
+  o.use(async ({ context, next }) => {
     if (!context.beneficiarySession) {
       throw new ORPCError("UNAUTHORIZED", {
         message: "Invalid or expired token",
@@ -126,7 +127,10 @@ export const beneficiaryProtectedProcedure = o.use(
       .where(eq(BeneficiaryAccount.id, context.beneficiarySession.accountId))
       .limit(1);
 
-    if (!account?.status || account.status !== "approved") {
+    if (
+      !account?.status ||
+      (account.status !== "approved" && opts.allowUnapproved !== true)
+    ) {
       throw new ORPCError("FORBIDDEN", {
         message: "Account not approved or not found",
       });
@@ -139,5 +143,4 @@ export const beneficiaryProtectedProcedure = o.use(
         beneficiarySession: context.beneficiarySession,
       },
     });
-  },
-);
+  });
